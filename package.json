@@ -14,7 +14,8 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "buffer-equal": "0.0.0"
   },
   "scripts": {
     "test": "mocha --reporter spec"
