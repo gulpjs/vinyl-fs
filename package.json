@@ -8,7 +8,9 @@
   "main": "./index.js",
   "dependencies": {
     "vinyl": "~0.1.0",
-    "event-stream": "~3.0.20"
+    "event-stream": "~3.0.20",
+    "glob-stream": "~3.0.4",
+    "mkdirp": "~0.3.5"
   },
   "devDependencies": {
     "mocha": "*",
