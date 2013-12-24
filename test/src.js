@@ -12,6 +12,33 @@ require('mocha');
 
 describe('source stream', function() {
 
+  it('should pass through writes', function(done) {
+    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: expectedPath,
+      contents: expectedContent
+    });
+
+    var stream = vfs.src("./fixtures/nothing.coffee", {cwd: __dirname});
+    var buffered = [];
+
+    stream.on('error', done);
+    stream.on('data', function(file) {
+      buffered.push(file);
+    });
+    stream.on('end', function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    });
+    stream.write(expectedFile);
+  });
+
   it('should glob a file with default settings', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
