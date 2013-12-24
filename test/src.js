@@ -52,9 +52,29 @@ describe('source stream', function() {
     });
     stream.on('end', function(){
       buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
       buffered[0].path.should.equal(expectedPath);
       buffered[0].isBuffer().should.equal(true);
       bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    });
+  });
+
+  it('should glob a directory with default settings', function(done) {
+    var expectedPath = path.join(__dirname, "./fixtures/wow");
+
+    var stream = vfs.src("./fixtures/wow/", {cwd: __dirname});
+    var buffered = [];
+
+    stream.on('error', done);
+    stream.on('data', function(file) {
+      buffered.push(file);
+    });
+    stream.on('end', function(){
+      buffered.length.should.equal(1);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isNull().should.equal(true);
+      buffered[0].isDirectory().should.equal(true);
       done();
     });
   });
@@ -92,6 +112,7 @@ describe('source stream', function() {
     });
     stream.on('end', function(){
       buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
       buffered[0].path.should.equal(expectedPath);
       buffered[0].isStream().should.equal(true);
       buffered[0].contents.pipe(es.wait(function(err, content){
