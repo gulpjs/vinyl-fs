@@ -51,6 +51,17 @@ fs.src(["./js/**/*.js", "!./js/vendor/*.js"])
 - On write the stream will simply pass items through.
 - This stream emits matching [vinyl] File objects
 
+### watch(globs[, opt, cb])
+
+This is just [glob-watcher]
+
+- Takes a glob string or an array of glob strings as the first argument.
+- Possible options for the second argument:
+  - Any options are passed to [gaze]
+- Returns an EventEmitter
+  - 'changed' event is emitted on each file change
+- Optionally calls the callback on each change event
+
 ### dest(folder[, opt])
 
 - Takes a folder path as the first argument.
@@ -87,4 +98,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [glob-stream]: https://github.com/wearefractal/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
+[gaze]: https://github.com/shama/gaze
+[glob-watcher]: https://github.com/shama/gaze
 [vinyl]: https://github.com/wearefractal/vinyl
