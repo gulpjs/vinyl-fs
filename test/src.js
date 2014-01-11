@@ -1,7 +1,7 @@
 var vfs = require('../');
 
 var path = require('path');
-var fs = require('fs');
+var fs = require('graceful-fs');
 
 var bufEqual = require('buffer-equal');
 var es = require('event-stream');
@@ -120,7 +120,6 @@ describe('source stream', function() {
         bufEqual(Buffer(content), expectedContent);
         done();
       }));
-      buffered[0].contents.resume();
     });
   });
 
