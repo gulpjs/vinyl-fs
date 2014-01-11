@@ -8,15 +8,17 @@
   "main": "./index.js",
   "dependencies": {
     "vinyl": "~0.2.0",
-    "event-stream": "~3.0.20",
     "glob-stream": "~3.0.4",
     "mkdirp": "~0.3.5",
-    "glob-watcher": "0.0.1"
+    "glob-watcher": "0.0.1",
+    "graceful-fs": "~2.0.1",
+    "map-stream": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "*",
     "should": "*",
-    "buffer-equal": "0.0.0"
+    "buffer-equal": "0.0.0",
+    "event-stream": "~3.0.20"
   },
   "scripts": {
     "test": "mocha --reporter spec"
