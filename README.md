@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/wearefractal/vinyl-fs.png?branch=master)](https://travis-ci.org/wearefractal/vinyl-fs)
-
-[![NPM version](https://badge.fury.io/js/vinyl-fs.png)](http://badge.fury.io/js/vinyl-fs)
+# vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status](https://david-dm.org/wearefractal/vinyl.png?theme=shields.io)](https://david-dm.org/wearefractal/vinyl)
 
 ## Information
 
@@ -14,7 +12,7 @@
 </tr>
 <tr>
 <td>Node Version</td>
-<td>>= 0.4</td>
+<td>>= 0.9</td>
 </tr>
 </table>
 
@@ -101,3 +99,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [gaze]: https://github.com/shama/gaze
 [glob-watcher]: https://github.com/shama/gaze
 [vinyl]: https://github.com/wearefractal/vinyl
+[npm-url]: https://npmjs.org/package/vinyl-fs
+[npm-image]: https://badge.fury.io/js/vinyl-fs.png
+[travis-url]: https://travis-ci.org/wearefractal/vinyl-fs
+[travis-image]: https://travis-ci.org/wearefractal/vinyl-fs.png?branch=master
+[coveralls-url]: https://coveralls.io/r/wearefractal/vinyl-fs
+[coveralls-image]: https://coveralls.io/repos/wearefractal/vinyl-fs/badge.png
+[depstat-url]: https://david-dm.org/wearefractal/vinyl-fs
+[depstat-image]: https://david-dm.org/wearefractal/vinyl-fs.png
