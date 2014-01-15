@@ -30,12 +30,13 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/nothing.coffee", {cwd: __dirname});
+    var stream = vfs.src("./fixtures/nothing.coffee");
 
     var buffered = [];
     bufferStream = es.through(buffered.push.bind(buffered), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
+    stream.end();
   });
 
   it('should glob a file with default settings', function(done) {
