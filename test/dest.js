@@ -69,4 +69,68 @@ describe('dest stream', function() {
     stream.end();
   });
 
+
+  it('should write buffer files to the right folder', function(done) {
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
+    var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedContents = fs.readFileSync(inputPath);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should write directories to the right folder', function(done) {
+    var expectedPath = path.join(__dirname, "./out-fixtures/test/");
+    var inputPath = path.join(__dirname, "./fixtures/test/");
+    var inputBase = path.join(__dirname, "./fixtures/");
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function(){
+          return true;
+        }
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).isDirectory().should.equal(true);
+      done();
+    };
+
+    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
 });
