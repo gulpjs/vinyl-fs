@@ -12,8 +12,7 @@
     "glob-watcher": "~0.0.1",
     "mkdirp": "~0.3.5",
     "graceful-fs": "~2.0.1",
-    "map-stream": "~0.1.0",
-    "async": "~0.2.9"
+    "map-stream": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "~1.17.0",
