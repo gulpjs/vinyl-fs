@@ -104,6 +104,36 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should write buffer files to the right folder with relative cwd', function(done) {
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
+    var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedContents = fs.readFileSync(inputPath);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.dest("./out-fixtures/", {cwd: path.relative(process.cwd(), __dirname)});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should write buffer files to the right folder', function(done) {
     var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");

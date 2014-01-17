@@ -66,6 +66,26 @@ describe('source stream', function() {
     stream.pipe(bufferStream);
   });
 
+  it('should glob a file with default settings and relative cwd', function(done) {
+    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src("./fixtures/*.coffee", {cwd: path.relative(process.cwd(), __dirname)});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
   it('should glob a directory with default settings', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/wow");
 
