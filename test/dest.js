@@ -27,12 +27,12 @@ describe('dest stream', function() {
   afterEach(wipeOut);
 
   it('should pass through writes with cwd', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
 
     var expectedFile = new File({
       base: __dirname,
       cwd: __dirname,
-      path: expectedPath,
+      path: inputPath,
       contents: null
     });
 
@@ -52,12 +52,12 @@ describe('dest stream', function() {
   });
 
   it('should pass through writes with default cwd', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
 
     var expectedFile = new File({
       base: __dirname,
       cwd: __dirname,
-      path: expectedPath,
+      path: inputPath,
       contents: null
     });
 
@@ -77,9 +77,11 @@ describe('dest stream', function() {
   });
 
   it('should not write null files', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
     var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, "./out-fixtures");
 
     var expectedFile = new File({
       base: inputBase,
@@ -91,6 +93,9 @@ describe('dest stream', function() {
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(false);
       done();
     };
@@ -105,9 +110,11 @@ describe('dest stream', function() {
   });
 
   it('should write buffer files to the right folder with relative cwd', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
     var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, "./out-fixtures");
     var expectedContents = fs.readFileSync(inputPath);
 
     var expectedFile = new File({
@@ -120,6 +127,9 @@ describe('dest stream', function() {
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
       done();
@@ -135,10 +145,12 @@ describe('dest stream', function() {
   });
 
   it('should write buffer files to the right folder', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
     var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, "./out-fixtures");
 
     var expectedFile = new File({
       base: inputBase,
@@ -150,6 +162,9 @@ describe('dest stream', function() {
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
       done();
@@ -165,10 +180,12 @@ describe('dest stream', function() {
   });
 
   it('should write streaming files to the right folder', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
     var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
     var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, "./out-fixtures");
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -181,6 +198,9 @@ describe('dest stream', function() {
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
       done();
@@ -200,9 +220,11 @@ describe('dest stream', function() {
   });
 
   it('should write directories to the right folder', function(done) {
-    var expectedPath = path.join(__dirname, "./out-fixtures/test/");
-    var inputPath = path.join(__dirname, "./fixtures/test/");
+    var inputPath = path.join(__dirname, "./fixtures/test");
     var inputBase = path.join(__dirname, "./fixtures/");
+    var expectedPath = path.join(__dirname, "./out-fixtures/test");
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, "./out-fixtures");
 
     var expectedFile = new File({
       base: inputBase,
@@ -219,6 +241,9 @@ describe('dest stream', function() {
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).isDirectory().should.equal(true);
       done();

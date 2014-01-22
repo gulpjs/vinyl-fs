@@ -1,7 +1,7 @@
 {
   "name": "vinyl-fs",
   "description": "Vinyl adapter for the file system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "http://github.com/wearefractal/vinyl-fs",
   "repository": "git://github.com/wearefractal/vinyl-fs.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "mocha": "~1.17.0",
-    "should": "~2.1.1",
+    "should": "~3.0.1",
     "mocha-lcov-reporter": "0.0.1",
     "coveralls": "~2.6.1",
     "istanbul": "~0.2.3",
