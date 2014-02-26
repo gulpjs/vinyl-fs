@@ -258,4 +258,42 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should allow piping multiple dests in streaming mode', function(done) {
+    var inputPath1 = path.join(__dirname, "./out-fixtures/multiple-first");
+    var inputPath2 = path.join(__dirname, "./out-fixtures/multiple-second");
+    var inputBase = path.join(__dirname, "./out-fixtures/");
+    var srcPath = path.join(__dirname, "./fixtures/test.coffee");
+    var stream1 = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    var stream2 = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    var content = fs.readFileSync(srcPath);
+    var rename = through.obj(function(file, _, next) {
+      file.path = inputPath2;
+      this.push(file);
+      next();
+    });
+
+    stream1.on('data', function(file) {
+      file.path.should.equal(inputPath1);
+    })
+
+    stream1.pipe(rename).pipe(stream2);
+    stream2.on('data', function(file) {
+      file.path.should.equal(inputPath2);
+    }).once('end', function() {
+      fs.readFileSync(inputPath1, 'utf8').should.equal(content.toString());
+      fs.readFileSync(inputPath2, 'utf8').should.equal(content.toString());
+      done();
+    });
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath1,
+      cwd: __dirname,
+      contents: content
+    })
+
+    stream1.write(file);
+    stream1.end();
+  })
+
 });
