@@ -22,6 +22,10 @@ var dataWrap = function(fn) {
   };
 };
 
+var realMode = function(n) {
+  return n & 07777;
+};
+
 describe('dest stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
@@ -151,12 +155,16 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedMode = 0655;
 
     var expectedFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      contents: expectedContents
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
     });
 
     var onEnd = function(){
@@ -167,6 +175,7 @@ describe('dest stream', function() {
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
 
@@ -186,13 +195,17 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedMode = 0655;
 
     var contentStream = through.obj();
     var expectedFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      contents: contentStream
+      contents: contentStream,
+      stat: {
+        mode: expectedMode
+      }
     });
 
     var onEnd = function(){
@@ -203,6 +216,7 @@ describe('dest stream', function() {
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
 
@@ -225,6 +239,7 @@ describe('dest stream', function() {
     var expectedPath = path.join(__dirname, "./out-fixtures/test");
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedMode = 0655;
 
     var expectedFile = new File({
       base: inputBase,
@@ -234,7 +249,8 @@ describe('dest stream', function() {
       stat: {
         isDirectory: function(){
           return true;
-        }
+        },
+        mode: expectedMode
       }
     });
 
@@ -246,6 +262,7 @@ describe('dest stream', function() {
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).isDirectory().should.equal(true);
+      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
 
