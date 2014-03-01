@@ -3,7 +3,7 @@
 ## Information
 
 <table>
-<tr> 
+<tr>
 <td>Package</td><td>vinyl-fs</td>
 </tr>
 <tr>
@@ -65,6 +65,7 @@ This is just [glob-watcher]
 - Takes a folder path as the first argument.
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
+  - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode)
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk it will be emitted from the stream so you can keep piping these around
