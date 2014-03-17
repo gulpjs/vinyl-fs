@@ -19,6 +19,39 @@ var dataWrap = function(fn) {
 
 describe('source stream', function() {
 
+  it('should explode on invalid glob (empty)', function(done) {
+    var stream;
+    try {
+      stream = gulp.src();
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
+  it('should explode on invalid glob (number)', function(done) {
+    var stream;
+    try {
+      stream = gulp.src(123);
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
+  it('should explode on invalid glob (empty array)', function(done) {
+    var stream;
+    try {
+      stream = gulp.src([]);
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
   it('should pass through writes', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
