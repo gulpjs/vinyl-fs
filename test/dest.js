@@ -30,6 +30,17 @@ describe('dest stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
 
+  it('should explode on invalid folder', function(done) {
+    var stream;
+    try {
+      stream = gulp.dest();
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
   it('should pass through writes with cwd', function(done) {
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
 
