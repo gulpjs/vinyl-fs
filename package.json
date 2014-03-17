@@ -30,8 +30,9 @@
     "coveralls": "istanbul cover _mocha -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "engines": {
-    "node": ">= 0.9"
+    "node": ">= 0.10"
   },
+  "engineStrict": true,
   "licenses": [
     {
       "type": "MIT",
