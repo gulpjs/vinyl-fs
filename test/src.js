@@ -145,10 +145,16 @@ describe('source stream', function() {
     };
 
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, buffer: false});
-    
+
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
+  });
+
+  it('should not accept an invalid glob', function() {
+    (function() {
+      vfs.src(null)
+    }).should.throw(/Invalid/);
   });
 
 });
