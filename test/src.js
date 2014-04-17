@@ -52,7 +52,7 @@ describe('source stream', function() {
     }
   });
 
-  it('should pass through writes', function(done) {
+  it('should NOT pass through writes', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
 
@@ -64,9 +64,7 @@ describe('source stream', function() {
     });
 
     var onEnd = function(){
-      buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
-      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      buffered.length.should.equal(0);
       done();
     };
 
@@ -178,7 +176,30 @@ describe('source stream', function() {
     };
 
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, buffer: false});
-    
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should drop files from an incoming stream/start from scratch', function(done) {
+    var initialFile = path.join(__dirname, "./fixtures/wow/suchempty");
+    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var initialStream = vfs.src('./fixtures/wow/suchempty');
+    var stream = initialStream
+        .pipe(vfs.src("./fixtures/*.coffee", {cwd: __dirname}));
+
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
