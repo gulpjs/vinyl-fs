@@ -44,16 +44,23 @@ describe('dest stream', function() {
   it('should pass through writes with cwd', function(done) {
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
 
-    var expectedFile = new File({
+    var inputFile = new File({
       base: __dirname,
       cwd: __dirname,
       path: inputPath,
       contents: null
     });
 
+    var expectedFile = new File({
+      base: path.resolve(__dirname, 'out-fixtures'),
+      cwd: __dirname,
+      path: path.resolve(__dirname, 'out-fixtures', 'test.coffee'),
+      contents: null
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       done();
     };
 
@@ -69,16 +76,23 @@ describe('dest stream', function() {
   it('should pass through writes with default cwd', function(done) {
     var inputPath = path.join(__dirname, "./fixtures/test.coffee");
 
-    var expectedFile = new File({
+    var inputFile = new File({
       base: __dirname,
       cwd: __dirname,
       path: inputPath,
       contents: null
     });
 
+    var expectedFile = new File({
+      base: path.resolve(__dirname, 'out-fixtures'),
+      cwd: process.cwd(), // is this really the intended behavior?
+      path: path.resolve(__dirname, 'out-fixtures', 'test.coffee'),
+      contents: null
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       done();
     };
 
@@ -98,16 +112,23 @@ describe('dest stream', function() {
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, "./out-fixtures");
 
-    var expectedFile = new File({
+    var inputFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
       contents: null
     });
 
+    var expectedFile = new File({
+      base: expectedBase,
+      cwd: expectedCwd,
+      path: expectedPath,
+      contents: null
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
@@ -132,16 +153,23 @@ describe('dest stream', function() {
     var expectedBase = path.join(__dirname, "./out-fixtures");
     var expectedContents = fs.readFileSync(inputPath);
 
-    var expectedFile = new File({
+    var inputFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
       contents: expectedContents
     });
 
+    var expectedFile = new File({
+      base: expectedBase,
+      cwd: expectedCwd,
+      path: expectedPath,
+      contents: expectedContents
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
@@ -169,9 +197,9 @@ describe('dest stream', function() {
     var expectedMode = 0655;
 
     var expectedFile = new File({
-      base: inputBase,
-      cwd: __dirname,
-      path: inputPath,
+      base: expectedBase,
+      cwd: expectedCwd,
+      path: expectedPath,
       contents: expectedContents,
       stat: {
         mode: expectedMode
@@ -180,7 +208,7 @@ describe('dest stream', function() {
 
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
@@ -209,7 +237,8 @@ describe('dest stream', function() {
     var expectedMode = 0655;
 
     var contentStream = through.obj();
-    var expectedFile = new File({
+
+    var inputFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
@@ -219,9 +248,18 @@ describe('dest stream', function() {
       }
     });
 
+    var expectedFile = new File({
+      base: expectedBase,
+      cwd: expectedCwd,
+      path: expectedPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
@@ -236,7 +274,7 @@ describe('dest stream', function() {
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
-    stream.write(expectedFile);
+    stream.write(inputFile);
     setTimeout(function(){
       contentStream.write(expectedContents);
       contentStream.end();
@@ -252,7 +290,7 @@ describe('dest stream', function() {
     var expectedBase = path.join(__dirname, "./out-fixtures");
     var expectedMode = 0655;
 
-    var expectedFile = new File({
+    var inputFile = new File({
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
@@ -265,9 +303,22 @@ describe('dest stream', function() {
       }
     });
 
+    var expectedFile = new File({
+      base: expectedBase,
+      cwd: expectedCwd,
+      path: expectedPath,
+      contents: null,
+      stat: {
+        isDirectory: function(){
+          return true;
+        },
+        mode: expectedMode
+      }
+    });
+
     var onEnd = function(){
       buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
+      buffered[0].should.eql(expectedFile);
       buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
