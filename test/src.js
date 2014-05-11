@@ -79,6 +79,72 @@ describe('source stream', function() {
     stream.end();
   });
 
+  it('should strip BOM from UTF-8-encoded files', function(done) {
+    var expectedPath = path.join(__dirname, "./fixtures/bom-utf8.txt");
+    var expectedContent = fs.readFileSync(expectedPath)
+      // U+FEFF takes up 3 bytes in UTF-8: http://mothereff.in/utf-8#%EF%BB%BF
+      .slice(3);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src("./fixtures/bom-utf8.txt", {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should not strip anything that looks like a UTF-8-encoded BOM from UTF-16-BE-encoded files', function(done) {
+    // Note: this goes for any non-UTF-8 encoding, but testing for UTF-16-BE
+    // and UTF-16-LE is enough to demonstrate this is done properly.
+    var expectedPath = path.join(__dirname, "./fixtures/bom-utf16be.txt");
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src("./fixtures/bom-utf16be.txt", {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should not strip anything that looks like a UTF-8-encoded BOM from UTF-16-LE-encoded files', function(done) {
+    // Note: this goes for any non-UTF-8 encoding, but testing for UTF-16-BE
+    // and UTF-16-LE is enough to demonstrate this is done properly.
+    var expectedPath = path.join(__dirname, "./fixtures/bom-utf16le.txt");
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src("./fixtures/bom-utf16le.txt", {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
   it('should glob a file with default settings', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
@@ -178,7 +244,7 @@ describe('source stream', function() {
     };
 
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, buffer: false});
-    
+
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
