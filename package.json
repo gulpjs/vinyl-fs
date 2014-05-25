@@ -7,22 +7,23 @@
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
   "main": "./index.js",
   "dependencies": {
-    "vinyl": "^0.2.0",
     "glob-stream": "^3.1.5",
     "glob-watcher": "^0.0.6",
-    "mkdirp": "^0.3.5",
     "graceful-fs": "^2.0.1",
-    "map-stream": "^0.1.0"
+    "map-stream": "^0.1.0",
+    "mkdirp": "^0.3.5",
+    "strip-bom": "^0.3.0",
+    "vinyl": "^0.2.0"
   },
   "devDependencies": {
-    "mocha": "^1.17.0",
-    "should": "^3.0.1",
-    "mocha-lcov-reporter": "^0.0.1",
+    "buffer-equal": "0.0.0",
     "coveralls": "^2.6.1",
     "istanbul": "^0.2.3",
-    "rimraf": "^2.2.5",
     "jshint": "^2.4.1",
-    "buffer-equal": "0.0.0",
+    "mocha": "^1.17.0",
+    "mocha-lcov-reporter": "^0.0.1",
+    "rimraf": "^2.2.5",
+    "should": "^3.0.1",
     "through2": "^0.4.0"
   },
   "scripts": {
