@@ -9,7 +9,7 @@
   "dependencies": {
     "glob-stream": "^3.1.5",
     "glob-watcher": "^0.0.6",
-    "graceful-fs": "^2.0.1",
+    "graceful-fs": "^3.0.0",
     "map-stream": "^0.1.0",
     "mkdirp": "^0.5.0",
     "strip-bom": "^0.3.0",
