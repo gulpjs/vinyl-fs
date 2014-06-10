@@ -12,7 +12,7 @@ var should = require('should');
 require('mocha');
 
 var wipeOut = function(cb) {
-  rimraf(path.join(__dirname, "./out-fixtures/"), cb);
+  rimraf(path.join(__dirname, './out-fixtures/'), cb);
 };
 
 var dataWrap = function(fn) {
@@ -42,7 +42,7 @@ describe('dest stream', function() {
   });
 
   it('should pass through writes with cwd', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
 
     var expectedFile = new File({
       base: __dirname,
@@ -57,7 +57,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -67,7 +67,7 @@ describe('dest stream', function() {
   });
 
   it('should pass through writes with default cwd', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
 
     var expectedFile = new File({
       base: __dirname,
@@ -82,7 +82,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest(path.join(__dirname, "./out-fixtures/"));
+    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'));
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -92,11 +92,11 @@ describe('dest stream', function() {
   });
 
   it('should not write null files', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
-    var inputBase = path.join(__dirname, "./fixtures/");
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedBase = path.join(__dirname, './out-fixtures');
 
     var expectedFile = new File({
       base: inputBase,
@@ -115,7 +115,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -125,11 +125,11 @@ describe('dest stream', function() {
   });
 
   it('should write buffer files to the right folder with relative cwd', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
-    var inputBase = path.join(__dirname, "./fixtures/");
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedContents = fs.readFileSync(inputPath);
 
     var expectedFile = new File({
@@ -150,7 +150,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: path.relative(process.cwd(), __dirname)});
+    var stream = vfs.dest('./out-fixtures/', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -160,12 +160,12 @@ describe('dest stream', function() {
   });
 
   it('should write buffer files to the right folder', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
-    var inputBase = path.join(__dirname, "./fixtures/");
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = 0655;
 
     var expectedFile = new File({
@@ -190,7 +190,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -200,12 +200,12 @@ describe('dest stream', function() {
   });
 
   it('should write streaming files to the right folder', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test.coffee");
-    var inputBase = path.join(__dirname, "./fixtures/");
-    var expectedPath = path.join(__dirname, "./out-fixtures/test.coffee");
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = 0655;
 
     var contentStream = through.obj();
@@ -231,7 +231,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -245,11 +245,11 @@ describe('dest stream', function() {
   });
 
   it('should write directories to the right folder', function(done) {
-    var inputPath = path.join(__dirname, "./fixtures/test");
-    var inputBase = path.join(__dirname, "./fixtures/");
-    var expectedPath = path.join(__dirname, "./out-fixtures/test");
+    var inputPath = path.join(__dirname, './fixtures/test');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test');
     var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, "./out-fixtures");
+    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = 0655;
 
     var expectedFile = new File({
@@ -277,7 +277,7 @@ describe('dest stream', function() {
       done();
     };
 
-    var stream = vfs.dest("./out-fixtures/", {cwd: __dirname});
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -287,10 +287,10 @@ describe('dest stream', function() {
   });
 
   it('should allow piping multiple dests in streaming mode', function(done) {
-    var inputPath1 = path.join(__dirname, "./out-fixtures/multiple-first");
-    var inputPath2 = path.join(__dirname, "./out-fixtures/multiple-second");
-    var inputBase = path.join(__dirname, "./out-fixtures/");
-    var srcPath = path.join(__dirname, "./fixtures/test.coffee");
+    var inputPath1 = path.join(__dirname, './out-fixtures/multiple-first');
+    var inputPath2 = path.join(__dirname, './out-fixtures/multiple-second');
+    var inputBase = path.join(__dirname, './out-fixtures/');
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
     var stream1 = vfs.dest('./out-fixtures/', {cwd: __dirname});
     var stream2 = vfs.dest('./out-fixtures/', {cwd: __dirname});
     var content = fs.readFileSync(srcPath);
