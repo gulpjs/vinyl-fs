@@ -65,6 +65,7 @@ This is just [glob-watcher]
 ### dest(folder[, opt])
 
 - Takes a folder path as the first argument.
+- First argument can also be a function that takes in a file and returns a folder path.
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
   - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode)

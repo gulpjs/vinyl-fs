@@ -159,6 +159,45 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should write buffer files to the right folder with function and relative cwd', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedContents = fs.readFileSync(inputPath);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
+      fs.existsSync(expectedPath).should.equal(true);
+      bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.dest(function(file){
+      should.exist(file);
+      file.should.equal(expectedFile);
+      return './out-fixtures';
+    }, {cwd: path.relative(process.cwd(), __dirname)});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should write buffer files to the right folder', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
