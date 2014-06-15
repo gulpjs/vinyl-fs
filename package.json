@@ -11,7 +11,6 @@
     "glob-watcher": "^0.0.6",
     "graceful-fs": "^3.0.0",
     "lodash.defaults": "^2.4.1",
-    "map-stream": "^0.1.0",
     "mkdirp": "^0.5.0",
     "strip-bom": "^0.3.0",
     "through2": "^0.5.1",
@@ -26,8 +25,7 @@
     "mocha": "^1.17.0",
     "mocha-lcov-reporter": "^0.0.1",
     "rimraf": "^2.2.5",
-    "should": "^4.0.0",
-    "through2": "^0.5.1"
+    "should": "^4.0.0"
   },
   "scripts": {
     "test": "mocha --reporter spec && jshint lib",
