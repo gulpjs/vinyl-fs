@@ -361,6 +361,23 @@ describe('dest stream', function() {
 
     stream1.write(file);
     stream1.end();
-  })
+  });
 
+  it('should emit end event', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    stream.on('end', function() {
+      done();
+    });
+
+    var file = new File({
+      path: srcPath,
+      cwd: __dirname,
+      contents: new Buffer("1234567890")
+    });
+
+    stream.write(file);
+    stream.end();
+  });
 });
