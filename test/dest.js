@@ -363,6 +363,91 @@ describe('dest stream', function() {
     stream1.end();
   });
 
+  it('should update file mode to match the vinyl mode', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var startMode = 0655;
+    var expectedMode = 0722;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
+      done();
+    };
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+    fs.chmodSync(expectedFile.path, startMode);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should update directory mode to match the vinyl mode', function(done) {
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputPath = path.join(__dirname, './fixtures/wow');
+    var expectedPath = path.join(__dirname, './out-fixtures/wow');
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+
+    var firstFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: expectedPath,
+      stat: fs.statSync(inputPath)
+    });
+    var startMode = firstFile.stat.mode;
+    var expectedMode = 0727;
+
+    var expectedFile = new File(firstFile);
+    expectedFile.stat.mode = (startMode & ~07777) | expectedMode;
+
+    var onEnd = function(){
+      buffered.length.should.equal(2);
+      buffered[0].should.equal(firstFile);
+      buffered[1].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(expectedCwd, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
+      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
+      done();
+    };
+
+    fs.mkdirSync(expectedBase);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(firstFile);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   ['end', 'finish'].forEach(function(eventName) {
     it('should emit ' + eventName + ' event', function(done) {
       var srcPath = path.join(__dirname, './fixtures/test.coffee');
