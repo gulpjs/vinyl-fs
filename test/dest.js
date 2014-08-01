@@ -448,6 +448,38 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should report an IO error', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var startMode = 0655;
+    var expectedMode = 0722;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+    fs.chmodSync(expectedPath, 0);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    stream.on('error', function(err) {
+      err.code.should.equal('EACCES');
+      done();
+    });
+    stream.write(expectedFile);
+  });
+
   ['end', 'finish'].forEach(function(eventName) {
     it('should emit ' + eventName + ' event', function(done) {
       var srcPath = path.join(__dirname, './fixtures/test.coffee');
