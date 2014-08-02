@@ -14,7 +14,7 @@
     "mkdirp": "^0.5.0",
     "strip-bom": "^0.3.0",
     "through2": "^0.5.1",
-    "vinyl": "^0.2.0"
+    "vinyl": "^0.3.2"
   },
   "devDependencies": {
     "buffer-equal": "^0.0.1",
