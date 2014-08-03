@@ -1,3 +1,7 @@
+var spies = require('./spy');
+var chmodSpy = spies.chmodSpy;
+var statSpy = spies.statSpy;
+
 var vfs = require('../');
 
 var path = require('path');
@@ -13,6 +17,9 @@ require('mocha');
 
 var wipeOut = function(cb) {
   rimraf(path.join(__dirname, './out-fixtures/'), cb);
+  spies.setError('false');
+  statSpy.reset();
+  chmodSpy.reset();
 };
 
 var dataWrap = function(fn) {
@@ -384,6 +391,7 @@ describe('dest stream', function() {
     });
 
     var onEnd = function(){
+      should(chmodSpy.called).be.ok;
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -393,8 +401,9 @@ describe('dest stream', function() {
 
     fs.mkdirSync(expectedBase);
     fs.closeSync(fs.openSync(expectedPath, 'w'));
-    fs.chmodSync(expectedFile.path, startMode);
+    fs.chmodSync(expectedPath, startMode);
 
+    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
@@ -448,14 +457,13 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should report an IO error', function(done) {
+  it('should report IO errors', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var startMode = 0655;
     var expectedMode = 0722;
 
     var expectedFile = new File({
@@ -478,6 +486,126 @@ describe('dest stream', function() {
       done();
     });
     stream.write(expectedFile);
+  });
+
+  it('should report stat errors', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = 0722;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+
+    spies.setError(function(mod, fn) {
+      if (fn === 'stat' && arguments[2] === expectedPath) {
+        return new Error('stat error');
+      }
+    });
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    stream.on('error', function(err) {
+      err.message.should.equal('stat error');
+      done();
+    });
+    stream.write(expectedFile);
+  });
+
+  it('should report chmod errors', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = 0722;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+
+    spies.setError(function(mod, fn) {
+      if (fn === 'chmod' && arguments[2] === expectedPath) {
+        return new Error('chmod error');
+      }
+    });
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    stream.on('error', function(err) {
+      err.message.should.equal('chmod error');
+      done();
+    });
+    stream.write(expectedFile);
+  });
+
+  it('should not chmod a matching file', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = 0722;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode
+      }
+    });
+
+    var expectedCount = 0;
+    spies.setError(function(mod, fn) {
+      if (fn === 'stat' && arguments[2] === expectedPath) {
+        expectedCount++;
+      }
+    });
+
+    var onEnd = function(){
+      expectedCount.should.equal(1);
+      should(chmodSpy.called).be.not.ok;
+      done();
+    };
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+    fs.chmodSync(expectedPath, expectedMode);
+
+    statSpy.reset();
+    chmodSpy.reset();
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
   });
 
   ['end', 'finish'].forEach(function(eventName) {
