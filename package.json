@@ -24,7 +24,8 @@
     "mocha": "^1.17.0",
     "mocha-lcov-reporter": "^0.0.1",
     "rimraf": "^2.2.5",
-    "should": "^4.0.0"
+    "should": "^4.0.0",
+    "sinon": "^1.10.3"
   },
   "scripts": {
     "test": "mocha --reporter spec && jshint lib",
