@@ -11,11 +11,11 @@
     "lib"
   ],
   "dependencies": {
-    "defaults": "^1.0.0",
     "glob-stream": "^3.1.5",
     "glob-watcher": "^0.0.6",
     "graceful-fs": "^3.0.0",
     "mkdirp": "^0.5.0",
+    "object-assign": "^2.0.0",
     "strip-bom": "^1.0.0",
     "through2": "^0.6.1",
     "vinyl": "^0.4.0"
