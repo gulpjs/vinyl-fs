@@ -216,6 +216,43 @@ describe('source stream', function() {
     stream.pipe(bufferStream);
   });
 
+  it('should glob a file changed after since', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+    var expectedContent = fs.readFileSync(expectedPath);
+    var lastUpdateDate = new Date(+fs.statSync(expectedPath).mtime - 1000);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, since: lastUpdateDate});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should not glob a file changed before since', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+    var lastUpdateDate = new Date(+fs.statSync(expectedPath).mtime + 1000);
+
+    var onEnd = function(){
+      buffered.length.should.equal(0);
+      done();
+    };
+
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, since: lastUpdateDate});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
   it('should glob a file with streaming contents', function(done) {
     var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
