@@ -47,6 +47,8 @@ fs.src(['./js/**/*.js', '!./js/vendor/*.js'])
     - Default value is `true`
     - `false` will disable writing the file to disk via `.dest()`
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
+  - followSymlink - `true` or `false` if you want to follow symlinks fully
+    - Default value is `false`
   - Any glob-related options are documented in [glob-stream] and [node-glob]
 - Returns a Readable/Writable stream.
 - On write the stream will simply pass items through.
