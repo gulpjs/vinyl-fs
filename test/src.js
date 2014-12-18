@@ -281,4 +281,52 @@ describe('source stream', function() {
     stream.pipe(bufferStream);
   });
 
+  it('should glob a symlinked file', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+    var expectedContent = fs.readFileSync(expectedPath);
+    var symlinkedDirectory = path.join(__dirname, '../.tmp');
+    var symlinkedPath = path.join(symlinkedDirectory, './fixtures/test.coffee');
+
+    if (fs.existsSync(symlinkedDirectory)) {
+      fs.unlinkSync(symlinkedDirectory);
+    }
+    fs.symlinkSync(__dirname, symlinkedDirectory, 'dir');
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(symlinkedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src(path.join(symlinkedDirectory, './fixtures/*.coffee'), {cwd: __dirname, followSymlink: true});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should not glob a symlinked file with followSymlink not present', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+    var symlinkedDirectory = path.join(__dirname, '../.tmp');
+
+    if (fs.existsSync(symlinkedDirectory)) {
+      fs.unlinkSync(symlinkedDirectory);
+    }
+    fs.symlinkSync(path.join('./fixtures'), symlinkedDirectory, 'dir');
+
+    var onEnd = function(){
+      buffered.length.should.equal(0);
+      done();
+    };
+
+    var stream = vfs.src(path.join(symlinkedDirectory, './fixtures/*.coffee'), {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
 });
