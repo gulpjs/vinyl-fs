@@ -81,7 +81,8 @@ This is just [glob-watcher]
 - First argument can also be a function that takes in a file and returns a folder path.
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
-  - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode)
+  - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode) or the process mode if the input file has no mode property.
+  - dirMode - Specify the mode the directory should be created with. Default is the process mode.
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
@@ -96,6 +97,7 @@ This is just [glob-watcher]
 - First argument can also be a function that takes in a file and returns a folder path.
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
+  - dirMode - Specify the mode the directory should be created with. Default is the process mode.
 - Returns a Readable/Writable stream.
 - On write the stream will create a symbolic link (i.e. symlink) on disk at the folder/cwd specified.
 - After creating the symbolic link, it will be emitted from the stream so you can keep piping these around.
