@@ -300,6 +300,40 @@ describe('symlink stream', function() {
     stream.write(expectedFile);
     stream.end();
   });
+  
+  it('should use different modes for files and directories', function(done) {
+    var inputBase = path.join(__dirname, './fixtures');
+    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
+    var expectedBase = path.join(__dirname, './out-fixtures/wow');
+    var expectedDirMode = 0755;
+    var expectedFileMode = 0655;
+
+    var firstFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      stat: fs.statSync(inputPath)
+    });
+
+    var onEnd = function(){
+      realMode(fs.lstatSync(expectedBase).mode).should.equal(expectedDirMode);
+      realMode(buffered[0].stat.mode).should.equal(expectedFileMode);
+      done();
+    };
+
+    var stream = vfs.symlink('./out-fixtures/', {
+      cwd: __dirname,
+      mode: expectedFileMode,
+      dirMode: expectedDirMode
+    });
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(firstFile);
+    stream.end();
+  });
 
   it('should report IO errors', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
