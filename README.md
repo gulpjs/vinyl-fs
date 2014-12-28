@@ -84,11 +84,23 @@ This is just [glob-watcher]
   - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode)
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
-- After writing the file to disk, it will be emitted from the stream so you can keep piping these around
-- The file will be modified after being written to this stream
+- After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
+- The file will be modified after being written to this stream:
   - `cwd`, `base`, and `path` will be overwritten to match the folder
   - `stat.mode` will be overwritten if you used a mode parameter
   - `contents` will have it's position reset to the beginning if it is a stream
+
+### symlink(folder[, opt])
+
+- Takes a folder path as the first argument.
+- First argument can also be a function that takes in a file and returns a folder path.
+- Possible options for the second argument:
+  - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
+- Returns a Readable/Writable stream.
+- On write the stream will create a symbolic link (i.e. symlink) on disk at the folder/cwd specified.
+- After creating the symbolic link, it will be emitted from the stream so you can keep piping these around.
+- The file will be modified after being written to this stream:
+  - `cwd`, `base`, and `path` will be overwritten to match the folder
 
 [glob-stream]: https://github.com/wearefractal/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
