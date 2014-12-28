@@ -37,6 +37,18 @@ fs.src(['./js/**/*.js', '!./js/vendor/*.js'])
 ### src(globs[, opt])
 
 - Takes a glob string or an array of glob strings as the first argument.
+- Globs are executed in order, so negations should follow positive globs. For example:
+
+```js
+fs.src(['!b*.js', '*.js'])
+```
+
+would not exclude any files, but this would
+
+```js
+fs.src(['*.js', '!b*.js'])
+```
+
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
   - base - Specify the folder relative to the cwd. Default is where the glob begins. This is used to determine the file names when saving in `.dest()`
