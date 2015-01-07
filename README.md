@@ -1,4 +1,4 @@
-# vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status](https://david-dm.org/wearefractal/vinyl.png?theme=shields.io)](https://david-dm.org/wearefractal/vinyl-fs)
+# vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]
 
 ## Information
 
@@ -110,11 +110,11 @@ This is just [glob-watcher]
 [glob-watcher]: https://github.com/wearefractal/glob-watcher
 [vinyl]: https://github.com/wearefractal/vinyl
 
-[npm-url]: https://npmjs.org/package/vinyl-fs
-[npm-image]: https://badge.fury.io/js/vinyl-fs.png
+[npm-url]: https://www.npmjs.com/package/vinyl-fs
+[npm-image]: https://badge.fury.io/js/vinyl-fs.svg
 [travis-url]: https://travis-ci.org/wearefractal/vinyl-fs
-[travis-image]: https://travis-ci.org/wearefractal/vinyl-fs.png?branch=master
+[travis-image]: https://travis-ci.org/wearefractal/vinyl-fs.svg?branch=master
 [coveralls-url]: https://coveralls.io/r/wearefractal/vinyl-fs
-[coveralls-image]: https://coveralls.io/repos/wearefractal/vinyl-fs/badge.png
+[coveralls-image]: https://img.shields.io/coveralls/wearefractal/vinyl-fs.svg?style=flat
 [depstat-url]: https://david-dm.org/wearefractal/vinyl-fs
-[depstat-image]: https://david-dm.org/wearefractal/vinyl-fs.png
+[depstat-image]: https://david-dm.org/wearefractal/vinyl-fs.svg
