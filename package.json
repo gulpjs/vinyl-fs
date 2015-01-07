@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "buffer-equal": "^0.0.1",
-    "coveralls": "^2.6.1",
     "istanbul": "^0.3.0",
+    "istanbul-coveralls": "^1.0.1",
     "jshint": "^2.4.1",
     "mocha": "^2.0.0",
     "mocha-lcov-reporter": "^0.0.1",
@@ -32,8 +32,8 @@
     "sinon": "^1.10.3"
   },
   "scripts": {
-    "test": "mocha --reporter spec && jshint lib",
-    "coveralls": "istanbul cover _mocha -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+    "test": "jshint lib && mocha",
+    "coveralls": "istanbul cover _mocha && istanbul-coveralls"
   },
   "engines": {
     "node": ">= 0.10"
