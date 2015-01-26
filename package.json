@@ -11,7 +11,7 @@
     "lib"
   ],
   "dependencies": {
-    "glob-stream": "^4.0.0",
+    "glob-stream": "^4.0.1",
     "glob-watcher": "^0.0.7",
     "graceful-fs": "^3.0.0",
     "mkdirp": "^0.5.0",
