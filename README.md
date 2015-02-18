@@ -59,9 +59,9 @@ fs.src(['*.js', '!b*.js'])
     - Default value is `true`
     - `false` will disable writing the file to disk via `.dest()`
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
+  - passthrough - `true` or `false` if you want a duplex stream which passes items through and emits globbed files.
   - Any glob-related options are documented in [glob-stream] and [node-glob]
-- Returns a Readable/Writable stream.
-- On write the stream will simply pass items through.
+- Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
 - This stream emits matching [vinyl] File objects
 
 ### watch(globs[, opt, cb])
