@@ -397,4 +397,24 @@ describe('source stream', function() {
     stream1.pipe(stream2).pipe(bufferStream);
   });
 
+  it('should follow file symlinks', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+
+    var stream = vfs.src('./fixtures/test-symlink', {cwd: __dirname});
+    stream.on('data', function(file){
+      file.path.should.equal(expectedPath);
+      done();
+    });
+  });
+
+  it('should follow dir symlinks', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/wow');
+
+    var stream = vfs.src('./fixtures/test-symlink-dir', {cwd: __dirname});
+    stream.on('data', function(file){
+      file.path.should.equal(expectedPath);
+      done();
+    });
+  });
+
 });
