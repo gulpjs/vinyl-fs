@@ -83,6 +83,7 @@ This is just [glob-watcher]
   - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
   - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode) or the process mode if the input file has no mode property.
   - dirMode - Specify the mode the directory should be created with. Default is the process mode.
+  - overwrite - Specify if existing files with the same path should be overwritten or not. Default is `true`, to always overwrite existing files
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
