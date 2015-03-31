@@ -1,7 +1,3 @@
-var spies = require('./spy');
-var chmodSpy = spies.chmodSpy;
-var statSpy = spies.statSpy;
-
 var vfs = require('../');
 
 var path = require('path');
@@ -53,21 +49,36 @@ describe('source stream', function() {
     });
   });
 
+  it('should error on file not existing', function(done) {
+    var stream = vfs.src('./fixtures/noexist.coffee');
+    stream.on('error', function(err){
+      should.exist(err);
+      done();
+    });
+  });
+
   it('should pass through writes', function(done) {
     var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
-
+    var files = [];
     var expectedFile = new File({
       base: __dirname,
       cwd: __dirname,
       path: expectedPath,
-      contents: expectedContent
+      contents: expectedContent,
+      stat: fs.lstatSync(expectedPath)
     });
 
-    var stream = vfs.src('./fixtures/noexist.coffee');
+    var stream = vfs.src(expectedPath, {cwd: __dirname, base: __dirname});
     stream.on('data', function(file){
-      file.should.equal(expectedFile);
-      bufEqual(file.contents, expectedContent).should.equal(true);
+      files.push(file);
+    });
+    stream.once('end', function(){
+      files.length.should.equal(2);
+      files[0].should.eql(expectedFile);
+      bufEqual(files[0].contents, expectedContent).should.equal(true);
+      files[1].should.eql(expectedFile);
+      bufEqual(files[1].contents, expectedContent).should.equal(true);
       done();
     });
     stream.write(expectedFile);
