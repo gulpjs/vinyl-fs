@@ -743,7 +743,6 @@ describe('dest stream', function() {
     var onEnd = function(){
       expectedCount.should.equal(1);
       should(chmodSpy.called).be.not.ok;
-      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
 
