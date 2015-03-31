@@ -21,7 +21,7 @@
     "strip-bom": "^1.0.0",
     "through2": "^0.6.1",
     "vinyl": "^0.4.0",
-    "vinyl-filter-since": "^1.0.0"
+    "vinyl-filter-since": "^2.0.0"
   },
   "devDependencies": {
     "buffer-equal": "^0.0.1",
