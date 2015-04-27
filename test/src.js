@@ -57,6 +57,24 @@ describe('source stream', function() {
     });
   });
 
+  it('should accept an optional encoding parameter', function (done) {
+    var expectedPath = path.join(__dirname, './fixtures/enc-utf8.txt');
+
+    // vfs.src with 'ascii' encoding should be the same as readFile with 'ascii'
+    // even though the file contains utf8 string
+    var stream = vfs.src(expectedPath, {encoding: 'ascii'});
+    var expectedContent = fs.readFileSync(expectedPath, {encoding: 'ascii'});
+    var buffered = [];
+    var onEnd = function () {
+      // should still be a buffer
+      buffered[0].isBuffer().should.equal(true);
+      buffered[0].contents.toString().should.equal(expectedContent);
+      done();
+    }
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
   it('should pass through writes', function(done) {
     var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
