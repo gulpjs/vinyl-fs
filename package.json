@@ -15,6 +15,7 @@
     "glob-stream": "^5.0.0",
     "glob-watcher": "^2.0.0",
     "graceful-fs": "^3.0.0",
+    "gulp-sourcemaps": "^1.5.2",
     "merge-stream": "^0.1.7",
     "mkdirp": "^0.5.0",
     "object-assign": "^2.0.0",
