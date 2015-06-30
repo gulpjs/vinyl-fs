@@ -68,6 +68,8 @@ fs.src(['*.js', '!b*.js'])
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
 - This stream emits matching [vinyl] File objects
 
+_Note:_ UTF-8 BOM will be stripped from all files read with `.src`
+
 ### watch(globs[, opt, cb])
 
 This is just [glob-watcher]
