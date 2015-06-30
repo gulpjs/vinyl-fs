@@ -106,6 +106,28 @@ describe('source stream', function() {
     stream.pipe(bufferStream);
   });
 
+  it('should not strip BOM from UTF-8-encoded files when stripBOM is false', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/bom-utf8.txt');
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      buffered[0].contents.length.should.equal(expectedContent.length);
+      done();
+    };
+
+    var stream = vfs.src('./fixtures/bom-utf8.txt', {
+      cwd: __dirname,
+      stripBOM: false
+    });
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
   it('should not strip anything that looks like a UTF-8-encoded BOM from UTF-16-BE-encoded files', function(done) {
     // Note: this goes for any non-UTF-8 encoding, but testing for UTF-16-BE
     // and UTF-16-LE is enough to demonstrate this is done properly.

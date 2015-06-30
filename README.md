@@ -59,6 +59,8 @@ fs.src(['*.js', '!b*.js'])
   - read - `true` or `false` if you want the file to be read or not. Useful for stuff like `rm`ing files.
     - Default value is `true`
     - `false` will disable writing the file to disk via `.dest()`
+  - stripBOM - `true` or `false` if you want UTF-8 BOM stripped from files as they are read.
+    - Default value is `true`
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
   - passthrough - `true` or `false` if you want a duplex stream which passes items through and emits globbed files.
     - Default is `false`.
@@ -67,6 +69,8 @@ fs.src(['*.js', '!b*.js'])
   - Any glob-related options are documented in [glob-stream] and [node-glob]
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
 - This stream emits matching [vinyl] File objects
+
+_Note:_ UTF-8 BOM will be stripped from all files read with `.src`
 
 ### watch(globs[, opt, cb])
 
