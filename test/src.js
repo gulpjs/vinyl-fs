@@ -41,6 +41,18 @@ describe('source stream', function() {
     }
   });
 
+  it('should explode on invalid glob (nested array)', function(done) {
+    var stream;
+    try {
+      stream = vfs.src([['./fixtures/*.coffee']]);
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      err.message.should.containEql('Invalid glob argument');
+      done();
+    }
+  });
+
   it('should not explode on invalid glob (empty array)', function(done) {
     var stream = vfs.src([]);
     stream.once('data', done);
