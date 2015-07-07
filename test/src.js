@@ -30,6 +30,17 @@ describe('source stream', function() {
     }
   });
 
+  it('should explode on invalid glob (empty string)', function(done) {
+    var stream;
+    try {
+      stream = vfs.src('');
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
   it('should explode on invalid glob (number)', function(done) {
     var stream;
     try {
@@ -49,6 +60,17 @@ describe('source stream', function() {
       should.exist(err);
       should.not.exist(stream);
       err.message.should.containEql('Invalid glob argument');
+      done();
+    }
+  });
+
+  it('should explode on invalid glob (empty string in array)', function(done) {
+    var stream;
+    try {
+      stream = vfs.src(['']);
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
       done();
     }
   });
