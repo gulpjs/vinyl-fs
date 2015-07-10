@@ -51,65 +51,74 @@ fs.src(['*.js', '!b*.js'])
 
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to.
-    - Default is `process.cwd()`
-  - base - Specify the folder relative to the cwd. Default is where the glob begins. This is used to determine the file names when saving in `.dest()`
+    - Default is `process.cwd()`.
+  - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
+    - Default is where the glob begins if any.
+    - Default is `process.cwd()` if there is no glob.
   - buffer - `true` or `false` if you want to buffer the file.
-    - Default value is `true`
-    - `false` will make file.contents a paused Stream
+    - Default value is `true`.
+    - `false` will make `file.contents` a paused Stream.
   - read - `true` or `false` if you want the file to be read or not. Useful for stuff like `rm`ing files.
-    - Default value is `true`
-    - `false` will disable writing the file to disk via `.dest()`
+    - Default value is `true`.
+    - `false` will disable writing the file to disk via `.dest()`.
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
   - passthrough - `true` or `false` if you want a duplex stream which passes items through and emits globbed files.
     - Default is `false`.
   - sourcemaps - `true` or `false` if you want files to have sourcemaps enabled.
     - Default is `false`.
-  - Any glob-related options are documented in [glob-stream] and [node-glob]
+  - Any glob-related options are documented in [glob-stream] and [node-glob].
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
-- This stream emits matching [vinyl] File objects
+- This stream emits matching [vinyl] File objects.
 
-_Note:_ UTF-8 BOM will be stripped from all files read with `.src`
+_Note:_ UTF-8 BOM will be stripped from all files read with `.src`.
 
 ### watch(globs[, opt, cb])
 
-This is just [glob-watcher]
+This is just [glob-watcher].
 
 - Takes a glob string or an array of glob strings as the first argument.
 - Possible options for the second argument:
-  - Any options are passed to [gaze]
-- Returns an EventEmitter
-  - 'changed' event is emitted on each file change
-- Optionally calls the callback on each change event
+  - Any options are passed to [gaze].
+- Returns an EventEmitter.
+  - 'changed' event is emitted on each file change.
+- Optionally calls the callback on each change event.
 
 ### dest(folder[, opt])
 
 - Takes a folder path as the first argument.
 - First argument can also be a function that takes in a file and returns a folder path.
 - Possible options for the second argument:
-  - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
-  - mode - Specify the mode the files should be created with. Default is the mode of the input file (file.stat.mode) or the process mode if the input file has no mode property.
-  - dirMode - Specify the mode the directory should be created with. Default is the process mode.
-  - overwrite - Specify if existing files with the same path should be overwritten or not. Default is `true`, to always overwrite existing files
+  - cwd - Specify the working directory the folder is relative to.
+    - Default is `process.cwd()`.
+  - mode - Specify the mode the files should be created with.
+    - Default is the mode of the input file (file.stat.mode) if any.
+    - Default is the process mode if the input file has no mode property.
+  - dirMode - Specify the mode the directory should be created with.
+    - Default is the process mode.
+  - overwrite - Specify if existing files with the same path should be overwritten or not.
+    - Default is `true`, to always overwrite existing files.
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
 - The file will be modified after being written to this stream:
-  - `cwd`, `base`, and `path` will be overwritten to match the folder
-  - `stat.mode` will be overwritten if you used a mode parameter
-  - `contents` will have it's position reset to the beginning if it is a stream
+  - `cwd`, `base`, and `path` will be overwritten to match the folder.
+  - `stat.mode` will be overwritten if you used a mode parameter.
+  - `contents` will have it's position reset to the beginning if it is a stream.
 
 ### symlink(folder[, opt])
 
 - Takes a folder path as the first argument.
 - First argument can also be a function that takes in a file and returns a folder path.
 - Possible options for the second argument:
-  - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
-  - dirMode - Specify the mode the directory should be created with. Default is the process mode.
+  - cwd - Specify the working directory the folder is relative to.
+    - Default is `process.cwd()`.
+  - dirMode - Specify the mode the directory should be created with.
+    - Default is the process mode.
 - Returns a Readable/Writable stream.
 - On write the stream will create a symbolic link (i.e. symlink) on disk at the folder/cwd specified.
 - After creating the symbolic link, it will be emitted from the stream so you can keep piping these around.
 - The file will be modified after being written to this stream:
-  - `cwd`, `base`, and `path` will be overwritten to match the folder
+  - `cwd`, `base`, and `path` will be overwritten to match the folder.
 
 [glob-stream]: https://github.com/wearefractal/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
