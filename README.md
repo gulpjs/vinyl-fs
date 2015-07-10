@@ -52,7 +52,9 @@ fs.src(['*.js', '!b*.js'])
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to.
     - Default is `process.cwd()`
-  - base - Specify the folder relative to the cwd. Default is where the glob begins. This is used to determine the file names when saving in `.dest()`
+  - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`
+    - Default is where the glob begins if any. 
+    - Default is `process.cwd()` if there is no glob.
   - buffer - `true` or `false` if you want to buffer the file.
     - Default value is `true`
     - `false` will make file.contents a paused Stream
