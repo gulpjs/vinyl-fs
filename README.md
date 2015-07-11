@@ -90,6 +90,8 @@ This is just [glob-watcher].
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to.
     - Default is `process.cwd()`.
+  - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
+    - Default is the `cwd` resolves to the folder path.
   - mode - Specify the mode the files should be created with.
     - Default is the mode of the input file (file.stat.mode) if any.
     - Default is the process mode if the input file has no mode property.
@@ -112,6 +114,8 @@ This is just [glob-watcher].
 - Possible options for the second argument:
   - cwd - Specify the working directory the folder is relative to.
     - Default is `process.cwd()`.
+  - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
+    - Default is the `cwd` resolves to the folder path.
   - dirMode - Specify the mode the directory should be created with.
     - Default is the process mode.
 - Returns a Readable/Writable stream.
