@@ -75,12 +75,15 @@ describe('source stream', function() {
     }
   });
 
-  it('should not explode on invalid glob (empty array)', function(done) {
-    var stream = vfs.src([]);
-    stream.once('data', done);
-    stream.once('end', function(){
+  it('should explode on invalid glob (empty array)', function(done) {
+    var stream;
+    try {
+      stream = vfs.src([]);
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
       done();
-    });
+    }
   });
 
   it('should error on file not existing', function(done) {
@@ -354,88 +357,6 @@ describe('source stream', function() {
 
     var stream1 = vfs.src('./fixtures/*.coffee', {cwd: __dirname});
     var stream2 = vfs.src('./fixtures/wow/*', {cwd: __dirname, passthrough: true});
-
-    var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-    stream1.pipe(stream2).pipe(bufferStream);
-  });
-
-  it('should pass files through (empty glob array in passthrough stream)', function(done) {
-    var expectedPaths = [
-      path.join(__dirname, './fixtures/test.coffee'),
-      path.join(__dirname, './fixtures/wow/suchempty')
-    ];
-    var expectedContents = expectedPaths.map(function(path/* more args here so can't pass function directly */) {
-      return fs.readFileSync(path);
-    });
-
-    var onEnd = function(){
-      buffered.length.should.equal(2);
-      buffered.forEach(function(file) {
-        should.exist(file.stat);
-        file.isBuffer().should.equal(true);
-
-        expectedPaths.some(function(expectedPath) {
-          return file.path === expectedPath;
-        }).should.equal(true);
-
-        expectedContents.some(function(expectedContent) {
-          return bufEqual(file.contents, expectedContent);
-        }).should.equal(true);
-      });
-      done();
-    };
-
-    var stream1 = vfs.src(['./fixtures/*.coffee', './fixtures/wow/*'], {cwd: __dirname});
-    var stream2 = vfs.src([], {cwd: __dirname, passthrough: true});
-
-    var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-    stream1.pipe(stream2).pipe(bufferStream);
-  });
-
-  it('should pass files through (empty glob array in source stream)', function(done) {
-    var expectedPaths = [
-      path.join(__dirname, './fixtures/test.coffee'),
-      path.join(__dirname, './fixtures/wow/suchempty')
-    ];
-    var expectedContents = expectedPaths.map(function(path/* more args here so can't pass function directly */) {
-      return fs.readFileSync(path);
-    });
-
-    var onEnd = function(){
-      buffered.length.should.equal(2);
-      buffered.forEach(function(file) {
-        should.exist(file.stat);
-        file.isBuffer().should.equal(true);
-
-        expectedPaths.some(function(expectedPath) {
-          return file.path === expectedPath;
-        }).should.equal(true);
-
-        expectedContents.some(function(expectedContent) {
-          return bufEqual(file.contents, expectedContent);
-        }).should.equal(true);
-      });
-      done();
-    };
-
-    var stream1 = vfs.src([], {cwd: __dirname});
-    var stream2 = vfs.src(['./fixtures/*.coffee', './fixtures/wow/*'], {cwd: __dirname, passthrough: true});
-
-    var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-    stream1.pipe(stream2).pipe(bufferStream);
-  });
-
-  it('should still end when passing through empty streams', function(done) {
-    var onEnd = function(){
-      buffered.length.should.equal(0);
-      done();
-    };
-
-    var stream1 = vfs.src([], {cwd: __dirname});
-    var stream2 = vfs.src([], {cwd: __dirname, passthrough: true});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
