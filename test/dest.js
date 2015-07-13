@@ -848,7 +848,7 @@ describe('dest stream', function() {
       var srcPath = path.join(__dirname, './fixtures/test.coffee');
       var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
-      stream.on(eventName, function() {
+      stream.once(eventName, function() {
         done();
       });
 
