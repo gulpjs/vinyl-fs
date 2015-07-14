@@ -843,23 +843,21 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  ['end', 'finish'].forEach(function(eventName) {
-    it('should emit ' + eventName + ' event', function(done) {
-      var srcPath = path.join(__dirname, './fixtures/test.coffee');
-      var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+  it('should emit finish event', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
-      stream.once(eventName, function() {
-        done();
-      });
-
-      var file = new File({
-        path: srcPath,
-        cwd: __dirname,
-        contents: new Buffer("1234567890")
-      });
-
-      stream.write(file);
-      stream.end();
+    stream.once('finish', function() {
+      done();
     });
+
+    var file = new File({
+      path: srcPath,
+      cwd: __dirname,
+      contents: new Buffer("1234567890")
+    });
+
+    stream.write(file);
+    stream.end();
   });
 });
