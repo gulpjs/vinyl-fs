@@ -42,7 +42,7 @@
     "coveralls": "istanbul cover _mocha && istanbul-coveralls"
   },
   "engines": {
-    "node": ">= 0.10"
+    "node": ">=0.10"
   },
   "license": "MIT"
 }
