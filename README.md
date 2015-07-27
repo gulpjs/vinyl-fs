@@ -92,6 +92,7 @@ This is just [glob-watcher].
     - Default is `process.cwd()`.
   - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
     - Default is the `cwd` resolves to the folder path.
+    - Can also be a function that takes in a file and returns a folder path.
   - mode - Specify the mode the files should be created with.
     - Default is the mode of the input file (file.stat.mode) if any.
     - Default is the process mode if the input file has no mode property.
