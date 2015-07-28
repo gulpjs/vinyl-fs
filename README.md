@@ -113,7 +113,7 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 
   - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
     - Default is the `cwd` resolves to the folder path.
-
+    - Can also be a function that takes in a file and returns a folder path.
   - dirMode - Specify the mode the directory should be created with.
     - Default is the process mode.
 
