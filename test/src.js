@@ -383,4 +383,40 @@ describe('source stream', function() {
     });
   });
 
+  it('should preserve file symlinks with followSymlinks option set to false', function (done) {
+    var sourcePath = path.join(__dirname, './fixtures/test-symlink');
+    var expectedPath = sourcePath;
+
+    fs.readlink(sourcePath, function (err, expectedRelativeSymlinkPath) {
+      if (err) {
+        throw err;
+      }
+
+      var stream = vfs.src('./fixtures/test-symlink', {cwd: __dirname, followSymlinks: false});
+      stream.on('data', function(file) {
+        file.path.should.equal(expectedPath);
+        file.symlink.should.equal(expectedRelativeSymlinkPath);
+        done();
+      });
+    });
+  });
+
+  it('should preserve dir symlinks with followSymlinks option set to false', function (done) {
+    var sourcePath = path.join(__dirname, './fixtures/test-symlink-dir');
+    var expectedPath = sourcePath;
+
+    fs.readlink(sourcePath, function (err, expectedRelativeSymlinkPath) {
+      if (err) {
+        throw err;
+      }
+
+      var stream = vfs.src(sourcePath, {cwd: __dirname, followSymlinks: false});
+      stream.on('data', function (file) {
+        file.path.should.equal(expectedPath);
+        file.symlink.should.equal(expectedRelativeSymlinkPath);
+        done();
+      });
+    });
+  });
+
 });
