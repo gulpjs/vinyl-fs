@@ -903,6 +903,40 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should create symlinks when the `symlink` attribute is set on the file', function (done) {
+    var inputPath = path.join(__dirname, './fixtures/test-create-dir-symlink');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputRelativeSymlinkPath = 'wow';
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test-create-dir-symlink');
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null, //''
+    });
+
+    // `src()` adds this side-effect with `keepSymlinks` option set to false
+    inputFile.symlink = inputRelativeSymlinkPath;
+
+    var onEnd = function(){
+      fs.readlink(buffered[0].path, function (err, link) {
+        buffered[0].symlink.should.equal(inputFile.symlink);
+        buffered[0].path.should.equal(expectedPath);
+        done();
+      });
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
   it('should emit finish event', function(done) {
     var srcPath = path.join(__dirname, './fixtures/test.coffee');
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
