@@ -83,7 +83,7 @@ This is just [glob-watcher].
 - Possible options for the second argument:
   - Any options are passed to [gaze].
 - Returns an EventEmitter.
-  - 'changed' event is emitted on each file change.
+  - 'change' event is emitted on each file change.
 - Optionally calls the callback on each change event.
 
 ### dest(folder[, opt])
