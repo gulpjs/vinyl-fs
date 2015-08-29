@@ -17,7 +17,7 @@
     "graceful-fs": "^4.0.0",
     "gulp-sourcemaps": "^1.5.2",
     "is-valid-glob": "^0.3.0",
-    "merge-stream": "^0.1.7",
+    "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
     "object-assign": "^3.0.0",
     "strip-bom": "^2.0.0",
