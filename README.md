@@ -68,6 +68,10 @@ fs.src(['*.js', '!b*.js'])
   - sourcemaps - `true` or `false` if you want files to have sourcemaps enabled.
     - Default is `false`.
 
+  - followSymlinks - `true` if you want to recursively resolve symlinks to their targets; set to `false` to preserve them as symlinks.
+    - Default is `true`.
+    - `false` will make `file.symlink` equal the original symlink's target path.
+
   - Any glob-related options are documented in [glob-stream] and [node-glob].
 
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
@@ -99,6 +103,7 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
+- If the file has a `symlink` attribute specifying a target path, then a symlink will be created.
 - The file will be modified after being written to this stream:
   - `cwd`, `base`, and `path` will be overwritten to match the folder.
   - `stat.mode` will be overwritten if you used a mode parameter.
@@ -113,6 +118,7 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 
   - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
     - Default is the `cwd` resolves to the folder path.
+    - Can also be a function that takes in a file and returns a folder path.
 
   - dirMode - Specify the mode the directory should be created with.
     - Default is the process mode.
