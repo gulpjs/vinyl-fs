@@ -1,18 +1,6 @@
 # vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]
 ## Information
-<table>
-<tr>
-<td>Package</td><td>vinyl-fs</td>
-</tr>
-<tr>
-<td>Description</td>
-<td>Vinyl adapter for the file system</td>
-</tr>
-<tr>
-<td>Node Version</td>
-<td>>= 0.10</td>
-</tr>
-</table>
+<table><br><tr><br><td>Package</td><td>vinyl-fs</td><br></tr><br><tr><br><td>Description</td><br><td>Vinyl adapter for the file system</td><br></tr><br><tr><br><td>Node Version</td><br><td>>= 0.10</td><br></tr><br></table>
 
 ## Usage
 
@@ -67,6 +55,8 @@ fs.src(['*.js', '!b*.js'])
 
   - sourcemaps - `true` or `false` if you want files to have sourcemaps enabled.
     - Default is `false`.
+    - Will load inline sourcemaps and resolve sourcemap links from files
+    - Uses `gulp-sourcemaps` under the hood
   - followSymlinks - `true` if you want to recursively resolve symlinks to their targets; set to `false` to preserve them as symlinks.
     - Default is `true`.
     - `false` will make `file.symlink` equal the original symlink's target path.
@@ -97,6 +87,11 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 
   - overwrite - Specify if existing files with the same path should be overwritten or not.
     - Default is `true`, to always overwrite existing files.
+
+  - sourcemaps -
+    - Default is `null` aka do not write sourcemaps.
+    - Use `.` to write sourcemaps as files
+    - Uses `gulp-sourcemaps` under the hood
 
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
