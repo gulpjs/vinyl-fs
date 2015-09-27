@@ -89,6 +89,7 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 
   - overwrite - Specify if existing files with the same path should be overwritten or not.
     - Default is `true`, to always overwrite existing files.
+    - Can also be a function that takes in a file and returns `true` or `false`.
 
   - sourcemaps -
     - Default is `null` aka do not write sourcemaps.
