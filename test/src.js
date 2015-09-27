@@ -121,7 +121,7 @@ describe('source stream', function() {
     stream.write(expectedFile);
   });
 
-  it('should strip BOM from UTF-8-encoded files', function(done) {
+  it('should strip BOM from UTF-8-encoded files by default', function(done) {
     var expectedPath = path.join(__dirname, './fixtures/bom-utf8.txt');
     var expectedContent = fs.readFileSync(expectedPath)
       // U+FEFF takes up 3 bytes in UTF-8: http://mothereff.in/utf-8#%EF%BB%BF
@@ -137,6 +137,26 @@ describe('source stream', function() {
     };
 
     var stream = vfs.src('./fixtures/bom-utf8.txt', {cwd: __dirname});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
+
+  it('should not strip BOM from UTF-8-encoded files if option is false', function(done) {
+    var expectedPath = path.join(__dirname, './fixtures/bom-utf8.txt');
+    var expectedContent = fs.readFileSync(expectedPath);
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      should.exist(buffered[0].stat);
+      buffered[0].path.should.equal(expectedPath);
+      buffered[0].isBuffer().should.equal(true);
+      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+      done();
+    };
+
+    var stream = vfs.src('./fixtures/bom-utf8.txt', {cwd: __dirname, stripBOM: false});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);

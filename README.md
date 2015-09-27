@@ -50,6 +50,10 @@ fs.src(['*.js', '!b*.js'])
     - `false` will disable writing the file to disk via `.dest()`.
 
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
+
+  - stripBOM - `true` or `false` if you want the BOM to be stripped on UTF-8 encoded files.
+    - Default value is `true`.
+
   - passthrough - `true` or `false` if you want a duplex stream which passes items through and emits globbed files.
     - Default is `false`.
 
