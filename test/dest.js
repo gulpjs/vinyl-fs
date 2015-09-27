@@ -903,6 +903,76 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should not overwrite files with overwrite option set to a function that returns false', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(existingContents)).should.equal(true);
+      done();
+    };
+
+    // Write expected file which should not be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return false; }});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should overwrite files with overwrite option set to a function that returns true', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(inputContents)).should.equal(true);
+      done();
+    };
+
+    // This should be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return true; }});
+
+    var buffered = [];
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
   it('should create symlinks when the `symlink` attribute is set on the file', function (done) {
     var inputPath = path.join(__dirname, './fixtures/test-create-dir-symlink');
     var inputBase = path.join(__dirname, './fixtures/');
