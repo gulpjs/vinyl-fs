@@ -1,6 +1,6 @@
 # vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]
 ## Information
-<table><br><tr><br><td>Package</td><td>vinyl-fs</td><br></tr><br><tr><br><td>Description</td><br><td>Vinyl adapter for the file system</td><br></tr><br><tr><br><td>Node Version</td><br><td>>= 0.10</td><br></tr><br></table>
+<table><br><tr><br><td>Package</td><td>vinyl-fs</td><br></tr><br><tr><br><td>Description</td><br><td>Vinyl adapter for the file system</td><br></tr><br><tr><br><td>Node Version</td><br><td>>= 0.10</td><br></tr><br></table>  
 
 ## Usage
 
@@ -50,7 +50,6 @@ fs.src(['*.js', '!b*.js'])
     - `false` will disable writing the file to disk via `.dest()`.
 
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
-
   - stripBOM - `true` or `false` if you want the BOM to be stripped on UTF-8 encoded files.
     - Default value is `true`.
 
@@ -95,8 +94,14 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 
   - sourcemaps -
     - Default is `null` aka do not write sourcemaps.
-    - Use `.` to write sourcemaps as files
     - Uses `gulp-sourcemaps` under the hood
+    - Examples:
+      - Write as inline comments
+      - fs.dest('./', {sourcemaps: true})
+      - Write as files in the same folder
+      - fs.dest('./', {<br>  sourcemaps: {<br>    path: '.'<br>  }<br>})
+      - Any other options are passed through to `gulp-sourcemaps`
+      - fs.dest('./', {<br>  sourcemaps: {<br>    path: '.',<br>    addComment: false,<br>    includeContent: false<br>  }<br>})
 
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
