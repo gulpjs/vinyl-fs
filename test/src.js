@@ -1,3 +1,5 @@
+'use strict';
+
 var vfs = require('../');
 
 var path = require('path');
@@ -139,7 +141,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/bom-utf8.txt', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -159,7 +161,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/bom-utf8.txt', {cwd: __dirname, stripBOM: false});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -181,7 +183,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/bom-utf16be.txt', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -203,7 +205,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/bom-utf16le.txt', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -223,7 +225,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -243,7 +245,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -261,7 +263,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/wow/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -280,7 +282,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, read: false});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -301,7 +303,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, since: lastUpdateDate});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -317,7 +319,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, since: lastUpdateDate});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -345,7 +347,7 @@ describe('source stream', function() {
     var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, buffer: false});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -379,7 +381,7 @@ describe('source stream', function() {
     var stream2 = vfs.src('./fixtures/wow/*', {cwd: __dirname, passthrough: true});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream1.pipe(stream2).pipe(bufferStream);
   });
 
