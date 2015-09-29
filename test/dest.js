@@ -1,3 +1,5 @@
+'use strict';
+
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
 var statSpy = spies.statSpy;
@@ -30,7 +32,7 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & 07777;
+  return n & parseInt('7777', 8);
 };
 
 describe('dest stream', function() {
@@ -78,7 +80,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -103,7 +105,7 @@ describe('dest stream', function() {
     var stream = vfs.dest(path.join(__dirname, './out-fixtures/'));
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -136,7 +138,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -171,7 +173,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -210,7 +212,7 @@ describe('dest stream', function() {
     }, {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -223,7 +225,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -250,7 +252,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -263,7 +265,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -291,7 +293,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     setTimeout(function(){
@@ -307,7 +309,7 @@ describe('dest stream', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/test');
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -337,7 +339,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -388,7 +390,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0666 & (~process.umask());
+    var expectedMode = parseInt('666', 8) & (~process.umask());
 
     var expectedFile = new File({
       base: inputBase,
@@ -409,7 +411,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -423,7 +425,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0744;
+    var expectedMode = parseInt('744', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -444,7 +446,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, mode:expectedMode});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -458,8 +460,8 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var startMode = 0655;
-    var expectedMode = 0722;
+    var startMode = parseInt('0655', 8);
+    var expectedMode = parseInt('0722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -488,7 +490,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -509,10 +511,10 @@ describe('dest stream', function() {
       stat: fs.statSync(inputPath)
     });
     var startMode = firstFile.stat.mode;
-    var expectedMode = 0727;
+    var expectedMode = parseInt('727', 8);
 
     var expectedFile = new File(firstFile);
-    expectedFile.stat.mode = (startMode & ~07777) | expectedMode;
+    expectedFile.stat.mode = (startMode & ~parseInt('7777', 8)) | expectedMode;
 
     var onEnd = function(){
       buffered.length.should.equal(2);
@@ -530,7 +532,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -542,8 +544,8 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
-    var expectedDirMode = 0755;
-    var expectedFileMode = 0655;
+    var expectedDirMode = parseInt('755', 8);
+    var expectedFileMode = parseInt('655', 8);
 
     var firstFile = new File({
       base: inputBase,
@@ -565,7 +567,7 @@ describe('dest stream', function() {
     });
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -593,7 +595,7 @@ describe('dest stream', function() {
     });
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -625,7 +627,7 @@ describe('dest stream', function() {
     });
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -639,7 +641,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -670,7 +672,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -706,7 +708,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -742,7 +744,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -777,7 +779,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -791,8 +793,8 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 03722;
-    var normalMode = 0722;
+    var expectedMode = parseInt('3722', 8);
+    var normalMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -826,7 +828,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -862,7 +864,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: false});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
@@ -897,7 +899,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: true});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
@@ -932,7 +934,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return false; }});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
@@ -967,7 +969,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return true; }});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
@@ -1001,7 +1003,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
