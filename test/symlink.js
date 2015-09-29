@@ -1,3 +1,5 @@
+"use strict";
+
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
 var statSpy = spies.statSpy;
@@ -30,7 +32,7 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & 07777;
+  return n & parseInt("7777", 8);
 };
 
 describe('symlink stream', function() {
@@ -67,7 +69,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -92,7 +94,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink(path.join(__dirname, './out-fixtures/'));
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -128,7 +130,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -168,7 +170,7 @@ describe('symlink stream', function() {
     }, {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -181,7 +183,7 @@ describe('symlink stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -208,7 +210,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -221,7 +223,7 @@ describe('symlink stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -249,7 +251,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     setTimeout(function(){
@@ -265,7 +267,7 @@ describe('symlink stream', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/wow');
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -295,7 +297,7 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -305,8 +307,8 @@ describe('symlink stream', function() {
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
-    var expectedDirMode = 0755;
-    var expectedFileMode = 0655;
+    var expectedDirMode = parseInt('755', 8);
+    var expectedFileMode = parseInt('655', 8);
 
     var firstFile = new File({
       base: inputBase,
@@ -328,7 +330,7 @@ describe('symlink stream', function() {
     });
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -357,7 +359,7 @@ describe('symlink stream', function() {
     });
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
@@ -371,7 +373,7 @@ describe('symlink stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
