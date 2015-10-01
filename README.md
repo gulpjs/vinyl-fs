@@ -71,6 +71,8 @@ fs.src(['*.js', '!b*.js'])
 
   - Any glob-related options are documented in [glob-stream] and [node-glob].
 
+  - Any through2-related options are documented in [through2]
+
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
 - This stream emits matching [vinyl] File objects.
 
@@ -109,6 +111,8 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
       - Any other options are passed through to `gulp-sourcemaps`
       - fs.dest('./', {<br>  sourcemaps: {<br>    path: '.',<br>    addComment: false,<br>    includeContent: false<br>  }<br>})
 
+  - Any through2-related options are documented in [through2]
+
 - Returns a Readable/Writable stream.
 - On write the stream will save the [vinyl] File to disk at the folder/cwd specified.
 - After writing the file to disk, it will be emitted from the stream so you can keep piping these around.
@@ -132,6 +136,8 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
   - dirMode - Specify the mode the directory should be created with.
     - Default is the process mode.
 
+  - Any through2-related options are documented in [through2]
+
 - Returns a Readable/Writable stream.
 - On write the stream will create a symbolic link (i.e. symlink) on disk at the folder/cwd specified.
 - After creating the symbolic link, it will be emitted from the stream so you can keep piping these around.
@@ -141,8 +147,9 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
 [gaze]: https://github.com/shama/gaze
-[glob-watcher]: https://github.com/gulpjs/glob-watcher
-[vinyl]: https://github.com/gulpjs/vinyl
+[glob-watcher]: https://github.com/wearefractal/glob-watcher
+[vinyl]: https://github.com/wearefractal/vinyl
+[through2]: https://github.com/rvagg/through2
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
 [npm-image]: https://badge.fury.io/js/vinyl-fs.svg
 [travis-url]: https://travis-ci.org/gulpjs/vinyl-fs
