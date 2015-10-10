@@ -1,6 +1,10 @@
 # vinyl-fs [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]
 ## Information
-<table><br><tr><br><td>Package</td><td>vinyl-fs</td><br></tr><br><tr><br><td>Description</td><br><td>Vinyl adapter for the file system</td><br></tr><br><tr><br><td>Node Version</td><br><td>>= 0.10</td><br></tr><br></table>  
+<table>
+  <tr><td>Package</td><td>vinyl-fs</td></tr>
+  <tr><td>Description</td><td>Vinyl adapter for the file system</td></tr>
+  <tr><td>Node Version</td><td>>= 0.10</td></tr>
+</table>
 
 ## Usage
 
@@ -134,16 +138,16 @@ _Note:_ UTF-8 BOM will be stripped from all UTF-8 files read with `.src`.
 - The file will be modified after being written to this stream:
   - `cwd`, `base`, and `path` will be overwritten to match the folder.
 
-[glob-stream]: https://github.com/wearefractal/glob-stream
+[glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
 [gaze]: https://github.com/shama/gaze
-[glob-watcher]: https://github.com/wearefractal/glob-watcher
-[vinyl]: https://github.com/wearefractal/vinyl
+[glob-watcher]: https://github.com/gulpjs/glob-watcher
+[vinyl]: https://github.com/gulpjs/vinyl
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
 [npm-image]: https://badge.fury.io/js/vinyl-fs.svg
-[travis-url]: https://travis-ci.org/wearefractal/vinyl-fs
-[travis-image]: https://travis-ci.org/wearefractal/vinyl-fs.svg?branch=master
+[travis-url]: https://travis-ci.org/gulpjs/vinyl-fs
+[travis-image]: https://travis-ci.org/gulpjs/vinyl-fs.svg?branch=master
 [coveralls-url]: https://coveralls.io/r/wearefractal/vinyl-fs
 [coveralls-image]: https://img.shields.io/coveralls/wearefractal/vinyl-fs.svg?style=flat
-[depstat-url]: https://david-dm.org/wearefractal/vinyl-fs
-[depstat-image]: https://david-dm.org/wearefractal/vinyl-fs.svg
+[depstat-url]: https://david-dm.org/gulpjs/vinyl-fs
+[depstat-image]: https://david-dm.org/gulpjs/vinyl-fs.svg
