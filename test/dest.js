@@ -574,6 +574,43 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should write file mtime using the vinyl mtime', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMtime = fs.lstatSync(inputPath).mtime;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mtime: expectedMtime
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).mtime.should.equal(expectedMtime);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should change to the specified base as string', function(done) {
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
