@@ -593,11 +593,14 @@ describe('dest stream', function() {
       }
     });
 
+    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
+    expectedMtime.setMilliseconds(0)
+
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).mtime.should.equal(expectedMtime);
+      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       done();
     };
 
