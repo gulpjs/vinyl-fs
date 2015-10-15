@@ -598,6 +598,7 @@ describe('dest stream', function() {
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
       fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      expectedFile.stat.should.equal({});
       done();
     };
 
@@ -641,6 +642,7 @@ describe('dest stream', function() {
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
+      expectedFile.stat.should.equal({mtime: expectedMtime});
       done();
     };
 
@@ -685,6 +687,7 @@ describe('dest stream', function() {
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
+      expectedFile.stat.should.equal({atime: expectedAtime, mtime: expectedMtime});
       done();
     };
 
