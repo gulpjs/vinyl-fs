@@ -666,7 +666,8 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMtime = new Date('foo');
+    var expectedMtime = new Date();
+    var invalidMtime = new Date(undefined);
 
     var expectedFile = new File({
       base: inputBase,
@@ -674,7 +675,7 @@ describe('dest stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        mtime: expectedMtime
+        mtime: invalidMtime
       }
     });
 
@@ -682,9 +683,7 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      expectedFile.stat.should.have.property('mtime');
-      expectedFile.stat.mtime.should.equal(expectedMtime);
-      expectedFile.stat.should.not.have.property('atime');
+      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
       done();
     };
 
@@ -705,8 +704,9 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedAtime = new Date('foo');
-    var expectedMtime = fs.lstatSync(inputPath).mtime;
+    var expectedAtime = new Date();
+    var expectedMtime = new Date();
+    var invalidAtime = new Date(undefined);
 
     var expectedFile = new File({
       base: inputBase,
@@ -714,7 +714,7 @@ describe('dest stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        atime: expectedAtime,
+        atime: invalidAtime,
         mtime: expectedMtime
       }
     });
@@ -723,10 +723,8 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      expectedFile.stat.should.have.property('mtime');
-      expectedFile.stat.mtime.should.equal(expectedMtime);
-      expectedFile.stat.should.have.property('atime');
-      expectedFile.stat.atime.should.equal(expectedAtime);
+      fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
       done();
     };
 
