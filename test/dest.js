@@ -697,7 +697,7 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should not modify file mtime and atime when provided atime on the vinyl stat is invalid', function(done) {
+  it('should write file mtime when provided mtime on the vinyl stat is valid but provided atime is invalid', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
@@ -705,7 +705,7 @@ describe('dest stream', function() {
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedAtime = new Date();
-    var expectedMtime = new Date();
+    var expectedMtime = fs.lstatSync(inputPath).mtime;
     var invalidAtime = new Date(undefined);
 
     var expectedFile = new File({
@@ -719,12 +719,16 @@ describe('dest stream', function() {
       }
     });
 
+    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
+    expectedAtime.setMilliseconds(0)
+    expectedMtime.setMilliseconds(0)
+
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
-      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
+      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       done();
     };
 
