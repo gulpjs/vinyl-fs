@@ -250,7 +250,7 @@ describe('source stream', function() {
   });
 
   it('should glob a directory with default settings', function(done) {
-    var expectedPath = path.join(__dirname, './fixtures/wow');
+    var expectedPath = path.join(__dirname, './fixtures/wow/');
 
     var onEnd = function(){
       buffered.length.should.equal(1);
