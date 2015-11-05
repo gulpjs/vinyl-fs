@@ -8,7 +8,8 @@ var vfs = require('../');
 
 var path = require('path');
 var fs = require('graceful-fs');
-var rimraf = require('rimraf');
+var del = require('del');
+var Writeable = require('readable-stream/writable');
 
 var bufEqual = require('buffer-equal');
 var through = require('through2');
@@ -17,11 +18,12 @@ var File = require('vinyl');
 var should = require('should');
 require('mocha');
 
-var wipeOut = function(cb) {
-  rimraf(path.join(__dirname, './out-fixtures/'), cb);
+var wipeOut = function() {
   spies.setError('false');
   statSpy.reset();
   chmodSpy.reset();
+  del.sync(path.join(__dirname, './fixtures/highwatermark'));
+  del.sync(path.join(__dirname, './out-fixtures/'));
 };
 
 var dataWrap = function(fn) {
@@ -1255,5 +1257,73 @@ describe('dest stream', function() {
 
     stream.write(file);
     stream.end();
+  });
+
+  it('does not get clogged by highWaterMark', function(done) {
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 17; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var fileCount = 0;
+    var countFiles = through.obj(function(file, enc, cb) {
+      fileCount++;
+
+      cb(null, file);
+    });
+
+    destStream.once('finish', function() {
+      fileCount.should.equal(17);
+      done();
+    });
+
+    srcStream.pipe(countFiles).pipe(destStream);
+  });
+
+  it('allows backpressure when piped to another, slower stream', function(done) {
+    this.timeout(20000);
+
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 24; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var fileCount = 0;
+    var countFiles = through.obj(function(file, enc, cb) {
+      fileCount++;
+
+      cb(null, file);
+    });
+
+    var slowFileCount = 0;
+    var slowCountFiles = new Writeable({
+      objectMode: true,
+      write: function(file, enc, cb){
+        slowFileCount++;
+
+        setTimeout(function() {
+          cb(null, file);
+        }, 250);
+      }
+    });
+
+    slowCountFiles.once('finish', function() {
+      fileCount.should.equal(24);
+      slowFileCount.should.equal(24);
+      done();
+    });
+
+    srcStream
+      .pipe(countFiles)
+      .pipe(destStream)
+      .pipe(slowCountFiles);
   });
 });
