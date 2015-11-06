@@ -620,7 +620,6 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedAtime = new Date();
     var expectedMtime = fs.lstatSync(inputPath).mtime;
 
     var expectedFile = new File({
@@ -633,15 +632,10 @@ describe('dest stream', function() {
       }
     });
 
-    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
-    expectedAtime.setMilliseconds(0)
-    expectedMtime.setMilliseconds(0)
-
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       expectedFile.stat.should.have.property('mtime');
       expectedFile.stat.mtime.should.equal(expectedMtime);
@@ -719,15 +713,10 @@ describe('dest stream', function() {
       }
     });
 
-    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
-    expectedAtime.setMilliseconds(0)
-    expectedMtime.setMilliseconds(0)
-
     var onEnd = function(){
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       done();
     };
