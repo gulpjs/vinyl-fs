@@ -2,7 +2,8 @@
 
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
-var statSpy = spies.statSpy;
+var fchmodSpy = spies.fchmodSpy;
+var fstatSpy = spies.fstatSpy;
 
 var vfs = require('../');
 
@@ -21,8 +22,9 @@ require('mocha');
 var wipeOut = function() {
   this.timeout(20000);
   spies.setError('false');
-  statSpy.reset();
+  fstatSpy.reset();
   chmodSpy.reset();
+  fchmodSpy.reset();
   del.sync(path.join(__dirname, './fixtures/highwatermark'));
   del.sync(path.join(__dirname, './out-fixtures/'));
 };
@@ -784,10 +786,6 @@ describe('dest stream', function() {
       },
     });
 
-    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
-    expectedAtime.setMilliseconds(0);
-    expectedMtime.setMilliseconds(0);
-
     var buffered = [];
 
     var onEnd = function() {
@@ -908,6 +906,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -926,7 +925,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
 
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'fstat' && arguments[2] === expectedFd) {
         return new Error('stat error');
       }
     });
@@ -943,6 +942,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -961,7 +961,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
 
     spies.setError(function(mod, fn) {
-      if (fn === 'chmod' && arguments[2] === expectedPath) {
+      if (fn === 'fchmod' && arguments[2] === expectedFd) {
         return new Error('chmod error');
       }
     });
@@ -978,6 +978,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -994,14 +995,14 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'fstat' && arguments[2] === expectedFd) {
         expectedCount++;
       }
     });
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(chmodSpy.called).be.not.ok;
+      should(fchmodSpy.called).be.not.ok;
       realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
@@ -1010,8 +1011,8 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
-    chmodSpy.reset();
+    fstatSpy.reset();
+    fchmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var buffered = [];
@@ -1026,6 +1027,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('3722', 8);
@@ -1043,14 +1045,14 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'fstat' && arguments[2] === expectedFd) {
         expectedCount++;
       }
     });
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(chmodSpy.called).be.not.ok;
+      should(fchmodSpy.called).be.not.ok;
       done();
     };
 
@@ -1058,8 +1060,8 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
-    chmodSpy.reset();
+    fstatSpy.reset();
+    fchmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var buffered = [];
@@ -1248,6 +1250,8 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.on('error', done);
     stream.pipe(bufferStream);
     stream.write(inputFile);
     stream.end();
