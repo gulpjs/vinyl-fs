@@ -781,10 +781,6 @@ describe('dest stream', function() {
       },
     });
 
-    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
-    expectedAtime.setMilliseconds(0);
-    expectedMtime.setMilliseconds(0);
-
     var buffered = [];
 
     var onEnd = function() {
