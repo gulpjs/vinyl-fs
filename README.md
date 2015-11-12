@@ -42,8 +42,8 @@ fs.src(['*.js', '!b*.js'])
     - Default is `process.cwd()`.
 
   - base - Specify the folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
-    - Default is where the glob begins if any.
-    - Default is `process.cwd()` if there is no glob.
+    - Default is where the glob begins, if any. For example, `path/to/**/*.js` would resolve to `path/to`.
+    - If there is no glob (i.e. a file path with no pattern), then the dirname of the path is used. For example, `path/to/some/file.js` would resolve to `path/to/some`.
 
   - buffer - `true` or `false` if you want to buffer the file.
     - Default value is `true`.
