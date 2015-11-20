@@ -26,4 +26,5 @@ module.exports = {
   },
   chmodSpy: maybeCallAsync(fs, 'chmod'),
   statSpy: maybeCallAsync(fs, 'stat'),
+  lstatSpy: maybeCallAsync(fs, 'lstat'),
 };

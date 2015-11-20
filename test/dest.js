@@ -2,7 +2,7 @@
 
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
-var statSpy = spies.statSpy;
+var lstatSpy = spies.lstatSpy;
 
 var vfs = require('../');
 
@@ -20,7 +20,7 @@ require('mocha');
 
 var wipeOut = function() {
   spies.setError('false');
-  statSpy.reset();
+  lstatSpy.reset();
   chmodSpy.reset();
   del.sync(path.join(__dirname, './fixtures/highwatermark'));
   del.sync(path.join(__dirname, './out-fixtures/'));
@@ -919,7 +919,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
 
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'lstat' && arguments[2] === expectedPath) {
         return new Error('stat error');
       }
     });
@@ -987,7 +987,7 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'lstat' && arguments[2] === expectedPath) {
         expectedCount++;
       }
     });
@@ -1003,7 +1003,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
+    lstatSpy.reset();
     chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
@@ -1036,7 +1036,7 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'stat' && arguments[2] === expectedPath) {
+      if (fn === 'lstat' && arguments[2] === expectedPath) {
         expectedCount++;
       }
     });
@@ -1051,7 +1051,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
+    lstatSpy.reset();
     chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
