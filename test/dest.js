@@ -939,7 +939,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 13;
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -975,7 +975,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 13;
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -1024,7 +1024,7 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 13;
+    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('3722', 8);
