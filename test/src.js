@@ -440,21 +440,39 @@ describe('.src() symlinks', function() {
     done();
   });
 
-  it('should follow file symlinks', function(done) {
-    var stream = vfs.src(fileSymlinkPath, { cwd: __dirname });
+  it('should follow symlinks correctly', function(done) {
+    var linkTarget = './fixtures/test-multi-layer-symlink';
+    var expectedPath = path.join(__dirname, linkTarget);
+
+    var stream = vfs.src(linkTarget, { cwd: __dirname, base: __dirname });
     stream.on('data', function(file) {
-      file.path.should.equal(filePath);
+      file.base.should.equal(__dirname);
+      // The path should be the symlink itself
+      file.path.should.equal(expectedPath);
+      // But the content should be what's in the actual file
+      file.contents.toString().should.equal('symlink works\n');
+      file.stat.isSymbolicLink().should.equal(false);
+      file.stat.isFile().should.equal(true);
       done();
     });
   });
 
-  it('should follow dir symlinks', function(done) {
-    var stream = vfs.src(dirSymlinkPath, { cwd: __dirname });
+  it('should follow dir symlinks correctly', function(done) {
+    var linkTarget = './fixtures/test-symlink-dir';
+    var expectedPath = path.join(__dirname, linkTarget);
+
+    var stream = vfs.src(linkTarget, { cwd: __dirname, base: __dirname });
     stream.on('data', function(file) {
-      file.path.should.equal(dirPath);
+      file.base.should.equal(__dirname);
+      // The path should be the symlink itself
+      file.path.should.equal(expectedPath);
+      // But the stats should have been updated
+      file.stat.isSymbolicLink().should.equal(false);
+      file.stat.isDirectory().should.equal(true);
       done();
     });
   });
+
 
   it('should preserve file symlinks with followSymlinks option set to false', function(done) {
     fs.readlink(fileSymlinkPath, function(err, expectedRelativeSymlinkPath) {
