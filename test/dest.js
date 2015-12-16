@@ -1285,7 +1285,7 @@ describe('dest stream', function() {
   });
 
   it('allows backpressure when piped to another, slower stream', function(done) {
-    this.timeout(8000);
+    this.timeout(20000);
 
     fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
     for (var idx = 0; idx < 24; idx++) {
