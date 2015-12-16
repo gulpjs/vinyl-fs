@@ -34,7 +34,7 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & parseInt('7777', 8);
+  return n & parseInt('777', 8);
 };
 
 describe('dest stream', function() {
