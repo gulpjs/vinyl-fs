@@ -1347,4 +1347,14 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should successfully process unbuffered items', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/*');
+    var srcStream = vfs.src(srcPath, {buffer: false});
+    var destStream = vfs.dest('./out-fixtures', {cwd: __dirname});
+
+    srcStream
+      .pipe(destStream)
+      .once('finish', done);
+  });
+
 });
