@@ -1336,4 +1336,25 @@ describe('dest stream', function() {
       .pipe(destStream)
       .once('finish', done);
   });
+
+  it('should pass options to through2',function(done){
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var content = fs.readFileSync(srcPath);
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, objectMode: false});
+
+    stream.on('error', function(err){
+      err.should.match(/Invalid non-string\/buffer chunk/);
+      done()
+    });
+
+    var file = new File({
+      path: srcPath,
+      cwd: __dirname,
+      contents: content
+    })
+
+    stream.write(file);
+    stream.end();
+  });
+
 });
