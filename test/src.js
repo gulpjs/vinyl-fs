@@ -276,7 +276,6 @@ describe('source stream', function() {
 
   it('should glob a file with with no contents', function(done) {
     var expectedPath = path.join(__dirname, './fixtures/test.coffee');
-    var expectedContent = fs.readFileSync(expectedPath);
 
     var buffered = [];
 

@@ -106,7 +106,6 @@ describe('symlink stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedContents = fs.readFileSync(inputPath);
 
@@ -144,7 +143,6 @@ describe('symlink stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedContents = fs.readFileSync(inputPath);
 
@@ -186,7 +184,6 @@ describe('symlink stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('655', 8);
 
@@ -227,7 +224,6 @@ describe('symlink stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('655', 8);
 
@@ -272,7 +268,6 @@ describe('symlink stream', function() {
     var inputPath = path.join(__dirname, './fixtures/wow');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/wow');
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('655', 8);
 
@@ -379,9 +374,7 @@ describe('symlink stream', function() {
   it('should report IO errors', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
-    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
 

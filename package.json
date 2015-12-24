@@ -29,7 +29,7 @@
   "devDependencies": {
     "buffer-equal": "^0.0.1",
     "del": "^2.2.0",
-    "eslint": "^1.7.3",
+    "eslint": "^1.10.3",
     "eslint-config-gulp": "^2.0.0",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",

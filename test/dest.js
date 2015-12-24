@@ -424,8 +424,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('666', 8) & (~process.umask());
 
     var expectedFile = new File({
@@ -460,8 +458,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('744', 8);
 
     var expectedFile = new File({
@@ -496,7 +492,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var startMode = parseInt('0655', 8);
     var expectedMode = parseInt('0722', 8);
@@ -620,8 +615,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedAtime = new Date();
     var expectedMtime = new Date();
 
@@ -660,8 +653,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMtime = fs.lstatSync(inputPath).mtime;
 
     var expectedFile = new File({
@@ -673,6 +664,8 @@ describe('dest stream', function() {
         mtime: expectedMtime,
       },
     });
+
+    var buffered = [];
 
     var onEnd = function() {
       buffered.length.should.equal(1);
@@ -699,8 +692,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMtime = new Date();
     var invalidMtime = new Date(undefined);
 
@@ -738,9 +729,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedAtime = new Date();
     var expectedMtime = fs.lstatSync(inputPath).mtime;
     var invalidAtime = new Date(undefined);
 
@@ -779,8 +767,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
-    var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedAtime = fs.lstatSync(inputPath).atime;
     var expectedMtime = fs.lstatSync(inputPath).mtime;
 
@@ -890,7 +876,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
 
@@ -921,7 +906,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
 
@@ -957,7 +941,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
 
@@ -993,7 +976,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
 
@@ -1042,7 +1024,6 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('3722', 8);
     var normalMode = parseInt('722', 8);
@@ -1254,7 +1235,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      fs.readlink(buffered[0].path, function(err, link) {
+      fs.readlink(buffered[0].path, function() {
         buffered[0].symlink.should.equal(inputFile.symlink);
         buffered[0].path.should.equal(expectedPath);
         done();

@@ -1,3 +1,7 @@
 {
-  "extends": "gulp/test"
+  "extends": "gulp/test",
+
+  "rules": {
+    "max-statements": 0
+  }
 }
