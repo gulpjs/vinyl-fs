@@ -45,10 +45,5 @@
   "engines": {
     "node": ">=0.10"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/wearefractal/vinyl-fs/raw/master/LICENSE"
-    }
-  ]
+  "licenses": "MIT"
 }
