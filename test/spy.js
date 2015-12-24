@@ -25,5 +25,5 @@ module.exports = {
     errorfn = fn;
   },
   chmodSpy: maybeCallAsync(fs, 'chmod'),
-  statSpy: maybeCallAsync(fs, 'stat')
+  statSpy: maybeCallAsync(fs, 'stat'),
 };
