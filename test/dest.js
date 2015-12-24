@@ -70,19 +70,20 @@ describe('dest stream', function() {
       base: __dirname,
       cwd: __dirname,
       path: inputPath,
-      contents: null
+      contents: null,
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       done();
     };
 
-    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), { sourcemaps: true });
-
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), { sourcemaps: true });
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -673,7 +674,7 @@ describe('dest stream', function() {
       },
     });
 
-    var onEnd = function(){
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -1294,7 +1295,7 @@ describe('dest stream', function() {
 
     var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
     var srcStream = vfs.src(srcPath);
-    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var fileCount = 0;
     var countFiles = through.obj(function(file, enc, cb) {
@@ -1321,7 +1322,7 @@ describe('dest stream', function() {
 
     var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
     var srcStream = vfs.src(srcPath);
-    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var fileCount = 0;
     var countFiles = through.obj(function(file, enc, cb) {
@@ -1333,13 +1334,13 @@ describe('dest stream', function() {
     var slowFileCount = 0;
     var slowCountFiles = new Writeable({
       objectMode: true,
-      write: function(file, enc, cb){
+      write: function(file, enc, cb) {
         slowFileCount++;
 
         setTimeout(function() {
           cb(null, file);
         }, 250);
-      }
+      },
     });
 
     slowCountFiles.once('finish', function() {
@@ -1354,10 +1355,10 @@ describe('dest stream', function() {
       .pipe(slowCountFiles);
   });
 
-  it('should successfully process unbuffered items', function (done) {
+  it('should successfully process unbuffered items', function(done) {
     var srcPath = path.join(__dirname, './fixtures/*');
-    var srcStream = vfs.src(srcPath, {buffer: false});
-    var destStream = vfs.dest('./out-fixtures', {cwd: __dirname});
+    var srcStream = vfs.src(srcPath, { buffer: false });
+    var destStream = vfs.dest('./out-fixtures', { cwd: __dirname });
 
     srcStream
       .pipe(destStream)
