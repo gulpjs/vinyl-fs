@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
@@ -32,7 +32,7 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & parseInt("777", 8);
+  return n & parseInt('777', 8);
 };
 
 describe('symlink stream', function() {
@@ -57,18 +57,19 @@ describe('symlink stream', function() {
       base: __dirname,
       cwd: __dirname,
       path: inputPath,
-      contents: null
+      contents: null,
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -82,10 +83,12 @@ describe('symlink stream', function() {
       base: __dirname,
       cwd: __dirname,
       path: inputPath,
-      contents: null
+      contents: null,
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       done();
@@ -93,7 +96,6 @@ describe('symlink stream', function() {
 
     var stream = vfs.symlink(path.join(__dirname, './out-fixtures/'));
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -112,10 +114,12 @@ describe('symlink stream', function() {
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      contents: expectedContents
+      contents: expectedContents,
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
@@ -127,9 +131,9 @@ describe('symlink stream', function() {
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: path.relative(process.cwd(), __dirname)});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: path.relative(process.cwd(), __dirname) });
 
-    var buffered = [];
+
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -148,10 +152,12 @@ describe('symlink stream', function() {
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      contents: expectedContents
+      contents: expectedContents,
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
@@ -163,13 +169,12 @@ describe('symlink stream', function() {
       done();
     };
 
-    var stream = vfs.symlink(function(file){
+    var stream = vfs.symlink(function(file) {
       should.exist(file);
       file.should.equal(expectedFile);
       return './out-fixtures';
-    }, {cwd: path.relative(process.cwd(), __dirname)});
+    }, { cwd: path.relative(process.cwd(), __dirname) });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -191,11 +196,13 @@ describe('symlink stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        mode: expectedMode
-      }
+        mode: expectedMode,
+      },
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
@@ -207,9 +214,8 @@ describe('symlink stream', function() {
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -232,11 +238,13 @@ describe('symlink stream', function() {
       path: inputPath,
       contents: contentStream,
       stat: {
-        mode: expectedMode
-      }
+        mode: expectedMode,
+      },
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
@@ -248,13 +256,12 @@ describe('symlink stream', function() {
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
-    setTimeout(function(){
+    setTimeout(function() {
       contentStream.write(expectedContents);
       contentStream.end();
     }, 100);
@@ -275,14 +282,16 @@ describe('symlink stream', function() {
       path: inputPath,
       contents: null,
       stat: {
-        isDirectory: function(){
+        isDirectory: function() {
           return true;
         },
-        mode: expectedMode
-      }
+        mode: expectedMode,
+      },
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
@@ -294,9 +303,8 @@ describe('symlink stream', function() {
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -314,10 +322,12 @@ describe('symlink stream', function() {
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      stat: fs.statSync(inputPath)
+      stat: fs.statSync(inputPath),
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       realMode(fs.lstatSync(expectedBase).mode).should.equal(expectedDirMode);
       realMode(buffered[0].stat.mode).should.equal(expectedFileMode);
       done();
@@ -326,10 +336,9 @@ describe('symlink stream', function() {
     var stream = vfs.symlink('./out-fixtures/', {
       cwd: __dirname,
       mode: expectedFileMode,
-      dirMode: expectedDirMode
+      dirMode: expectedDirMode,
     });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
@@ -345,20 +354,21 @@ describe('symlink stream', function() {
       base: inputBase,
       cwd: __dirname,
       path: inputPath,
-      stat: fs.statSync(inputPath)
+      stat: fs.statSync(inputPath),
     });
 
-    var onEnd = function(){
+    var buffered = [];
+
+    var onEnd = function() {
       buffered[0].base.should.equal(inputBase);
       done();
     };
 
     var stream = vfs.symlink('./out-fixtures/', {
       cwd: __dirname,
-      base: inputBase
+      base: inputBase,
     });
 
-    var buffered = [];
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
@@ -381,14 +391,14 @@ describe('symlink stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        mode: expectedMode
-      }
+        mode: expectedMode,
+      },
     });
 
     fs.mkdirSync(expectedBase);
     fs.chmodSync(expectedBase, 0);
 
-    var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
     stream.on('error', function(err) {
       err.code.should.equal('EACCES');
       done();
@@ -399,7 +409,7 @@ describe('symlink stream', function() {
   ['end', 'finish'].forEach(function(eventName) {
     it('should emit ' + eventName + ' event', function(done) {
       var srcPath = path.join(__dirname, './fixtures/test.coffee');
-      var stream = vfs.symlink('./out-fixtures/', {cwd: __dirname});
+      var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
       stream.on(eventName, function() {
         done();
@@ -408,7 +418,7 @@ describe('symlink stream', function() {
       var file = new File({
         path: srcPath,
         cwd: __dirname,
-        contents: new Buffer("1234567890")
+        contents: new Buffer('1234567890'),
       });
 
       stream.write(file);
