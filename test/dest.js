@@ -8,7 +8,8 @@ var vfs = require('../');
 
 var path = require('path');
 var fs = require('graceful-fs');
-var rimraf = require('rimraf');
+var del = require('del');
+var Writeable = require('readable-stream/writable');
 
 var bufEqual = require('buffer-equal');
 var through = require('through2');
@@ -17,11 +18,12 @@ var File = require('vinyl');
 var should = require('should');
 require('mocha');
 
-var wipeOut = function(cb) {
-  rimraf(path.join(__dirname, './out-fixtures/'), cb);
+var wipeOut = function() {
   spies.setError('false');
   statSpy.reset();
   chmodSpy.reset();
+  del.sync(path.join(__dirname, './fixtures/highwatermark'));
+  del.sync(path.join(__dirname, './out-fixtures/'));
 };
 
 var dataWrap = function(fn) {
@@ -32,7 +34,7 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & parseInt('7777', 8);
+  return n & parseInt('777', 8);
 };
 
 describe('dest stream', function() {
@@ -59,6 +61,31 @@ describe('dest stream', function() {
       should.not.exist(stream);
       done();
     }
+  });
+
+  it('should not explode if the sourcemap option is true', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      done();
+    };
+
+    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), { sourcemaps: true });
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
   });
 
   it('should pass through writes with cwd', function(done) {
@@ -574,6 +601,211 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should not modify file mtime and atime when not provided on the vinyl stat', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedAtime = new Date();
+    var expectedMtime = new Date();
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {}
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      expectedFile.stat.should.not.have.property('mtime');
+      expectedFile.stat.should.not.have.property('atime');
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should write file mtime using the vinyl mtime', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMtime = fs.lstatSync(inputPath).mtime;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mtime: expectedMtime
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
+      expectedFile.stat.should.have.property('mtime');
+      expectedFile.stat.mtime.should.equal(expectedMtime);
+      expectedFile.stat.should.not.have.property('atime');
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should not modify file mtime and atime when provided mtime on the vinyl stat is invalid', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMtime = new Date();
+    var invalidMtime = new Date(undefined);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mtime: invalidMtime
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should write file mtime when provided mtime on the vinyl stat is valid but provided atime is invalid', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedAtime = new Date();
+    var expectedMtime = fs.lstatSync(inputPath).mtime;
+    var invalidAtime = new Date(undefined);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        atime: invalidAtime,
+        mtime: expectedMtime
+      }
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should write file atime and mtime using the vinyl stat', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedAtime = fs.lstatSync(inputPath).atime;
+    var expectedMtime = fs.lstatSync(inputPath).mtime;
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        atime: expectedAtime,
+        mtime: expectedMtime
+      }
+    });
+
+    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
+    expectedAtime.setMilliseconds(0)
+    expectedMtime.setMilliseconds(0)
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      fs.existsSync(expectedPath).should.equal(true);
+      fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
+      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
+      expectedFile.stat.should.have.property('mtime');
+      expectedFile.stat.mtime.should.equal(expectedMtime);
+      expectedFile.stat.should.have.property('atime');
+      expectedFile.stat.atime.should.equal(expectedAtime);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should change to the specified base as string', function(done) {
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
@@ -1025,5 +1257,83 @@ describe('dest stream', function() {
 
     stream.write(file);
     stream.end();
+  });
+
+  it('does not get clogged by highWaterMark', function(done) {
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 17; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var fileCount = 0;
+    var countFiles = through.obj(function(file, enc, cb) {
+      fileCount++;
+
+      cb(null, file);
+    });
+
+    destStream.once('finish', function() {
+      fileCount.should.equal(17);
+      done();
+    });
+
+    srcStream.pipe(countFiles).pipe(destStream);
+  });
+
+  it('allows backpressure when piped to another, slower stream', function(done) {
+    this.timeout(20000);
+
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 24; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var fileCount = 0;
+    var countFiles = through.obj(function(file, enc, cb) {
+      fileCount++;
+
+      cb(null, file);
+    });
+
+    var slowFileCount = 0;
+    var slowCountFiles = new Writeable({
+      objectMode: true,
+      write: function(file, enc, cb){
+        slowFileCount++;
+
+        setTimeout(function() {
+          cb(null, file);
+        }, 250);
+      }
+    });
+
+    slowCountFiles.once('finish', function() {
+      fileCount.should.equal(24);
+      slowFileCount.should.equal(24);
+      done();
+    });
+
+    srcStream
+      .pipe(countFiles)
+      .pipe(destStream)
+      .pipe(slowCountFiles);
+  });
+
+  it('should successfully process unbuffered items', function (done) {
+    var srcPath = path.join(__dirname, './fixtures/*');
+    var srcStream = vfs.src(srcPath, {buffer: false});
+    var destStream = vfs.dest('./out-fixtures', {cwd: __dirname});
+
+    srcStream
+      .pipe(destStream)
+      .once('finish', done);
   });
 });

@@ -1,7 +1,7 @@
 {
   "name": "vinyl-fs",
   "description": "Vinyl adapter for the file system",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "homepage": "http://github.com/wearefractal/vinyl-fs",
   "repository": "git://github.com/wearefractal/vinyl-fs.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
@@ -12,13 +12,14 @@
   ],
   "dependencies": {
     "duplexify": "^3.2.0",
-    "glob-stream": "^5.0.0",
+    "glob-stream": "^5.2.0",
     "graceful-fs": "^4.0.0",
     "gulp-sourcemaps": "^1.5.2",
     "is-valid-glob": "^0.3.0",
     "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
     "object-assign": "^4.0.0",
+    "readable-stream": "^2.0.4",
     "strip-bom": "^2.0.0",
     "strip-bom-stream": "^1.0.0",
     "through2": "^2.0.0",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "buffer-equal": "^0.0.1",
+    "del": "^2.2.0",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",
     "jshint": "^2.4.1",
