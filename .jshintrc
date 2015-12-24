@@ -15,13 +15,5 @@
   "undef": true,
   "unused": true,
   "node": true,
-  "mocha": true,
-  "globals": {
-    "describe": false,
-    "it": false,
-    "before": false,
-    "beforeEach": false,
-    "after": false,
-    "afterEach": false
-  }
+  "mocha": true
 }

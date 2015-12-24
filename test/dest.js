@@ -1,3 +1,5 @@
+'use strict';
+
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
 var statSpy = spies.statSpy;
@@ -30,17 +32,28 @@ var dataWrap = function(fn) {
 };
 
 var realMode = function(n) {
-  return n & 07777;
+  return n & parseInt('7777', 8);
 };
 
 describe('dest stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
 
-  it('should explode on invalid folder', function(done) {
+  it('should explode on invalid folder (empty)', function(done) {
     var stream;
     try {
       stream = gulp.dest();
+    } catch (err) {
+      should.exist(err);
+      should.not.exist(stream);
+      done();
+    }
+  });
+
+  it('should explode on invalid folder (empty string)', function(done) {
+    var stream;
+    try {
+      stream = gulp.dest('');
     } catch (err) {
       should.exist(err);
       should.not.exist(stream);
@@ -67,7 +80,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -92,7 +105,7 @@ describe('dest stream', function() {
     var stream = vfs.dest(path.join(__dirname, './out-fixtures/'));
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -125,7 +138,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -160,7 +173,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -199,7 +212,7 @@ describe('dest stream', function() {
     }, {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -212,7 +225,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -239,7 +252,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -252,7 +265,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -280,7 +293,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     setTimeout(function(){
@@ -296,7 +309,7 @@ describe('dest stream', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/test');
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0655;
+    var expectedMode = parseInt('655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -326,7 +339,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -377,7 +390,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0666 & (~process.umask());
+    var expectedMode = parseInt('666', 8) & (~process.umask());
 
     var expectedFile = new File({
       base: inputBase,
@@ -398,7 +411,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -412,7 +425,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0744;
+    var expectedMode = parseInt('744', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -433,7 +446,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, mode:expectedMode});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -447,8 +460,8 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var startMode = 0655;
-    var expectedMode = 0722;
+    var startMode = parseInt('0655', 8);
+    var expectedMode = parseInt('0722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -477,7 +490,7 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
@@ -498,10 +511,10 @@ describe('dest stream', function() {
       stat: fs.statSync(inputPath)
     });
     var startMode = firstFile.stat.mode;
-    var expectedMode = 0727;
+    var expectedMode = parseInt('727', 8);
 
     var expectedFile = new File(firstFile);
-    expectedFile.stat.mode = (startMode & ~07777) | expectedMode;
+    expectedFile.stat.mode = (startMode & ~parseInt('7777', 8)) | expectedMode;
 
     var onEnd = function(){
       buffered.length.should.equal(2);
@@ -519,11 +532,105 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(firstFile);
     stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should use different modes for files and directories', function(done) {
+    var inputBase = path.join(__dirname, './fixtures');
+    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
+    var expectedBase = path.join(__dirname, './out-fixtures/wow');
+    var expectedDirMode = parseInt('755', 8);
+    var expectedFileMode = parseInt('655', 8);
+
+    var firstFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      stat: fs.statSync(inputPath)
+    });
+
+    var onEnd = function(){
+      realMode(fs.lstatSync(expectedBase).mode).should.equal(expectedDirMode);
+      realMode(buffered[0].stat.mode).should.equal(expectedFileMode);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {
+      cwd: __dirname,
+      mode: expectedFileMode,
+      dirMode: expectedDirMode
+    });
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(firstFile);
+    stream.end();
+  });
+
+  it('should change to the specified base as string', function(done) {
+    var inputBase = path.join(__dirname, './fixtures');
+    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
+
+    var firstFile = new File({
+      cwd: __dirname,
+      path: inputPath,
+      stat: fs.statSync(inputPath)
+    });
+
+    var onEnd = function(){
+      buffered[0].base.should.equal(inputBase);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {
+      cwd: __dirname,
+      base: inputBase
+    });
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(firstFile);
+    stream.end();
+  });
+
+  it('should change to the specified base as function', function(done) {
+    var inputBase = path.join(__dirname, './fixtures');
+    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
+
+    var firstFile = new File({
+      cwd: __dirname,
+      path: inputPath,
+      stat: fs.statSync(inputPath)
+    });
+
+    var onEnd = function(){
+      buffered[0].base.should.equal(inputBase);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', {
+      cwd: __dirname,
+      base: function(file){
+        should.exist(file);
+        file.path.should.equal(inputPath);
+        return inputBase;
+      }
+    });
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(firstFile);
     stream.end();
   });
 
@@ -534,7 +641,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -565,7 +672,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -601,7 +708,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -637,7 +744,7 @@ describe('dest stream', function() {
     var expectedContents = fs.readFileSync(inputPath);
     var expectedCwd = __dirname;
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = 0722;
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -672,30 +779,251 @@ describe('dest stream', function() {
     var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
   });
 
-  ['end', 'finish'].forEach(function(eventName) {
-    it('should emit ' + eventName + ' event', function(done) {
-      var srcPath = path.join(__dirname, './fixtures/test.coffee');
-      var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+  it('should see a file with special chmod (setuid/setgid/sticky) as matching', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedCwd = __dirname;
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = parseInt('3722', 8);
+    var normalMode = parseInt('722', 8);
 
-      stream.on(eventName, function() {
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: normalMode
+      }
+    });
+
+    var expectedCount = 0;
+    spies.setError(function(mod, fn) {
+      if (fn === 'stat' && arguments[2] === expectedPath) {
+        expectedCount++;
+      }
+    });
+
+    var onEnd = function(){
+      expectedCount.should.equal(1);
+      should(chmodSpy.called).be.not.ok;
+      done();
+    };
+
+    fs.mkdirSync(expectedBase);
+    fs.closeSync(fs.openSync(expectedPath, 'w'));
+    fs.chmodSync(expectedPath, expectedMode);
+
+    statSpy.reset();
+    chmodSpy.reset();
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should not overwrite files with overwrite option set to false', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(existingContents)).should.equal(true);
+      done();
+    };
+
+    // Write expected file which should not be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: false});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should overwrite files with overwrite option set to true', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(inputContents)).should.equal(true);
+      done();
+    };
+
+    // This should be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: true});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should not overwrite files with overwrite option set to a function that returns false', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(existingContents)).should.equal(true);
+      done();
+    };
+
+    // Write expected file which should not be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return false; }});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should overwrite files with overwrite option set to a function that returns true', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputContents = fs.readFileSync(inputPath);
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var existingContents = 'Lorem Ipsum';
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: inputContents
+    });
+
+    var onEnd = function(){
+      buffered.length.should.equal(1);
+      bufEqual(fs.readFileSync(expectedPath), new Buffer(inputContents)).should.equal(true);
+      done();
+    };
+
+    // This should be overwritten
+    fs.mkdirSync(expectedBase);
+    fs.writeFileSync(expectedPath, existingContents);
+
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname, overwrite: function() { return true; }});
+
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should create symlinks when the `symlink` attribute is set on the file', function (done) {
+    var inputPath = path.join(__dirname, './fixtures/test-create-dir-symlink');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var inputRelativeSymlinkPath = 'wow';
+
+    var expectedPath = path.join(__dirname, './out-fixtures/test-create-dir-symlink');
+
+    var inputFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null, //''
+    });
+
+    // `src()` adds this side-effect with `keepSymlinks` option set to false
+    inputFile.symlink = inputRelativeSymlinkPath;
+
+    var onEnd = function(){
+      fs.readlink(buffered[0].path, function (err, link) {
+        buffered[0].symlink.should.equal(inputFile.symlink);
+        buffered[0].path.should.equal(expectedPath);
         done();
       });
+    };
 
-      var file = new File({
-        path: srcPath,
-        cwd: __dirname,
-        contents: new Buffer("1234567890")
-      });
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
 
-      stream.write(file);
-      stream.end();
+    var buffered = [];
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(inputFile);
+    stream.end();
+  });
+
+  it('should emit finish event', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var stream = vfs.dest('./out-fixtures/', {cwd: __dirname});
+
+    stream.once('finish', function() {
+      done();
     });
+
+    var file = new File({
+      path: srcPath,
+      cwd: __dirname,
+      contents: new Buffer("1234567890")
+    });
+
+    stream.write(file);
+    stream.end();
   });
 });
