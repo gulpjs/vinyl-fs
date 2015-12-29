@@ -19,6 +19,7 @@ var should = require('should');
 require('mocha');
 
 var wipeOut = function() {
+  this.timeout(20000);
   spies.setError('false');
   statSpy.reset();
   chmodSpy.reset();
