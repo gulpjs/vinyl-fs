@@ -1367,4 +1367,36 @@ describe('dest stream', function() {
       .once('finish', done);
   });
 
+  it('should not exhaust available file descriptors when streaming thousands of files', function(done) {
+    // This can be a very slow test on boxes with slow disk i/o
+    this.timeout(0);
+
+    // Make a ton of hard links
+    var numFiles = 6000;
+    var srcFile = path.join(__dirname, './fixtures/test.coffee');
+    fs.mkdirSync(path.join(__dirname, './out-fixtures'));
+    fs.mkdirSync(path.join(__dirname, './out-fixtures/in/'));
+
+    for (var idx = 0; idx < numFiles; idx++) {
+      fs.linkSync(srcFile, path.join(__dirname, './out-fixtures/in/test' + idx + '.coffee'));
+    }
+
+    var srcStream = vfs.src(path.join(__dirname, './out-fixtures/in/*.coffee'), { buffer: false });
+    var destStream = vfs.dest('./out-fixtures/out/', { cwd: __dirname });
+
+    var fileCount = 0;
+
+    srcStream
+      .pipe(through.obj(function(file, enc, cb) {
+        fileCount++;
+
+        cb(null, file);
+      }))
+      .pipe(destStream)
+      .once('finish', function() {
+        fileCount.should.equal(numFiles);
+        done();
+      });
+  });
+
 });
