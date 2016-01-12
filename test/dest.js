@@ -1337,6 +1337,29 @@ describe('dest stream', function() {
       .pipe(slowCountFiles);
   });
 
+  it('should respect readable listeners on destination stream', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+
+    srcStream
+      .pipe(destStream);
+
+    var readables = 0;
+    destStream.on('readable', function() {
+      var data = destStream.read();
+
+      if (data == null) {
+        // Stream ended
+        readables.should.equal(1);
+        done();
+      } else {
+        // New data
+        readables++;
+      }
+    });
+  });
+
   it('should pass options to through2', function(done) {
     var srcPath = path.join(__dirname, './fixtures/test.coffee');
     var content = fs.readFileSync(srcPath);
