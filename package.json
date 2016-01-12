@@ -16,6 +16,7 @@
     "graceful-fs": "^4.0.0",
     "gulp-sourcemaps": "^1.5.2",
     "is-valid-glob": "^0.3.0",
+    "lazystream": "^1.0.0",
     "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
     "object-assign": "^4.0.0",
