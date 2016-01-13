@@ -998,7 +998,7 @@ describe('dest stream', function() {
     });
 
     var onEnd = function() {
-      expectedCount.should.equal(2);
+      expectedCount.should.equal(1);
       should(fchmodSpy.called).be.not.ok;
       realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
@@ -1048,7 +1048,7 @@ describe('dest stream', function() {
     });
 
     var onEnd = function() {
-      expectedCount.should.equal(2);
+      expectedCount.should.equal(1);
       should(fchmodSpy.called).be.not.ok;
       done();
     };
