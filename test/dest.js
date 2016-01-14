@@ -38,6 +38,8 @@ var realMode = function(n) {
   return n & parseInt('777', 8);
 };
 
+function noop() {}
+
 describe('dest stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
@@ -1349,14 +1351,103 @@ describe('dest stream', function() {
     destStream.on('readable', function() {
       var data = destStream.read();
 
-      if (data == null) {
-        // Stream ended
-        readables.should.equal(1);
-        done();
-      } else {
-        // New data
+      if (data != null) {
         readables++;
       }
+    });
+
+    destStream.on('error', done);
+
+    destStream.on('finish', function() {
+      readables.should.equal(1);
+      done();
+    });
+  });
+
+  it('should respect data listeners on destination stream', function(done) {
+    var srcPath = path.join(__dirname, './fixtures/test.coffee');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+
+    srcStream
+      .pipe(destStream);
+
+    var datas = 0;
+    destStream.on('data', function() {
+      datas++;
+    });
+
+    destStream.on('error', done);
+
+    destStream.on('finish', function() {
+      datas.should.equal(1);
+      done();
+    });
+  });
+
+  it('sinks the stream if all the readable event handlers are removed', function(done) {
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 17; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+
+    var fileCount = 0;
+    var countFiles = through.obj(function(file, enc, cb) {
+      fileCount++;
+
+      cb(null, file);
+    });
+
+    destStream.on('readable', noop);
+
+    destStream.once('finish', function() {
+      fileCount.should.equal(17);
+      done();
+    });
+
+    srcStream.pipe(countFiles).pipe(destStream);
+
+    process.nextTick(function() {
+      destStream.removeListener('readable', noop);
+    });
+  });
+
+  it('sinks the stream if all the data event handlers are removed', function(done) {
+    fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
+    for (var idx = 0; idx < 17; idx++) {
+      fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
+    }
+
+    var srcPath = path.join(__dirname, './fixtures/highwatermark/*.txt');
+    var srcStream = vfs.src(srcPath);
+    var destStream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+
+    var fileCount = 0;
+    function onData() {
+      fileCount++;
+    }
+
+    var countFiles = through.obj(function(file, enc, cb) {
+      onData();
+
+      cb(null, file);
+    });
+
+    destStream.on('data', onData);
+
+    destStream.once('finish', function() {
+      fileCount.should.equal(17);
+      done();
+    });
+
+    srcStream.pipe(countFiles).pipe(destStream);
+
+    process.nextTick(function() {
+      destStream.removeListener('data', onData);
     });
   });
 
