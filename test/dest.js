@@ -1411,7 +1411,9 @@ describe('dest stream', function() {
 
     srcStream.pipe(countFiles).pipe(destStream);
 
-    destStream.removeListener('readable', noop);
+    process.nextTick(function() {
+      destStream.removeListener('readable', noop);
+    });
   });
 
   it('sinks the stream if all the data event handlers are removed', function(done) {
@@ -1444,7 +1446,9 @@ describe('dest stream', function() {
 
     srcStream.pipe(countFiles).pipe(destStream);
 
-    destStream.removeListener('data', onData);
+    process.nextTick(function() {
+      destStream.removeListener('data', onData);
+    });
   });
 
   it('should pass options to through2', function(done) {
