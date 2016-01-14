@@ -618,8 +618,7 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedAtime = new Date();
-    var expectedMtime = new Date();
+    var earlier = Date.now() - 1000;
 
     var expectedFile = new File({
       base: inputBase,
@@ -635,8 +634,8 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
-      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).atime.getTime().should.be.above(earlier);
+      fs.lstatSync(expectedPath).mtime.getTime().should.be.above(earlier);
       expectedFile.stat.should.not.have.property('mtime');
       expectedFile.stat.should.have.property('atime');
       done();
@@ -695,8 +694,7 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMtime = new Date();
-    var invalidMtime = new Date(undefined);
+    var earlier = Date.now() - 1000;
 
     var expectedFile = new File({
       base: inputBase,
@@ -704,7 +702,8 @@ describe('dest stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        mtime: invalidMtime,
+        atime: new Date(earlier),
+        mtime: new Date(undefined),
       },
     });
 
@@ -714,7 +713,8 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).atime.getTime().should.be.above(earlier);
+      fs.lstatSync(expectedPath).mtime.getTime().should.be.above(earlier);
       done();
     };
 
