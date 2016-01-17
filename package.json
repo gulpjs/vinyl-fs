@@ -32,6 +32,7 @@
     "del": "^2.2.0",
     "eslint": "^1.10.3",
     "eslint-config-gulp": "^2.0.0",
+    "github-changes": "^1.0.1",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",
     "jscs": "^2.4.0",
@@ -45,7 +46,8 @@
   "scripts": {
     "lint": "eslint . && jscs index.js lib/ test/",
     "test": "npm run lint && mocha",
-    "coveralls": "istanbul cover _mocha && istanbul-coveralls"
+    "coveralls": "istanbul cover _mocha && istanbul-coveralls",
+    "changelog": "github-changes -o gulpjs -r vinyl-fs -b master -f ./CHANGELOG.md --order-semver --use-commit-body"
   },
   "engines": {
     "node": ">=0.10"
