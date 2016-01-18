@@ -114,10 +114,12 @@ describe('source stream', function() {
     });
     stream.once('end', function() {
       files.length.should.equal(2);
-      files[0].should.eql(expectedFile);
-      bufEqual(files[0].contents, expectedContent).should.equal(true);
-      files[1].should.eql(expectedFile);
-      bufEqual(files[1].contents, expectedContent).should.equal(true);
+      for (var i = 0; i < files.length; i++) {
+        files[i].base.should.equal(expectedFile.base);
+        files[i].cwd.should.equal(expectedFile.cwd);
+        files[i].path.should.equal(expectedFile.path);
+        bufEqual(files[i].contents, expectedContent).should.equal(true);
+      }
       done();
     });
     stream.write(expectedFile);

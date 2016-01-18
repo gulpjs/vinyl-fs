@@ -613,13 +613,12 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should not modify file mtime and atime when not provided on the vinyl stat', function(done) {
+  it('should not modify file mtime when not provided on the vinyl stat', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedAtime = new Date();
-    var expectedMtime = new Date();
+    var earlier = Date.now() - 1000;
 
     var expectedFile = new File({
       base: inputBase,
@@ -635,10 +634,10 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
-      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).atime.getTime().should.be.above(earlier);
+      fs.lstatSync(expectedPath).mtime.getTime().should.be.above(earlier);
       expectedFile.stat.should.not.have.property('mtime');
-      expectedFile.stat.should.not.have.property('atime');
+      expectedFile.stat.should.have.property('atime');
       done();
     };
 
@@ -677,7 +676,7 @@ describe('dest stream', function() {
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       expectedFile.stat.should.have.property('mtime');
       expectedFile.stat.mtime.should.equal(expectedMtime);
-      expectedFile.stat.should.not.have.property('atime');
+      expectedFile.stat.should.have.property('atime');
       done();
     };
 
@@ -695,8 +694,7 @@ describe('dest stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMtime = new Date();
-    var invalidMtime = new Date(undefined);
+    var earlier = Date.now() - 1000;
 
     var expectedFile = new File({
       base: inputBase,
@@ -704,7 +702,8 @@ describe('dest stream', function() {
       path: inputPath,
       contents: expectedContents,
       stat: {
-        mtime: invalidMtime,
+        atime: new Date(earlier),
+        mtime: new Date(undefined),
       },
     });
 
@@ -714,7 +713,8 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
+      fs.lstatSync(expectedPath).atime.getTime().should.be.above(earlier);
+      fs.lstatSync(expectedPath).mtime.getTime().should.be.above(earlier);
       done();
     };
 
@@ -753,53 +753,6 @@ describe('dest stream', function() {
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
-      done();
-    };
-
-    var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
-
-    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-
-    stream.pipe(bufferStream);
-    stream.write(expectedFile);
-    stream.end();
-  });
-
-  it('should write file atime and mtime using the vinyl stat', function(done) {
-    var inputPath = path.join(__dirname, './fixtures/test.coffee');
-    var inputBase = path.join(__dirname, './fixtures/');
-    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedContents = fs.readFileSync(inputPath);
-    var expectedAtime = fs.lstatSync(inputPath).atime;
-    var expectedMtime = fs.lstatSync(inputPath).mtime;
-
-    var expectedFile = new File({
-      base: inputBase,
-      cwd: __dirname,
-      path: inputPath,
-      contents: expectedContents,
-      stat: {
-        atime: expectedAtime,
-        mtime: expectedMtime,
-      },
-    });
-
-    // Node.js uses `utime()`, so `fs.utimes()` has a resolution of 1 second
-    expectedAtime.setMilliseconds(0);
-    expectedMtime.setMilliseconds(0);
-
-    var buffered = [];
-
-    var onEnd = function() {
-      buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
-      fs.existsSync(expectedPath).should.equal(true);
-      fs.lstatSync(expectedPath).atime.getTime().should.equal(expectedAtime.getTime());
-      fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
-      expectedFile.stat.should.have.property('mtime');
-      expectedFile.stat.mtime.should.equal(expectedMtime);
-      expectedFile.stat.should.have.property('atime');
-      expectedFile.stat.atime.should.equal(expectedAtime);
       done();
     };
 
