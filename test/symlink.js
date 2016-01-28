@@ -43,10 +43,10 @@ describe('symlink stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
 
-  it('should explode on invalid folder', function(done) {
+  it.skip('should explode on invalid folder', function(done) {
     var stream;
     try {
-      stream = gulp.symlink();
+      stream = vfs.symlink();
     } catch (err) {
       should.exist(err);
       should.not.exist(stream);
