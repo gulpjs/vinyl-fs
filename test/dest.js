@@ -55,10 +55,10 @@ describe('dest stream', function() {
   beforeEach(wipeOut);
   afterEach(wipeOut);
 
-  it('should explode on invalid folder (empty)', function(done) {
+  it.skip('should explode on invalid folder (empty)', function(done) {
     var stream;
     try {
-      stream = gulp.dest();
+      stream = vfs.dest();
     } catch (err) {
       should.exist(err);
       should.not.exist(stream);
@@ -66,10 +66,10 @@ describe('dest stream', function() {
     }
   });
 
-  it('should explode on invalid folder (empty string)', function(done) {
+  it.skip('should explode on invalid folder (empty string)', function(done) {
     var stream;
     try {
-      stream = gulp.dest('');
+      stream = vfs.dest('');
     } catch (err) {
       should.exist(err);
       should.not.exist(stream);
