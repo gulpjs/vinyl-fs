@@ -15,8 +15,10 @@
     "glob-stream": "^5.2.0",
     "graceful-fs": "^4.0.0",
     "gulp-sourcemaps": "^1.5.2",
+    "is-buffer": "^1.1.2",
     "is-valid-glob": "^0.3.0",
     "lazystream": "^1.0.0",
+    "lodash.isequal": "^4.0.0",
     "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
     "object-assign": "^4.0.0",
@@ -25,13 +27,16 @@
     "strip-bom-stream": "^1.0.0",
     "through2": "^2.0.0",
     "through2-filter": "^2.0.0",
+    "vali-date": "^1.0.0",
     "vinyl": "^1.0.0"
   },
   "devDependencies": {
     "buffer-equal": "^0.0.1",
+    "default-resolution": "^1.0.1",
     "del": "^2.2.0",
     "eslint": "^1.10.3",
     "eslint-config-gulp": "^2.0.0",
+    "expect": "^1.14.0",
     "github-changes": "^1.0.1",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",
@@ -46,7 +51,8 @@
   "scripts": {
     "lint": "eslint . && jscs index.js lib/ test/",
     "test": "npm run lint && mocha",
-    "coveralls": "istanbul cover _mocha && istanbul-coveralls",
+    "cover": "istanbul cover _mocha",
+    "coveralls": "npm run cover && istanbul-coveralls",
     "changelog": "github-changes -o gulpjs -r vinyl-fs -b master -f ./CHANGELOG.md --order-semver --use-commit-body"
   },
   "engines": {

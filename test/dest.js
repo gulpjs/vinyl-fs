@@ -12,6 +12,7 @@ var path = require('path');
 var fs = require('graceful-fs');
 var del = require('del');
 var Writeable = require('readable-stream/writable');
+var expect = require('expect');
 
 var bufEqual = require('buffer-equal');
 var through = require('through2');
@@ -27,6 +28,7 @@ var wipeOut = function() {
   chmodSpy.reset();
   fchmodSpy.reset();
   futimesSpy.reset();
+  expect.restoreSpies();
   del.sync(path.join(__dirname, './fixtures/highwatermark'));
   del.sync(path.join(__dirname, './out-fixtures/'));
 };
@@ -91,6 +93,38 @@ describe('dest stream', function() {
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
 
     var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), { sourcemaps: true });
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should not explode if sourcemap option is an object', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+
+    var options = {
+      sourcemaps: {
+        addComment: false,
+      },
+    };
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+    });
+
+    var buffered = [];
+
+    var onEnd = function() {
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      done();
+    };
+
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), options);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -636,7 +670,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      should(futimesSpy.called).be.not.ok;
+      futimesSpy.called.should.equal(false);
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -674,7 +708,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      should(futimesSpy.called).be.ok;
+      futimesSpy.called.should.equal(true);
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -714,7 +748,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      should(futimesSpy.called).be.not.ok;
+      futimesSpy.called.should.equal(false);
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -753,7 +787,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      should(futimesSpy.called).be.ok;
+      futimesSpy.called.should.equal(true);
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -1002,7 +1036,7 @@ describe('dest stream', function() {
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(fchmodSpy.called).be.not.ok;
+      fchmodSpy.called.should.equal(false);
       realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
@@ -1051,7 +1085,7 @@ describe('dest stream', function() {
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(fchmodSpy.called).be.not.ok;
+      fchmodSpy.called.should.equal(false);
       done();
     };
 
@@ -1420,6 +1454,9 @@ describe('dest stream', function() {
   });
 
   it('sinks the stream if all the data event handlers are removed', function(done) {
+
+    this.timeout(10000);
+
     fs.mkdirSync(path.join(__dirname, './fixtures/highwatermark'));
     for (var idx = 0; idx < 17; idx++) {
       fs.writeFileSync(path.join(__dirname, './fixtures/highwatermark/', 'file' + idx + '.txt'));
@@ -1516,4 +1553,131 @@ describe('dest stream', function() {
       });
   });
 
+  it('errors if we cannot mkdirp', function(done) {
+    var outputDir = path.join(__dirname, './out-fixtures/');
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+
+    fs.mkdirSync(outputDir, parseInt('000', 8));
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+    });
+
+    var stream = vfs.dest(outputDir);
+    stream.write(expectedFile);
+    stream.on('error', function(err) {
+      expect(err).toExist();
+      done();
+    });
+  });
+
+  it('errors if vinyl object is a directory and we cannot mkdirp', function(done) {
+    var outputDir = path.join(__dirname, './out-fixtures/');
+    var inputPath = path.join(__dirname, './other-dir/');
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function() {
+          return true;
+        },
+      },
+    });
+
+    var stream = vfs.dest(outputDir, { dirMode: parseInt('000', 8) });
+    stream.write(expectedFile);
+    stream.on('error', function(err) {
+      expect(err).toExist();
+      done();
+    });
+  });
+
+  // TODO: is this correct behavior? had to adjust it
+  it('does not error if vinyl object is a directory and we cannot open it', function(done) {
+    var outputDir = path.join(__dirname, './out-fixtures/');
+    var inputPath = path.join(__dirname, './other-dir/');
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function() {
+          return true;
+        },
+        mode: parseInt('000', 8),
+      },
+    });
+
+    var stream = vfs.dest(outputDir);
+    stream.write(expectedFile);
+    stream.on('error', function(err) {
+      expect(err).toNotExist();
+      done(err);
+    });
+    stream.end(function() {
+      var exists = fs.existsSync(path.join(outputDir, './other-dir/'));
+      expect(exists).toEqual(true);
+      done();
+    });
+  });
+
+  it('errors if vinyl object is a directory and open errors', function(done) {
+    var openSpy = expect.spyOn(fs, 'open').andCall(function(writePath, flag, cb) {
+      cb(new Error('mocked error'));
+    });
+
+    var outputDir = path.join(__dirname, './out-fixtures/');
+    var inputPath = path.join(__dirname, './other-dir/');
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function() {
+          return true;
+        },
+      },
+    });
+
+    var stream = vfs.dest(outputDir);
+    stream.write(expectedFile);
+    stream.on('error', function(err) {
+      expect(err).toExist();
+      expect(openSpy.calls.length).toEqual(1);
+      done();
+    });
+  });
+
+  it('error if content stream errors', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+
+    var contentStream = through.obj();
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: contentStream,
+    });
+
+    var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+    stream.write(expectedFile);
+    setTimeout(function() {
+      contentStream.emit('error', new Error('mocked error'));
+    }, 100);
+    stream.on('error', function(err) {
+      expect(err).toExist();
+      done();
+    });
+  });
 });
