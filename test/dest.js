@@ -3,6 +3,7 @@
 var spies = require('./spy');
 var chmodSpy = spies.chmodSpy;
 var fchmodSpy = spies.fchmodSpy;
+var futimesSpy = spies.futimesSpy;
 var fstatSpy = spies.fstatSpy;
 
 var vfs = require('../');
@@ -25,6 +26,7 @@ var wipeOut = function() {
   fstatSpy.reset();
   chmodSpy.reset();
   fchmodSpy.reset();
+  futimesSpy.reset();
   del.sync(path.join(__dirname, './fixtures/highwatermark'));
   del.sync(path.join(__dirname, './out-fixtures/'));
 };
@@ -615,7 +617,7 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should not modify file mtime and atime when not provided on the vinyl stat', function(done) {
+  it('should not call futimes when no mtime is provided on the vinyl stat', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
@@ -634,13 +636,12 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
+      should(futimesSpy.called).be.not.ok;
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).atime.setMilliseconds(0).should.equal(expectedAtime.setMilliseconds(0));
       fs.lstatSync(expectedPath).mtime.setMilliseconds(0).should.equal(expectedMtime.setMilliseconds(0));
-      expectedFile.stat.should.not.have.property('mtime');
-      expectedFile.stat.should.not.have.property('atime');
       done();
     };
 
@@ -653,7 +654,7 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should write file mtime using the vinyl mtime', function(done) {
+  it('should call futimes when an mtime is provided on the vinyl stat', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
@@ -673,13 +674,13 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
+      should(futimesSpy.called).be.ok;
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
       fs.lstatSync(expectedPath).mtime.getTime().should.equal(expectedMtime.getTime());
       expectedFile.stat.should.have.property('mtime');
       expectedFile.stat.mtime.should.equal(expectedMtime);
-      expectedFile.stat.should.not.have.property('atime');
       done();
     };
 
@@ -692,7 +693,7 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should not modify file mtime and atime when provided mtime on the vinyl stat is invalid', function(done) {
+  it('should not call futimes when provided mtime on the vinyl stat is invalid', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
@@ -713,6 +714,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
+      should(futimesSpy.called).be.not.ok;
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -729,7 +731,7 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should write file mtime when provided mtime on the vinyl stat is valid but provided atime is invalid', function(done) {
+  it('should call futimes when provided mtime on the vinyl stat is valid but provided atime is invalid', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
@@ -751,6 +753,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
+      should(futimesSpy.called).be.ok;
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -906,7 +909,6 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -925,7 +927,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
 
     spies.setError(function(mod, fn) {
-      if (fn === 'fstat' && arguments[2] === expectedFd) {
+      if (fn === 'fstat' && typeof arguments[2] === 'number') {
         return new Error('stat error');
       }
     });
@@ -942,7 +944,6 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -961,7 +962,7 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
 
     spies.setError(function(mod, fn) {
-      if (fn === 'fchmod' && arguments[2] === expectedFd) {
+      if (fn === 'fchmod' && typeof arguments[2] === 'number') {
         return new Error('chmod error');
       }
     });
@@ -978,7 +979,6 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('722', 8);
@@ -995,7 +995,7 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'fstat' && arguments[2] === expectedFd) {
+      if (fn === 'fstat' && typeof arguments[2] === 'number') {
         expectedCount++;
       }
     });
@@ -1027,7 +1027,6 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
-    var expectedFd = 12;
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
     var expectedMode = parseInt('3722', 8);
@@ -1045,7 +1044,7 @@ describe('dest stream', function() {
 
     var expectedCount = 0;
     spies.setError(function(mod, fn) {
-      if (fn === 'fstat' && arguments[2] === expectedFd) {
+      if (fn === 'fstat' && typeof arguments[2] === 'number') {
         expectedCount++;
       }
     });
