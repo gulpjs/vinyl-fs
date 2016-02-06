@@ -446,7 +446,6 @@ describe('dest stream', function() {
       done();
     };
 
-    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -480,7 +479,6 @@ describe('dest stream', function() {
       done();
     };
 
-    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname, mode: expectedMode });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -512,7 +510,7 @@ describe('dest stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      should(chmodSpy.called).be.ok;
+      chmodSpy.called.should.equal(true);
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
@@ -524,7 +522,6 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, startMode);
 
-    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -1001,7 +998,7 @@ describe('dest stream', function() {
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(chmodSpy.called).be.not.ok;
+      chmodSpy.called.should.equal(false);
       realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
       done();
     };
@@ -1010,8 +1007,6 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
-    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var buffered = [];
@@ -1050,7 +1045,7 @@ describe('dest stream', function() {
 
     var onEnd = function() {
       expectedCount.should.equal(1);
-      should(chmodSpy.called).be.not.ok;
+      chmodSpy.called.should.equal(false);
       done();
     };
 
@@ -1058,8 +1053,6 @@ describe('dest stream', function() {
     fs.closeSync(fs.openSync(expectedPath, 'w'));
     fs.chmodSync(expectedPath, expectedMode);
 
-    statSpy.reset();
-    chmodSpy.reset();
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
 
     var buffered = [];
