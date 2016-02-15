@@ -396,38 +396,54 @@ describe('source stream', function() {
     stream1.pipe(stream2).pipe(bufferStream);
   });
 
-  it('should follow file symlinks', function(done) {
-    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
+});
 
-    var stream = vfs.src('./fixtures/test-symlink', { cwd: __dirname });
+describe('.src() symlinks', function() {
+
+
+  var dirPath = path.join(__dirname, './fixtures/wow');
+  var dirSymlinkPath = path.join(__dirname, './fixtures/test-symlink-dir');
+
+  var filePath = path.join(__dirname, './fixtures/test.coffee');
+  var fileSymlinkPath = path.join(__dirname, './fixtures/test-symlink');
+
+  beforeEach(function(done) {
+    fs.symlinkSync(dirPath, dirSymlinkPath);
+    fs.symlinkSync(filePath, fileSymlinkPath);
+    done();
+  });
+
+  afterEach(function(done) {
+    fs.unlinkSync(dirSymlinkPath);
+    fs.unlinkSync(fileSymlinkPath);
+    done();
+  });
+
+  it('should follow file symlinks', function(done) {
+    var stream = vfs.src(fileSymlinkPath, { cwd: __dirname });
     stream.on('data', function(file) {
-      file.path.should.equal(expectedPath);
+      file.path.should.equal(filePath);
       done();
     });
   });
 
   it('should follow dir symlinks', function(done) {
-    var expectedPath = path.join(__dirname, './fixtures/wow');
-
-    var stream = vfs.src('./fixtures/test-symlink-dir', { cwd: __dirname });
+    var stream = vfs.src(dirSymlinkPath, { cwd: __dirname });
     stream.on('data', function(file) {
-      file.path.should.equal(expectedPath);
+      file.path.should.equal(dirPath);
       done();
     });
   });
 
   it('should preserve file symlinks with followSymlinks option set to false', function(done) {
-    var sourcePath = path.join(__dirname, './fixtures/test-symlink');
-    var expectedPath = sourcePath;
-
-    fs.readlink(sourcePath, function(err, expectedRelativeSymlinkPath) {
+    fs.readlink(fileSymlinkPath, function(err, expectedRelativeSymlinkPath) {
       if (err) {
         throw err;
       }
 
-      var stream = vfs.src('./fixtures/test-symlink', { cwd: __dirname, followSymlinks: false });
+      var stream = vfs.src(fileSymlinkPath, { cwd: __dirname, followSymlinks: false });
       stream.on('data', function(file) {
-        file.path.should.equal(expectedPath);
+        file.path.should.equal(fileSymlinkPath);
         file.symlink.should.equal(expectedRelativeSymlinkPath);
         done();
       });
@@ -435,21 +451,17 @@ describe('source stream', function() {
   });
 
   it('should preserve dir symlinks with followSymlinks option set to false', function(done) {
-    var sourcePath = path.join(__dirname, './fixtures/test-symlink-dir');
-    var expectedPath = sourcePath;
-
-    fs.readlink(sourcePath, function(err, expectedRelativeSymlinkPath) {
+    fs.readlink(dirSymlinkPath, function(err, expectedRelativeSymlinkPath) {
       if (err) {
         throw err;
       }
 
-      var stream = vfs.src(sourcePath, { cwd: __dirname, followSymlinks: false });
+      var stream = vfs.src(dirSymlinkPath, { cwd: __dirname, followSymlinks: false });
       stream.on('data', function(file) {
-        file.path.should.equal(expectedPath);
+        file.path.should.equal(dirSymlinkPath);
         file.symlink.should.equal(expectedRelativeSymlinkPath);
         done();
       });
     });
   });
-
 });
