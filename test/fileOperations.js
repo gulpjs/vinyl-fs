@@ -2,6 +2,7 @@
 
 var expect = require('expect');
 
+var os = require('os');
 var fs = require('graceful-fs');
 var del = require('del');
 var path = require('path');
@@ -27,6 +28,8 @@ function masked(mode) {
 
 function noop() {}
 
+var isWindows = (os.platform() === 'win32');
+
 describe('isOwner', function() {
 
   var ownerStat = {
@@ -45,6 +48,11 @@ describe('isOwner', function() {
       process.geteuid = noop;
     }
 
+    // Windows :(
+    if (typeof process.getuid !== 'function') {
+      process.getuid = noop;
+    }
+
     getuidSpy = expect.spyOn(process, 'getuid').andReturn(ownerStat.uid);
     geteuidSpy = expect.spyOn(process, 'geteuid').andReturn(ownerStat.uid);
 
@@ -58,8 +66,15 @@ describe('isOwner', function() {
       delete process.geteuid;
     }
 
+    // Windows :(
+    if (process.getuid === noop) {
+      delete process.getuid;
+    }
+
     done();
   });
+
+  // TODO: test for having neither
 
   it('uses process.geteuid() when available', function(done) {
 
@@ -323,7 +338,7 @@ describe('closeFd', function() {
   });
 
   it('calls the callback with close error if no error to propagate', function(done) {
-    closeFd(null, 9001, function(err) {
+    closeFd(null, -1, function(err) {
       expect(err).toExist();
 
       done();
@@ -333,7 +348,7 @@ describe('closeFd', function() {
   it('calls the callback with propagated error if close errors', function(done) {
     var propagatedError = new Error();
 
-    closeFd(propagatedError, 9001, function(err) {
+    closeFd(propagatedError, -1, function(err) {
       expect(err).toEqual(propagatedError);
 
       done();
@@ -383,10 +398,9 @@ describe('writeFile', function() {
     done();
   });
 
-  afterEach(function(done) {
-    del.sync(filepath);
-
-    done();
+  afterEach(function() {
+    // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
+    return del(filepath);
   });
 
   it('writes a file to the filesystem, does not close and returns the fd', function(done) {
@@ -426,6 +440,12 @@ describe('writeFile', function() {
   });
 
   it('accepts a different mode in options', function(done) {
+    if (isWindows) {
+      console.log('Changing the mode of a file is not supported by node.js in Windows.');
+      this.skip();
+      return;
+    }
+
     var expected = parseInt('0777', 8) & (~process.umask());
     var content = new Buffer('test');
     var options = {
@@ -587,6 +607,14 @@ describe('updateMetadata', function() {
   });
 
   it('passes the error and file descriptor if fstat fails', function(done) {
+    if (isWindows) {
+      console.log('Changing the time of a directory errors in Windows.');
+      console.log('Changing the mode of a file is not supported by node.js in Windows.');
+      console.log('Windows is treated as though it does not have permission to make these operations.');
+      this.skip();
+      return;
+    }
+
     var fd = 9001;
 
     updateMetadata(fd, file, function(err, fd2) {
@@ -599,6 +627,11 @@ describe('updateMetadata', function() {
   });
 
   it('updates the vinyl object with fs stats', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var fd = fs.openSync(inputPath, 'w+');
     var stats = fs.fstatSync(fd);
 
@@ -613,6 +646,11 @@ describe('updateMetadata', function() {
   });
 
   it('does not touch the fs if nothing to update', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
@@ -627,6 +665,11 @@ describe('updateMetadata', function() {
   });
 
   it('does not touch the fs if process is not owner of the file', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     if (typeof process.geteuid !== 'function') {
       process.geteuid = noop;
     }
@@ -648,6 +691,11 @@ describe('updateMetadata', function() {
   });
 
   it('updates times on fs and vinyl object if there is a diff', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
     var now = Date.now();
@@ -674,6 +722,11 @@ describe('updateMetadata', function() {
   });
 
   it('forwards futimes error and descriptor upon error', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var futimesSpy = expect.spyOn(fs, 'futimes').andCall(function(fd, atime, mtime, cb) {
       cb(new Error('mocked error'));
     });
@@ -695,6 +748,11 @@ describe('updateMetadata', function() {
   });
 
   it('updates the mode on fs and vinyl object if there is a diff', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
 
     var mode = parseInt('777', 8);
@@ -712,14 +770,19 @@ describe('updateMetadata', function() {
   });
 
   it('forwards fchmod error and descriptor upon error', function(done) {
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(function(fd, mode, cb) {
-      cb(new Error('mocked error'));
-    });
+    if (isWindows) {
+      this.skip();
+      return;
+    }
 
     var mode = parseInt('777', 8);
     file.stat.mode = mode;
 
     var fd = fs.openSync(inputPath, 'w+');
+
+    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(function(fd, mode, cb) {
+      cb(new Error('mocked error'));
+    });
 
     updateMetadata(fd, file, function(err, fd2) {
       expect(err).toExist();
@@ -731,6 +794,11 @@ describe('updateMetadata', function() {
   });
 
   it('updates the mode & times on fs and vinyl object if there is a diff', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
@@ -765,6 +833,11 @@ describe('updateMetadata', function() {
   });
 
   it('forwards fchmod error and descriptor through futimes if there is a time diff', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var expectedErr = new Error('mocked error');
 
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(function(fd, mode, cb) {
@@ -780,7 +853,7 @@ describe('updateMetadata', function() {
     file.stat.mtime = new Date(then);
     file.stat.atime = new Date(then);
 
-    var fd = fs.openSync(inputPath, 'w+');
+    var fd = fs.openSync(inputPath, 'w');
 
     updateMetadata(fd, file, function(err, fd2) {
       expect(err).toExist();
