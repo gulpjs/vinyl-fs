@@ -1,5 +1,23 @@
 ## Change Log
 
+### v2.3.2 (2016/02/26 01:17 +00:00)
+- [6ed1793](https://github.com/gulpjs/vinyl-fs/commit/6ed179380da7caa4e3506f78b8864ea59164992e) 2.3.2 (@phated)
+- [#151](https://github.com/gulpjs/vinyl-fs/pull/151) Feature metadata refactor (@gulpjs)
+- [0cd8f22](https://github.com/gulpjs/vinyl-fs/commit/0cd8f2229d7788477a3fa2613dbf93e019503198) add docs for changes (@phated)
+- [550edd5](https://github.com/gulpjs/vinyl-fs/commit/550edd56f555240c36068ad060b2136213b135f6) test on latest node 4 instead of old ones (@phated)
+- [8d55978](https://github.com/gulpjs/vinyl-fs/commit/8d55978c3640ac25db8331ac4d7314579eb04da9) skip broken tests that were not testing the right thing (@phated)
+- [6f4c2eb](https://github.com/gulpjs/vinyl-fs/commit/6f4c2eb396b78a91dcf41f5063eee27b66b35fe0) `sourcemaps` is not a valid option to gulp-sourcemaps (@phated)
+- [011320b](https://github.com/gulpjs/vinyl-fs/commit/011320b1f988ecd7846ef04f7a597ee4b25d7285) add appveyor to test on windows & get tests to actually pass (@phated)
+- [84cf3c2](https://github.com/gulpjs/vinyl-fs/commit/84cf3c2e1901bd700c089edac06ce0c75f8e701d) refactor and lots of tests for updating of metadata (@phated)
+- [90a1189](https://github.com/gulpjs/vinyl-fs/commit/90a11894472d29abe9e34b80df0dfab9907f11e7) Make the tests pass again, some more refactoring of metadata handling (@erikkemperman)
+- [35e9b3a](https://github.com/gulpjs/vinyl-fs/commit/35e9b3a68907167b51fa31edd0701ae24915fd84) Use filedescriptors where possible, refactor handling of stats metadata in dest (@piranna)
+- [#150](https://github.com/gulpjs/vinyl-fs/pull/150) Update license year from initial date of release to current (@pra85)
+- [ec48559](https://github.com/gulpjs/vinyl-fs/commit/ec485592d7a96562acc97ccd8b39a12cf17ed319) Update license year from initial date of release to current (@pra85)
+- [#149](https://github.com/gulpjs/vinyl-fs/pull/149) chore: add NPM script for changelog (@T1st3)
+- [0010bd3](https://github.com/gulpjs/vinyl-fs/commit/0010bd3b3c49e7b60e0d69dacdd8fd1b87a6c3dd) chore: add NPM script for changelog (@t1st3)
+- [#148](https://github.com/gulpjs/vinyl-fs/pull/148) docs: add CHANGELOG.md (@T1st3)
+- [da4cd0b](https://github.com/gulpjs/vinyl-fs/commit/da4cd0b449f8e9bd4bd0842fe2eb2b4eceea6c0b) docs: add changelog (@t1st3)
+
 ### v2.3.1 (2016/01/14 09:13 +00:00)
 - [7d2fcba](https://github.com/gulpjs/vinyl-fs/commit/7d2fcbaa49c78087fa975a4183fee38d422b9d4a) 2.3.1
 - [#145](https://github.com/gulpjs/vinyl-fs/pull/145) Allow things to listen for data or readable events and avoid sinking in those cases (@gulpjs)
