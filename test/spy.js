@@ -1,6 +1,6 @@
 'use strict';
 
-var fs = require('fs');
+var fs = require('graceful-fs');
 var sinon = require('sinon');
 
 var errorfn = false;
@@ -25,5 +25,8 @@ module.exports = {
     errorfn = fn;
   },
   chmodSpy: maybeCallAsync(fs, 'chmod'),
+  fchmodSpy: maybeCallAsync(fs, 'fchmod'),
+  futimesSpy: maybeCallAsync(fs, 'futimes'),
   statSpy: maybeCallAsync(fs, 'stat'),
+  fstatSpy: maybeCallAsync(fs, 'fstat'),
 };
