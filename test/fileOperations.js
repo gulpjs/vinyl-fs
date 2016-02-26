@@ -7,6 +7,7 @@ var fs = require('graceful-fs');
 var del = require('del');
 var path = require('path');
 var File = require('vinyl');
+var buffer = require('buffer');
 var defaultResolution = require('default-resolution');
 
 var fo = require('../lib/fileOperations');
@@ -556,19 +557,36 @@ describe('writeFile', function() {
     });
   });
 
-  it('does not pass an error if called with string as data', function(done) {
+  it('passes an error if called with string as data', function(done) {
     writeFile(filepath, 'test', function(err) {
-      expect(err).toNotExist();
+      expect(err).toExist();
 
       done();
     });
   });
 
-  it('passes an error if called with non-buffer/non-string as data', function(done) {
-    writeFile(filepath, {}, function(err) {
-      expect(err).toExist();
+  it('does not error on SlowBuffer', function(done) {
+    if (!buffer.SlowBuffer) {
+      this.skip();
+      return;
+    }
 
-      done();
+    var expected = 'test';
+    var buf = new Buffer(expected);
+    var content = new buffer.SlowBuffer(4);
+    buf.copy(content, 0, 0, 4);
+
+    writeFile(filepath, content, function(err, fd) {
+      expect(err).toNotExist();
+      expect(typeof fd === 'number').toEqual(true);
+
+      fs.close(fd, function() {
+        var written = fs.readFileSync(filepath, 'utf-8');
+
+        expect(written).toEqual(expected);
+
+        done();
+      });
     });
   });
 
