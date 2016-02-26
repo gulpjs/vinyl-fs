@@ -143,11 +143,16 @@ Any through2-related options are documented in [through2].
 Takes a folder path string or a function as the first argument and an options object as the second. If given a function, it will be called with each [vinyl] `File` object and must return a folder path.
 Returns a stream that accepts [vinyl] `File` objects, writes them to disk at the folder/cwd specified, and passes them downstream so you can keep piping these around.
 
+Once the file is written to disk, an attempt is made to determine if the `stat.mode`, `stat.mtime` and `stat.atime` of the [vinyl] `File` object differ from the file on the filesystem.
+If they differ and the running process owns the file, the corresponding filesystem metadata is updated.
+If they don't differ or the process doesn't own the file, the attempt is skipped silently.
+__This functionality is disabled on Windows operating systems or any other OS that doesn't support `process.getuid` or `process.geteuid` in node. This is due to Windows having very unexpected results through usage of `fs.fchmod` and `fs.futimes`.__
+
 If the file has a `symlink` attribute specifying a target path, then a symlink will be created.
 
 __Note: The file will be modified after being written to this stream.__
   - `cwd`, `base`, and `path` will be overwritten to match the folder.
-  - `stat.mode` will be overwritten if you used a mode parameter.
+  - `stat` will be updated to match the file on the filesystem.
   - `contents` will have it's position reset to the beginning if it is a stream.
 
 #### Options
