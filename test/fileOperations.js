@@ -556,8 +556,16 @@ describe('writeFile', function() {
     });
   });
 
-  it('passes an error if called without buffer for data', function(done) {
+  it('does not pass an error if called with string as data', function(done) {
     writeFile(filepath, 'test', function(err) {
+      expect(err).toNotExist();
+
+      done();
+    });
+  });
+
+  it('passes an error if called with non-buffer/non-string as data', function(done) {
+    writeFile(filepath, {}, function(err) {
       expect(err).toExist();
 
       done();
