@@ -199,7 +199,8 @@ Default: `true` (always overwrite existing files)
 
 ##### `options.sourcemaps`
 
-Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`. Uses [gulp-sourcemaps] under the hood.
+Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`.
+Specifying a `string` is shorthand for the path option. Uses [gulp-sourcemaps] under the hood.
 
 Examples:
 
@@ -211,9 +212,7 @@ vfs.dest('./', {
 
 // Write as files in the same folder
 vfs.dest('./', {
-  sourcemaps: {
-    path: '.'
-  }
+  sourcemaps: '.'
 });
 
 // Any other options are passed through to [gulp-sourcemaps]
@@ -226,7 +225,7 @@ vfs.dest('./', {
 });
 ```
 
-Type: `Boolean` or `Object`
+Type: `Boolean`, `String` or `Object`
 
 Default: `undefined` (do not write sourcemaps)
 
