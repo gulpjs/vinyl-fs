@@ -103,6 +103,32 @@ describe('dest stream', function() {
     stream.end();
   });
 
+  it('should not explode if the sourcemap option is string', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+
+    var expectedFile = new File({
+      base: __dirname,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+    });
+
+    var buffered = [];
+
+    var onEnd = function() {
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      done();
+    };
+
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+
+    var stream = vfs.dest(path.join(__dirname, './out-fixtures/'), { sourcemaps: '.' });
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should not explode if sourcemap option is an object', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
 
