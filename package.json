@@ -1,7 +1,7 @@
 {
   "name": "vinyl-fs",
   "description": "Vinyl adapter for the file system",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "homepage": "http://github.com/wearefractal/vinyl-fs",
   "repository": "git://github.com/wearefractal/vinyl-fs.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
