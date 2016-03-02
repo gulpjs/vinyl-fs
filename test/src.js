@@ -396,6 +396,27 @@ describe('source stream', function() {
     stream1.pipe(stream2).pipe(bufferStream);
   });
 
+  it('should not pass options.read on to through2', function(done) {
+    // Note: https://github.com/gulpjs/vinyl-fs/issues/153
+    // In future, if/when function values are supported for options like
+    // `read` and `buffered`, the expected value here will be 1.
+    var canary = 0;
+    var expected = 0;
+    var read = function() {
+      canary++;
+      return 0;
+    };
+
+    var onEnd = function() {
+      canary.should.equal(expected);
+      done();
+    };
+
+    var buffered = [];
+    var stream = vfs.src('./fixtures/test.coffee', { cwd: __dirname, read: read });
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+  });
 });
 
 describe('.src() symlinks', function() {
