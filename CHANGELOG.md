@@ -1,11 +1,35 @@
 ## Change Log
 
+### v2.4.2 (2016/03/03 19:59 +00:00)
+- [5edb75a](https://github.com/gulpjs/vinyl-fs/commit/5edb75a10935fdc89e29d5e2413694aca77a3e85) 2.4.2 (@phated)
+- [f445987](https://github.com/gulpjs/vinyl-fs/commit/f445987ce905659e62dcb27a8ad69f4ed2fb8198) upgrade glob-stream and remove path.normalize workaround (@phated)
+
+### v2.4.1 (2016/03/02 20:53 +00:00)
+- [caac041](https://github.com/gulpjs/vinyl-fs/commit/caac041836436577d52468d32b9844c00d666265) 2.4.1 (@phated)
+- [#154](https://github.com/gulpjs/vinyl-fs/pull/154) Don't pass `read` option from `src` to `through2` (@erikkemperman)
+
+### v2.4.0 (2016/03/01 22:40 +00:00)
+- [926a9ad](https://github.com/gulpjs/vinyl-fs/commit/926a9ad3cf40d133120eb6f90d26234dc9f00138) 2.4.0 (@phated)
+- [#160](https://github.com/gulpjs/vinyl-fs/pull/160) Allow specify dest sourcemaps option as string (@TrySound)
+- [ebaffbe](https://github.com/gulpjs/vinyl-fs/commit/ebaffbecd642d3f8dd7d6edd6a19a1e768e7d2d1) Upgrade documentation (@TrySound)
+- [7a0c94a](https://github.com/gulpjs/vinyl-fs/commit/7a0c94ae97de5e46392efe9a08ee3c68885dd7ba) Allow specify dest sourcemaps option as string (@TrySound)
+
+### v2.3.4 (2016/02/26 21:48 +00:00)
+- [cd8a992](https://github.com/gulpjs/vinyl-fs/commit/cd8a992294228eea1d08957efc823794baa48fba) 2.3.4 (@phated)
+- [8b50f49](https://github.com/gulpjs/vinyl-fs/commit/8b50f495c9b782d2afc64b38c0b7181a21c20b62) revert string handling from previous release, add support for SlowBuffer support (@phated)
+
+### v2.3.3 (2016/02/26 20:08 +00:00)
+- [a75feda](https://github.com/gulpjs/vinyl-fs/commit/a75feda20131177a8f5a5008483f24169d0b3df3) 2.3.3 (@phated)
+- [165149c](https://github.com/gulpjs/vinyl-fs/commit/165149c6a676ac867933173db28300cf3bab2a5f) support strings in writeFile (@phated)
+- [3b67921](https://github.com/gulpjs/vinyl-fs/commit/3b67921fe5ddd925fc12acef2bd03777b0081dc3) Don't pass `read` option from `src` to `through2` (@erikkemperman)
+- [5918841](https://github.com/gulpjs/vinyl-fs/commit/5918841bbd2c5256413b86c000e28ac3fff516e7) update changelog (@phated)
+
 ### v2.3.2 (2016/02/26 01:17 +00:00)
 - [6ed1793](https://github.com/gulpjs/vinyl-fs/commit/6ed179380da7caa4e3506f78b8864ea59164992e) 2.3.2 (@phated)
 - [#151](https://github.com/gulpjs/vinyl-fs/pull/151) Feature metadata refactor (@gulpjs)
 - [0cd8f22](https://github.com/gulpjs/vinyl-fs/commit/0cd8f2229d7788477a3fa2613dbf93e019503198) add docs for changes (@phated)
-- [550edd5](https://github.com/gulpjs/vinyl-fs/commit/550edd56f555240c36068ad060b2136213b135f6) test on latest node 4 instead of old ones (@phated)
 - [8d55978](https://github.com/gulpjs/vinyl-fs/commit/8d55978c3640ac25db8331ac4d7314579eb04da9) skip broken tests that were not testing the right thing (@phated)
+- [550edd5](https://github.com/gulpjs/vinyl-fs/commit/550edd56f555240c36068ad060b2136213b135f6) test on latest node 4 instead of old ones (@phated)
 - [6f4c2eb](https://github.com/gulpjs/vinyl-fs/commit/6f4c2eb396b78a91dcf41f5063eee27b66b35fe0) `sourcemaps` is not a valid option to gulp-sourcemaps (@phated)
 - [011320b](https://github.com/gulpjs/vinyl-fs/commit/011320b1f988ecd7846ef04f7a597ee4b25d7285) add appveyor to test on windows & get tests to actually pass (@phated)
 - [84cf3c2](https://github.com/gulpjs/vinyl-fs/commit/84cf3c2e1901bd700c089edac06ce0c75f8e701d) refactor and lots of tests for updating of metadata (@phated)
