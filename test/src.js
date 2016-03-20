@@ -428,15 +428,23 @@ describe('.src() symlinks', function() {
   var filePath = path.join(__dirname, './fixtures/test.coffee');
   var fileSymlinkPath = path.join(__dirname, './fixtures/test-symlink');
 
+  var symlinkFirstLayer = path.join(__dirname, './fixtures/test-multi-layer-symlink');
+  var symlinkSecondLayer = path.join(__dirname, './fixtures/foo/baz-link.txt');
+  var symlinkSecondLayerTarget = path.join(__dirname, './fixtures/foo/bar/baz.txt');
+
   beforeEach(function(done) {
     fs.symlinkSync(dirPath, dirSymlinkPath);
     fs.symlinkSync(filePath, fileSymlinkPath);
+    fs.symlinkSync(symlinkSecondLayerTarget, symlinkSecondLayer);
+    fs.symlinkSync(symlinkSecondLayer, symlinkFirstLayer);
     done();
   });
 
   afterEach(function(done) {
     fs.unlinkSync(dirSymlinkPath);
     fs.unlinkSync(fileSymlinkPath);
+    fs.unlinkSync(symlinkSecondLayer);
+    fs.unlinkSync(symlinkFirstLayer);
     done();
   });
 
