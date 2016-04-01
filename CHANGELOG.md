@@ -1,5 +1,11 @@
 ## Change Log
 
+### v2.4.3 (2016/04/01 19:53 +00:00)
+- [3033555](https://github.com/gulpjs/vinyl-fs/commit/3033555d4b094e115b274b9c611be55104538118) 2.4.3 (@phated)
+- [aa18c60](https://github.com/gulpjs/vinyl-fs/commit/aa18c60a12a7866cd3abd8fec0c63f9bf7b8a9ce) move originalSymlinkPath assignment into realpath callback, fix comment linting (@phated)
+- [6a97cdf](https://github.com/gulpjs/vinyl-fs/commit/6a97cdf57d4cdc687402ef4e9d1d1d45c88478d2) Fixes #132 The symlink following logic in src() was incorrect resulting in wrong file.base being generated. (@xunnanxu)
+- [4a08c4e](https://github.com/gulpjs/vinyl-fs/commit/4a08c4e991d3b209b6f63140b7a7dde1d4970607) update changelog (@phated)
+
 ### v2.4.2 (2016/03/03 19:59 +00:00)
 - [5edb75a](https://github.com/gulpjs/vinyl-fs/commit/5edb75a10935fdc89e29d5e2413694aca77a3e85) 2.4.2 (@phated)
 - [f445987](https://github.com/gulpjs/vinyl-fs/commit/f445987ce905659e62dcb27a8ad69f4ed2fb8198) upgrade glob-stream and remove path.normalize workaround (@phated)
