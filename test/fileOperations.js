@@ -21,7 +21,7 @@ var updateMetadata = fo.updateMetadata;
 
 var resolution = defaultResolution();
 
-var MASK_MODE = parseInt('777', 8);
+var MASK_MODE = parseInt('7777', 8);
 
 function masked(mode) {
   return mode & MASK_MODE;
@@ -170,13 +170,13 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('ignores the sticky/setuid/setgid bits', function(done) {
+  it('includes the sticky/setuid/setgid bits', function(done) {
     var fsMode = parseInt('1777', 8);
     var vfsMode = parseInt('4777', 8);
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(0);
+    expect(result).toEqual(fsMode ^ vfsMode);
 
     done();
   });
@@ -782,6 +782,29 @@ describe('updateMetadata', function() {
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
 
     var mode = parseInt('777', 8);
+    file.stat.mode = mode;
+
+    var fd = fs.openSync(inputPath, 'w+');
+
+    updateMetadata(fd, file, function(err, fd2) {
+      expect(fchmodSpy.calls.length).toEqual(1);
+      var stats = fs.fstatSync(fd);
+      expect(file.stat.mode).toEqual(stats.mode);
+
+      fs.close(fd2, done);
+    });
+  });
+
+
+  it('updates the sticky bit on mode on fs and vinyl object if there is a diff', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+
+    var mode = parseInt('1777', 8);
     file.stat.mode = mode;
 
     var fd = fs.openSync(inputPath, 'w+');

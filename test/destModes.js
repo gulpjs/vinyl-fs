@@ -23,13 +23,14 @@ function wipeOut() {
     });
 }
 
-var MASK_MODE = parseInt('777', 8);
+var MASK_MODE = parseInt('7777', 8);
 
 function masked(mode) {
   return mode & MASK_MODE;
 }
 
 var isWindows = (os.platform() === 'win32');
+var isDarwin = (os.platform() === 'darwin');
 
 describe('.dest() with custom modes', function() {
   beforeEach(wipeOut);
@@ -67,6 +68,46 @@ describe('.dest() with custom modes', function() {
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
     stream.on('end', onEnd);
     stream.write(expectedFile);
+    stream.end();
+  });
+
+
+
+  it('should set the sticky bit on the mode of a written stream file if set on the vinyl object', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedMode = parseInt('1655', 8);
+
+    var contentStream = through.obj();
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: contentStream,
+      stat: {
+        mode: expectedMode,
+      },
+    });
+
+    var onEnd = function() {
+      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+    stream.on('end', onEnd);
+    stream.write(expectedFile);
+    setTimeout(function() {
+      contentStream.write(expectedContents);
+      contentStream.end();
+    }, 100);
     stream.end();
   });
 
@@ -118,6 +159,41 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test');
     var expectedMode = parseInt('655', 8);
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function() {
+          return true;
+        },
+        mode: expectedMode,
+      },
+    });
+
+    var onEnd = function() {
+      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      done();
+    };
+
+    var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
+    stream.on('end', onEnd);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should set sticky bit on the mode of a written directory if set on the vinyl object', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var inputPath = path.join(__dirname, './fixtures/test');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test');
+    var expectedMode = parseInt('1655', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -255,11 +331,13 @@ describe('.dest() with custom modes', function() {
       return;
     }
 
+
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
     var expectedPath = path.join(__dirname, './out-fixtures/wow/suchempty');
-    var expectedDirMode = parseInt('755', 8);
+    // NOTE: Darwin does not set setgid
+    var expectedDirMode = isDarwin ? parseInt('755', 8) : parseInt('2755', 8);
     var expectedFileMode = parseInt('655', 8);
 
     var firstFile = new File({
@@ -322,7 +400,7 @@ describe('.dest() with custom modes', function() {
     stream.end();
   });
 
-  it('should see a file with special chmod (setuid/setgid/sticky) as matching', function(done) {
+  it('should see a file with special chmod (setuid/setgid/sticky) as distinct', function(done) {
     if (isWindows) {
       this.skip();
       return;
@@ -349,7 +427,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(fchmodSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.calls.length).toEqual(1);
       done();
     };
 
