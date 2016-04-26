@@ -10,7 +10,7 @@ var File = require('vinyl');
 var buffer = require('buffer');
 var defaultResolution = require('default-resolution');
 
-var fo = require('../lib/fileOperations');
+var fo = require('../lib/file-operations');
 
 var closeFd = fo.closeFd;
 var isOwner = fo.isOwner;
