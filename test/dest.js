@@ -1100,12 +1100,12 @@ describe('dest stream', function() {
     });
 
     var stream = vfs.dest(outputDir);
-    stream.write(expectedFile);
     stream.on('error', function(err) {
       expect(err).toExist();
       expect(mkdirSpy.calls.length).toEqual(1);
       done();
     });
+    stream.write(expectedFile);
   });
 
   it('errors if vinyl object is a directory and we cannot mkdirp', function(done) {
