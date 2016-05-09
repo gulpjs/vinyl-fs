@@ -899,6 +899,11 @@ describe('mkdirp', function() {
   var MODE_MASK = parseInt('0777', 8);
 
   it('makes single directory', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var dir = path.join(__dirname, './fixtures/bif');
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
@@ -914,6 +919,11 @@ describe('mkdirp', function() {
   });
 
   it('makes multiple directories', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var dir = path.join(__dirname, './fixtures/bif/bam/bof');
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
@@ -929,6 +939,11 @@ describe('mkdirp', function() {
   });
 
   it('makes directory with mode', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var dir = path.join(__dirname, './fixtures/bif');
     var mode = parseInt('0700',8);
     mkdirp(dir, mode, function(err) {
@@ -945,6 +960,11 @@ describe('mkdirp', function() {
   });
 
   it('makes multiple directories with mode', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var dir = path.join(__dirname, './fixtures/bif/bam/bof');
     var mode = parseInt('0700',8);
     mkdirp(dir, mode, function(err) {
@@ -962,6 +982,11 @@ describe('mkdirp', function() {
   });
 
   it('changes mode of existing directory', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
     var dir = path.join(__dirname, './fixtures/bif');
     var mode = parseInt('0700',8);
     mkdirp(dir, function(err) {
