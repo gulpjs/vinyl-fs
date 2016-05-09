@@ -952,9 +952,9 @@ describe('mkdirp', function() {
       fs.stat(dir, function(err2, stats) {
         expect(err2).toNotExist();
         expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-        del(dir);
-
-        done();
+        del(dir).then(function() {
+          done();
+        });
       });
     });
   });
@@ -974,7 +974,7 @@ describe('mkdirp', function() {
         expect(err2).toNotExist();
         expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
         del(path.join(__dirname, './fixtures/bif'))
-          .then(function(results) {
+          .then(function() {
             done();
           });
       });
