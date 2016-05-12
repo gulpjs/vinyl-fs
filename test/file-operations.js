@@ -132,7 +132,7 @@ describe('getModeDiff', function() {
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(0);
+    expect(result.toString(8)).toEqual('0');
 
     done();
   });
@@ -143,7 +143,7 @@ describe('getModeDiff', function() {
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(0);
+    expect(result.toString(8)).toEqual('0');
 
     done();
   });
@@ -154,7 +154,7 @@ describe('getModeDiff', function() {
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(27);
+    expect(result.toString(8)).toEqual('33');
 
     done();
   });
@@ -165,7 +165,7 @@ describe('getModeDiff', function() {
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(82);
+    expect(result.toString(8)).toEqual('122');
 
     done();
   });
@@ -176,7 +176,7 @@ describe('getModeDiff', function() {
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(fsMode ^ vfsMode);
+    expect(result.toString(8)).toEqual('5000');
 
     done();
   });
