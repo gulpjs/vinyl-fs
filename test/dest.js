@@ -499,7 +499,7 @@ describe('dest stream', function() {
       buffered.length.should.equal(1);
       buffered[0].should.equal(expectedFile);
       fs.existsSync(expectedPath).should.equal(true);
-      realMode(fs.lstatSync(expectedPath).mode).should.equal(expectedMode);
+      realMode(fs.lstatSync(expectedPath).mode).toString(8).should.equal(expectedMode.toString(8));
       done();
     };
 
