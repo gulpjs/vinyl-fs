@@ -189,7 +189,7 @@ describe('symlink stream', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8)  & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -229,7 +229,7 @@ describe('symlink stream', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8) & ~process.umask();
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -273,7 +273,7 @@ describe('symlink stream', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/wow');
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8) & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -320,8 +320,8 @@ describe('symlink stream', function() {
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
-    var expectedDirMode = parseInt('755', 8);
-    var expectedFileMode = parseInt('655', 8);
+    var expectedDirMode = parseInt('777', 8) & ~process.umask();
+    var expectedFileMode = parseInt('677', 8) & ~process.umask();
 
     var firstFile = new File({
       base: inputBase,
@@ -333,8 +333,8 @@ describe('symlink stream', function() {
     var buffered = [];
 
     var onEnd = function() {
-      realMode(fs.lstatSync(expectedBase).mode).should.equal(expectedDirMode);
-      realMode(buffered[0].stat.mode).should.equal(expectedFileMode);
+      realMode(fs.lstatSync(expectedBase).mode).toString(8).should.equal(expectedDirMode.toString(8));
+      realMode(buffered[0].stat.mode).toString(8).should.equal(expectedFileMode.toString(8));
       done();
     };
 

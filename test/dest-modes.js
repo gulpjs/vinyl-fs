@@ -48,7 +48,7 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8) & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -61,7 +61,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -83,7 +83,7 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMode = parseInt('1655', 8);
+    var expectedMode = parseInt('1677', 8) & ~process.umask();
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -97,7 +97,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -121,7 +121,7 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8) & ~process.umask();
 
     var contentStream = through.obj();
     var expectedFile = new File({
@@ -135,7 +135,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -158,7 +158,7 @@ describe('.dest() with custom modes', function() {
     var inputPath = path.join(__dirname, './fixtures/test');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test');
-    var expectedMode = parseInt('655', 8);
+    var expectedMode = parseInt('677', 8) & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -174,7 +174,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -193,7 +193,7 @@ describe('.dest() with custom modes', function() {
     var inputPath = path.join(__dirname, './fixtures/test');
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test');
-    var expectedMode = parseInt('1655', 8);
+    var expectedMode = parseInt('1677', 8) & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -209,7 +209,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -229,7 +229,7 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMode = parseInt('744', 8);
+    var expectedMode = parseInt('777', 8) & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -239,7 +239,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -260,8 +260,8 @@ describe('.dest() with custom modes', function() {
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
     var expectedBase = path.join(__dirname, './out-fixtures');
-    var startMode = parseInt('0655', 8);
-    var expectedMode = parseInt('0722', 8);
+    var startMode = parseInt('655', 8);
+    var expectedMode = parseInt('722', 8);
 
     var expectedFile = new File({
       base: inputBase,
@@ -274,7 +274,7 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -312,7 +312,7 @@ describe('.dest() with custom modes', function() {
     expectedFile.stat.mode = (startMode & ~parseInt('7777', 8)) | expectedMode;
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
@@ -337,8 +337,8 @@ describe('.dest() with custom modes', function() {
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
     var expectedPath = path.join(__dirname, './out-fixtures/wow/suchempty');
     // NOTE: Darwin does not set setgid
-    var expectedDirMode = isDarwin ? parseInt('755', 8) : parseInt('2755', 8);
-    var expectedFileMode = parseInt('655', 8);
+    var expectedDirMode = (isDarwin ? parseInt('777', 8) : parseInt('2777', 8)) & ~process.umask();
+    var expectedFileMode = parseInt('677', 8) & ~process.umask();
 
     var firstFile = new File({
       base: inputBase,
@@ -349,8 +349,8 @@ describe('.dest() with custom modes', function() {
     });
 
     var onEnd = function() {
-      expect(masked(fs.lstatSync(expectedBase).mode)).toEqual(expectedDirMode);
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedFileMode);
+      expect(masked(fs.lstatSync(expectedBase).mode).toString(8)).toEqual(expectedDirMode.toString(8));
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedFileMode.toString(8));
       done();
     };
 
@@ -376,7 +376,7 @@ describe('.dest() with custom modes', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var expectedMode = parseInt('711', 8);
+    var expectedMode = parseInt('777', 8)  & ~process.umask();
 
     var expectedFile = new File({
       base: inputBase,
@@ -390,7 +390,7 @@ describe('.dest() with custom modes', function() {
 
     var onEnd = function() {
       expect(fchmodSpy.calls.length).toEqual(0);
-      expect(masked(fs.lstatSync(expectedPath).mode)).toEqual(expectedMode);
+      expect(masked(fs.lstatSync(expectedPath).mode).toString(8)).toEqual(expectedMode.toString(8));
       done();
     };
 
