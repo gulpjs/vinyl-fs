@@ -133,6 +133,14 @@ Type: `Boolean`
 
 Default: `true`
 
+##### `options.dots` - `true`
+
+Whether or not you want globs to match on dot files or not (e.g. `.gitignore`)
+
+Type: `Boolean`
+
+Default: `false`
+
 ##### other
 
 Any glob-related options are documented in [glob-stream] and [node-glob].
