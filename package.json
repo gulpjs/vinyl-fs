@@ -19,7 +19,6 @@
     "lazystream": "^1.0.0",
     "lodash.isequal": "^4.0.0",
     "merge-stream": "^1.0.0",
-    "mkdirp": "^0.5.0",
     "object-assign": "^4.0.0",
     "readable-stream": "^2.0.4",
     "strip-bom": "^2.0.0",
