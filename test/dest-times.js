@@ -37,7 +37,7 @@ describe('.dest() with custom times', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var earlier = Date.now() - 1000;
+    var earlier = Date.now() - 1001;
 
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
@@ -113,7 +113,7 @@ describe('.dest() with custom times', function() {
     var inputBase = path.join(__dirname, './fixtures/');
     var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
     var expectedContents = fs.readFileSync(inputPath);
-    var earlier = Date.now() - 1000;
+    var earlier = Date.now() - 1001;
 
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
