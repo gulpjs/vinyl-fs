@@ -164,14 +164,6 @@ Type: `String`
 
 Default: `process.cwd()`
 
-##### `options.base`
-
-The folder relative to the cwd. This is used to determine the file names when saving in `.dest()`. Can also be a function that takes in a file and returns a folder path.
-
-Type: `String` or `Function`
-
-Default: The `cwd` resolved to the folder path.
-
 ##### `options.mode`
 
 The mode the files should be created with.
@@ -253,14 +245,6 @@ The working directory the folder is relative to.
 Type: `String`
 
 Default: `process.cwd()`
-
-##### `options.base`
-
-The folder relative to the cwd. This is used to determine the file names when saving in `.symlink()`. Can also be a function that takes in a file and returns a folder path.
-
-Type: `String` or `Function`
-
-Default: The `cwd` resolved to the folder path.
 
 ##### `options.dirMode`
 

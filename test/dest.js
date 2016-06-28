@@ -513,68 +513,6 @@ describe('dest stream', function() {
     stream.end();
   });
 
-  it('should change to the specified base as string', function(done) {
-    var inputBase = path.join(__dirname, './fixtures');
-    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
-
-    var firstFile = new File({
-      cwd: __dirname,
-      path: inputPath,
-      stat: fs.statSync(inputPath),
-    });
-
-    var buffered = [];
-
-    var onEnd = function() {
-      buffered[0].base.should.equal(inputBase);
-      done();
-    };
-
-    var stream = vfs.dest('./out-fixtures/', {
-      cwd: __dirname,
-      base: inputBase,
-    });
-
-    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-
-    stream.pipe(bufferStream);
-    stream.write(firstFile);
-    stream.end();
-  });
-
-  it('should change to the specified base as function', function(done) {
-    var inputBase = path.join(__dirname, './fixtures');
-    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
-
-    var firstFile = new File({
-      cwd: __dirname,
-      path: inputPath,
-      stat: fs.statSync(inputPath),
-    });
-
-    var buffered = [];
-
-    var onEnd = function() {
-      buffered[0].base.should.equal(inputBase);
-      done();
-    };
-
-    var stream = vfs.dest('./out-fixtures/', {
-      cwd: __dirname,
-      base: function(file) {
-        should.exist(file);
-        file.path.should.equal(inputPath);
-        return inputBase;
-      },
-    });
-
-    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-
-    stream.pipe(bufferStream);
-    stream.write(firstFile);
-    stream.end();
-  });
-
   it('should report IO errors', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');

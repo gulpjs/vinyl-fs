@@ -351,36 +351,6 @@ describe('symlink stream', function() {
     stream.end();
   });
 
-  it('should change to the specified base', function(done) {
-    var inputBase = path.join(__dirname, './fixtures');
-    var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
-
-    var firstFile = new File({
-      base: inputBase,
-      cwd: __dirname,
-      path: inputPath,
-      stat: fs.statSync(inputPath),
-    });
-
-    var buffered = [];
-
-    var onEnd = function() {
-      buffered[0].base.should.equal(inputBase);
-      done();
-    };
-
-    var stream = vfs.symlink('./out-fixtures/', {
-      cwd: __dirname,
-      base: inputBase,
-    });
-
-    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-
-    stream.pipe(bufferStream);
-    stream.write(firstFile);
-    stream.end();
-  });
-
   it('should report IO errors', function(done) {
     if (isWindows) {
       console.log('Changing the mode of a file is not supported by node.js in Windows.');
