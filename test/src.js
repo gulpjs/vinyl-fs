@@ -398,10 +398,8 @@ describe('source stream', function() {
 
   it('should not pass options.read on to through2', function(done) {
     // Note: https://github.com/gulpjs/vinyl-fs/issues/153
-    // In future, if/when function values are supported for options like
-    // `read` and `buffered`, the expected value here will be 1.
     var canary = 0;
-    var expected = 0;
+    var expected = 1;
     var read = function() {
       canary++;
       return 0;

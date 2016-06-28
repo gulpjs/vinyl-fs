@@ -61,21 +61,8 @@ fs.src(['*.js', '!b*.js'])
 
 #### Options
 
-##### `options.cwd`
-
-The working directory the folder is relative to.
-
-Type: `String`
-
-Default: `process.cwd()`
-
-##### `options.base`
-
-The folder relative to the cwd. This is used to determine the file names when saving in `.dest()`.
-
-Type: `String`
-
-Default: The part of the path before the glob (if any) begins. For example, `path/to/**/*.js` would resolve to `path/to`. If there is no glob (i.e. a file path with no pattern), then the dirname of the path is used. For example, `path/to/some/file.js` would resolve to `path/to/some`.
+- Values passed to the options must be of the right type, otherwise they will be ignored.
+- All options can be passed a function instead of a value. The function must return a value of the right type, otherwise it will be ignored.
 
 ##### `options.buffer`
 
@@ -145,6 +132,7 @@ Default: `false`
 
 Any glob-related options are documented in [glob-stream] and [node-glob].
 Any through2-related options are documented in [through2].
+Those options are forwarded verbatim.
 
 ### `dest(folder[, options])`
 
@@ -164,6 +152,9 @@ __Note: The file will be modified after being written to this stream.__
   - `contents` will have it's position reset to the beginning if it is a stream.
 
 #### Options
+
+- Values passed to the options must be of the right type, otherwise they will be ignored.
+- All options can be passed a function instead of a value. The function will be called with the [vinyl] `File` object as its only argument and must return a value of the right type for the option.
 
 ##### `options.cwd`
 
@@ -240,6 +231,7 @@ Default: `undefined` (do not write sourcemaps)
 ##### other
 
 Any through2-related options are documented in [through2].
+Those options are forwarded verbatim.
 
 ### `symlink(folder[, options])`
 
@@ -250,6 +242,9 @@ __Note: The file will be modified after being written to this stream.__
   - `cwd`, `base`, and `path` will be overwritten to match the folder.
 
 #### Options
+
+- Values passed to the options must be of the right type, otherwise they will be ignored.
+- All options can be passed a function instead of a value. The function will be called with the [vinyl] `File` object as its only argument and must return a value of the right type for the option.
 
 ##### `options.cwd`
 
@@ -278,6 +273,7 @@ Default: The process mode.
 ##### other
 
 Any through2-related options are documented in [through2].
+Those options are forwarded verbatim.
 
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [gulp-sourcemaps]: https://github.com/floridoo/gulp-sourcemaps
