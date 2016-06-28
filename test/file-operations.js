@@ -632,7 +632,7 @@ describe('updateMetadata', function() {
     done();
   });
 
-  it('passes the error and file descriptor if fstat fails', function(done) {
+  it('passes the error if fstat fails', function(done) {
     if (isWindows) {
       console.log('Changing the time of a directory errors in Windows.');
       console.log('Changing the mode of a file is not supported by node.js in Windows.');
@@ -643,10 +643,8 @@ describe('updateMetadata', function() {
 
     var fd = 9001;
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(err).toExist();
-      expect(typeof fd === 'number').toEqual(true);
-      expect(fd2).toEqual(fd);
 
       done();
     });
@@ -661,13 +659,13 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(inputPath, 'w+');
     var stats = fs.fstatSync(fd);
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       // Not sure why .toEqual doesn't match these
       Object.keys(file.stat).forEach(function(key) {
         expect(file.stat[key]).toEqual(stats[key]);
       });
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -682,11 +680,11 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(fchmodSpy.calls.length).toEqual(0);
       expect(futimesSpy.calls.length).toEqual(0);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -708,11 +706,11 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(fchmodSpy.calls.length).toEqual(0);
       expect(futimesSpy.calls.length).toEqual(0);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -731,7 +729,7 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(futimesSpy.calls.length).toEqual(1);
       var stats = fs.fstatSync(fd);
       var mtimeMs = Date.parse(file.stat.mtime);
@@ -743,7 +741,7 @@ describe('updateMetadata', function() {
       expect(file.stat.atime).toEqual(new Date(then));
       expect(atime).toEqual(Date.parse(stats.atime));
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -763,13 +761,13 @@ describe('updateMetadata', function() {
     file.stat.atime = new Date(then);
 
     var fd = fs.openSync(inputPath, 'w+');
+    expect(typeof fd === 'number').toEqual(true);
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(err).toExist();
       expect(futimesSpy.calls.length).toEqual(1);
-      expect(typeof fd2 === 'number').toEqual(true);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -786,12 +784,12 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(fchmodSpy.calls.length).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -809,12 +807,12 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(fchmodSpy.calls.length).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -833,12 +831,11 @@ describe('updateMetadata', function() {
       cb(new Error('mocked error'));
     });
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(err).toExist();
       expect(fchmodSpy.calls.length).toEqual(1);
-      expect(typeof fd2 === 'number').toEqual(true);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -861,7 +858,7 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w+');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(fchmodSpy.calls.length).toEqual(1);
       expect(futimesSpy.calls.length).toEqual(1);
 
@@ -877,7 +874,7 @@ describe('updateMetadata', function() {
       expect(atime).toEqual(Date.parse(stats.atime));
       expect(file.stat.mode).toEqual(stats.mode);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 
@@ -904,14 +901,13 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(inputPath, 'w');
 
-    updateMetadata(fd, file, function(err, fd2) {
+    updateMetadata(fd, file, function(err) {
       expect(err).toExist();
       expect(err).toEqual(expectedErr);
       expect(fchmodSpy.calls.length).toEqual(1);
       expect(futimesSpy.calls.length).toEqual(1);
-      expect(typeof fd2 === 'number').toEqual(true);
 
-      fs.close(fd2, done);
+      fs.close(fd, done);
     });
   });
 });
