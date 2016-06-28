@@ -27,6 +27,7 @@
     "through2": "^2.0.0",
     "through2-filter": "^2.0.0",
     "vali-date": "^1.0.0",
+    "value-or-function": "^1.2.0",
     "vinyl": "^1.0.0"
   },
   "devDependencies": {
