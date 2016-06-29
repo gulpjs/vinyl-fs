@@ -917,7 +917,7 @@ describe('mkdirp', function() {
   var DEFAULT_DIR_MODE = parseInt('0777', 8);
   var MODE_MASK = parseInt('0777', 8);
 
-  var dir = path.join(__dirname, './fixtures/bif');
+  var dir = path.join(__dirname, './fixtures/bar');
 
   afterEach(function() {
     return del(dir);
@@ -955,7 +955,7 @@ describe('mkdirp', function() {
   });
 
   it('makes multiple directories', function(done) {
-    var nestedDir = path.join(dir, './bam/bof');
+    var nestedDir = path.join(dir, './baz/foo');
     mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
 
@@ -974,7 +974,7 @@ describe('mkdirp', function() {
       return;
     }
 
-    var nestedDir = path.join(dir, './bam/bof');
+    var nestedDir = path.join(dir, './baz/foo');
     mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
 
@@ -1012,7 +1012,7 @@ describe('mkdirp', function() {
       return;
     }
 
-    var nestedDir = path.join(dir, './bam/bof');
+    var nestedDir = path.join(dir, './baz/foo');
     var mode = parseInt('0700',8);
     mkdirp(nestedDir, mode, function(err) {
       expect(err).toNotExist();
@@ -1049,6 +1049,53 @@ describe('mkdirp', function() {
 
             done();
           });
+        });
+      });
+    });
+  });
+
+  it('errors with EEXIST if file in path', function(done) {
+    var file = path.join(dir, './bar.txt');
+    mkdirp(dir, function(err) {
+      expect(err).toNotExist();
+
+      fs.writeFile(file, 'hello world', function(err2) {
+        expect(err2).toNotExist();
+
+        mkdirp(file, function(err3) {
+          expect(err3).toExist();
+          expect(err3.code).toEqual('EEXIST');
+
+          done();
+        });
+      });
+    });
+  });
+
+  it('does not change mode of existing file', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = path.join(dir, './bar.txt');
+    var mode = parseInt('0700', 8);
+    mkdirp(dir, function(err) {
+      expect(err).toNotExist();
+
+      fs.writeFile(file, 'hello world', function(err2) {
+        expect(err2).toNotExist();
+
+        var stats = fs.statSync(file);
+        var expectedMode = stats.mode & MODE_MASK;
+
+        mkdirp(file, mode, function(err3) {
+          expect(err3).toExist();
+
+          var stats = fs.statSync(file);
+          expect(stats.mode & MODE_MASK).toEqual(expectedMode);
+
+          done();
         });
       });
     });
