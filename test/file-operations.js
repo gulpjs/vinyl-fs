@@ -917,20 +917,37 @@ describe('mkdirp', function() {
   var DEFAULT_DIR_MODE = parseInt('0777', 8);
   var MODE_MASK = parseInt('0777', 8);
 
-  it('makes single directory', function(done) {
+  var dir = path.join(__dirname, './fixtures/bif');
+
+  afterEach(function() {
+    return del(dir);
+  });
+
+  it('makes a single directory', function(done) {
+    mkdirp(dir, function(err) {
+      expect(err).toNotExist();
+
+      fs.stat(dir, function(err2, stats) {
+        expect(err2).toNotExist();
+        expect(stats).toExist();
+
+        done();
+      });
+    });
+  });
+
+  it('makes single directory w/ correct permissions', function(done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var dir = path.join(__dirname, './fixtures/bif');
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
 
       fs.stat(dir, function(err2, stats) {
         expect(err2).toNotExist();
         expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
-        del(dir);
 
         done();
       });
@@ -938,53 +955,44 @@ describe('mkdirp', function() {
   });
 
   it('makes multiple directories', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var dir = path.join(__dirname, './fixtures/bif/bam/bof');
-    mkdirp(dir, function(err) {
+    var nestedDir = path.join(dir, './bam/bof');
+    mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
 
-      fs.stat(dir, function(err2, stats) {
+      fs.stat(nestedDir, function(err2, stats) {
         expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
-        del(path.join(__dirname, './fixtures/bif'));
+        expect(stats).toExist();
 
         done();
       });
     });
   });
 
-  it('makes directory with mode', function(done) {
+  it('makes multiple directories w/ correct permissions', function(done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var dir = path.join(__dirname, './fixtures/bif');
-    var mode = parseInt('0700',8);
-    mkdirp(dir, mode, function(err) {
+    var nestedDir = path.join(dir, './bam/bof');
+    mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
 
-      fs.stat(dir, function(err2, stats) {
+      fs.stat(nestedDir, function(err2, stats) {
         expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-        del(dir).then(function() {
-          done();
-        });
+        expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
+
+        done();
       });
     });
   });
 
-  it('makes multiple directories with mode', function(done) {
+  it('makes directory with custom mode', function(done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var dir = path.join(__dirname, './fixtures/bif/bam/bof');
     var mode = parseInt('0700',8);
     mkdirp(dir, mode, function(err) {
       expect(err).toNotExist();
@@ -992,10 +1000,28 @@ describe('mkdirp', function() {
       fs.stat(dir, function(err2, stats) {
         expect(err2).toNotExist();
         expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-        del(path.join(__dirname, './fixtures/bif'))
-          .then(function() {
-            done();
-          });
+
+        done();
+      });
+    });
+  });
+
+  it('makes multiple directories with custom mode', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var nestedDir = path.join(dir, './bam/bof');
+    var mode = parseInt('0700',8);
+    mkdirp(nestedDir, mode, function(err) {
+      expect(err).toNotExist();
+
+      fs.stat(nestedDir, function(err2, stats) {
+        expect(err2).toNotExist();
+        expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
+
+        done();
       });
     });
   });
@@ -1006,7 +1032,6 @@ describe('mkdirp', function() {
       return;
     }
 
-    var dir = path.join(__dirname, './fixtures/bif');
     var mode = parseInt('0700',8);
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
@@ -1021,7 +1046,6 @@ describe('mkdirp', function() {
           fs.stat(dir, function(err4, stats) {
             expect(err2).toNotExist();
             expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-            del(path.join(__dirname, './fixtures/bif'));
 
             done();
           });
