@@ -10,6 +10,7 @@ var expect = require('expect');
 var through = require('through2');
 
 var vfs = require('../');
+var constants = require('../lib/constants');
 
 function wipeOut() {
   this.timeout(20000);
@@ -331,14 +332,17 @@ describe('.dest() with custom modes', function() {
       return;
     }
 
-
     var inputBase = path.join(__dirname, './fixtures');
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
     var expectedPath = path.join(__dirname, './out-fixtures/wow/suchempty');
     // NOTE: Darwin does not set setgid
-    var expectedDirMode = (isDarwin ? parseInt('777', 8) : parseInt('2777', 8)) & ~process.umask();
-    var expectedFileMode = parseInt('677', 8) & ~process.umask();
+    var expectedDirMode = constants.DEFAULT_DIR_MODE;
+    if (!isDarwin) {
+      expectedDirMode |= parseInt('2000', 8);
+    }
+    expectedDirMode &= ~process.umask();
+    var expectedFileMode = constants.DEFAULT_FILE_MODE & ~process.umask();
 
     var firstFile = new File({
       base: inputBase,
