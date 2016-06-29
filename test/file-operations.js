@@ -993,7 +993,7 @@ describe('mkdirp', function() {
       return;
     }
 
-    var mode = parseInt('0700',8);
+    var mode = parseInt('0700', 8);
     mkdirp(dir, mode, function(err) {
       expect(err).toNotExist();
 
@@ -1002,6 +1002,29 @@ describe('mkdirp', function() {
         expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
 
         done();
+      });
+    });
+  });
+
+  it('does not change directory mode if exists and no mode given', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = parseInt('0700', 8);
+    mkdirp(dir, mode, function(err) {
+      expect(err).toNotExist();
+
+      mkdirp(dir, function(err2) {
+        expect(err2).toNotExist();
+
+        fs.stat(dir, function(err3, stats) {
+          expect(err3).toNotExist();
+          expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
+
+          done();
+        });
       });
     });
   });
