@@ -336,12 +336,7 @@ describe('.dest() with custom modes', function() {
     var inputPath = path.join(__dirname, './fixtures/wow/suchempty');
     var expectedBase = path.join(__dirname, './out-fixtures/wow');
     var expectedPath = path.join(__dirname, './out-fixtures/wow/suchempty');
-    // NOTE: Darwin does not set setgid
-    var expectedDirMode = constants.DEFAULT_DIR_MODE;
-    if (!isDarwin) {
-      expectedDirMode |= parseInt('2000', 8);
-    }
-    expectedDirMode &= ~process.umask();
+    var expectedDirMode = parseInt('2777', 8) & ~process.umask();
     var expectedFileMode = constants.DEFAULT_FILE_MODE & ~process.umask();
 
     var firstFile = new File({

@@ -11,6 +11,7 @@ var buffer = require('buffer');
 var defaultResolution = require('default-resolution');
 
 var fo = require('../lib/file-operations');
+var constants = require('../lib/constants');
 
 var mkdirp = fo.mkdirp;
 var closeFd = fo.closeFd;
@@ -22,10 +23,15 @@ var updateMetadata = fo.updateMetadata;
 
 var resolution = defaultResolution();
 
-var MASK_MODE = parseInt('7777', 8);
+var DEFAULT_DIR_MODE = masked(constants.DEFAULT_DIR_MODE & ~process.umask()).toString(8);
 
 function masked(mode) {
-  return mode & MASK_MODE;
+  return mode & constants.MASK_MODE;
+}
+
+function statHuman(filepath) {
+  var stats = fs.lstatSync(filepath);
+  return masked(stats.mode).toString(8);
 }
 
 function noop() {}
@@ -914,10 +920,15 @@ describe('updateMetadata', function() {
 });
 
 describe('mkdirp', function() {
-  var DEFAULT_DIR_MODE = parseInt('0777', 8);
-  var MODE_MASK = parseInt('0777', 8);
 
-  var dir = path.join(__dirname, './fixtures/bar');
+  var fixtures = path.join(__dirname, './fixtures');
+  var dir = path.join(fixtures, './bar');
+
+  beforeEach(function(done) {
+    // Linux inherits the setgid of the directory and it messes up our assertions
+    // So we explixitly set the mode to 777 before each test
+    fs.chmod(fixtures, '777', done);
+  });
 
   afterEach(function() {
     return del(dir);
@@ -926,17 +937,13 @@ describe('mkdirp', function() {
   it('makes a single directory', function(done) {
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(dir)).toExist();
 
-      fs.stat(dir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats).toExist();
-
-        done();
-      });
+      done();
     });
   });
 
-  it('makes single directory w/ correct permissions', function(done) {
+  it('makes single directory w/ default mode', function(done) {
     if (isWindows) {
       this.skip();
       return;
@@ -944,13 +951,9 @@ describe('mkdirp', function() {
 
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(dir)).toEqual(DEFAULT_DIR_MODE);
 
-      fs.stat(dir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
-
-        done();
-      });
+      done();
     });
   });
 
@@ -958,17 +961,13 @@ describe('mkdirp', function() {
     var nestedDir = path.join(dir, './baz/foo');
     mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(nestedDir)).toExist();
 
-      fs.stat(nestedDir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats).toExist();
-
-        done();
-      });
+      done();
     });
   });
 
-  it('makes multiple directories w/ correct permissions', function(done) {
+  it('makes multiple directories w/ default mode', function(done) {
     if (isWindows) {
       this.skip();
       return;
@@ -977,13 +976,9 @@ describe('mkdirp', function() {
     var nestedDir = path.join(dir, './baz/foo');
     mkdirp(nestedDir, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(nestedDir)).toEqual(DEFAULT_DIR_MODE);
 
-      fs.stat(nestedDir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
-
-        done();
-      });
+      done();
     });
   });
 
@@ -996,13 +991,24 @@ describe('mkdirp', function() {
     var mode = parseInt('0700', 8);
     mkdirp(dir, mode, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(dir)).toEqual(masked(mode).toString(8));
 
-      fs.stat(dir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
+      done();
+    });
+  });
 
-        done();
-      });
+  it('can create a directory with setgid permission', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = parseInt('2700', 8);
+    mkdirp(dir, mode, function(err) {
+      expect(err).toNotExist();
+      expect(statHuman(dir)).toEqual(masked(mode).toString(8));
+
+      done();
     });
   });
 
@@ -1018,13 +1024,9 @@ describe('mkdirp', function() {
 
       mkdirp(dir, function(err2) {
         expect(err2).toNotExist();
+        expect(statHuman(dir)).toEqual(masked(mode).toString(8));
 
-        fs.stat(dir, function(err3, stats) {
-          expect(err3).toNotExist();
-          expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-
-          done();
-        });
+        done();
       });
     });
   });
@@ -1039,13 +1041,27 @@ describe('mkdirp', function() {
     var mode = parseInt('0700',8);
     mkdirp(nestedDir, mode, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(nestedDir)).toEqual(masked(mode).toString(8));
 
-      fs.stat(nestedDir, function(err2, stats) {
-        expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
+      done();
+    });
+  });
 
-        done();
-      });
+  it('uses default mode on intermediate directories', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var intermediateDir = path.join(dir, './baz');
+    var nestedDir = path.join(intermediateDir, './foo');
+    var mode = parseInt('0700',8);
+    mkdirp(nestedDir, mode, function(err) {
+      expect(err).toNotExist();
+      expect(statHuman(dir)).toEqual(DEFAULT_DIR_MODE);
+      expect(statHuman(intermediateDir)).toEqual(DEFAULT_DIR_MODE);
+
+      done();
     });
   });
 
@@ -1058,21 +1074,13 @@ describe('mkdirp', function() {
     var mode = parseInt('0700',8);
     mkdirp(dir, function(err) {
       expect(err).toNotExist();
+      expect(statHuman(dir)).toEqual(DEFAULT_DIR_MODE);
 
-      fs.stat(dir, function(err2, stats) {
+      mkdirp(dir, mode, function(err2) {
         expect(err2).toNotExist();
-        expect(stats.mode & MODE_MASK).toEqual(DEFAULT_DIR_MODE & ~process.umask());
+        expect(statHuman(dir)).toEqual(masked(mode).toString(8));
 
-        mkdirp(dir, mode, function(err3) {
-          expect(err3).toNotExist();
-
-          fs.stat(dir, function(err4, stats) {
-            expect(err2).toNotExist();
-            expect(stats.mode & MODE_MASK).toEqual(mode & ~process.umask());
-
-            done();
-          });
-        });
+        done();
       });
     });
   });
@@ -1109,14 +1117,11 @@ describe('mkdirp', function() {
       fs.writeFile(file, 'hello world', function(err2) {
         expect(err2).toNotExist();
 
-        var stats = fs.statSync(file);
-        var expectedMode = stats.mode & MODE_MASK;
+        var expectedMode = statHuman(file);
 
         mkdirp(file, mode, function(err3) {
           expect(err3).toExist();
-
-          var stats = fs.statSync(file);
-          expect(stats.mode & MODE_MASK).toEqual(expectedMode);
+          expect(statHuman(file)).toEqual(expectedMode);
 
           done();
         });
