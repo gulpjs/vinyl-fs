@@ -190,7 +190,7 @@ describe('symlink stream', function() {
     options: {},
   }, {
     description: 'should write buffer files to the right folder relatively',
-    expectedLink: '../fixtures/test.coffee',
+    expectedLink: path.join('..', 'fixtures', 'test.coffee'),
     options: { relative: true },
   },].forEach(function(test) {
     it(test.description, function(done) {
@@ -285,7 +285,7 @@ describe('symlink stream', function() {
     options: {},
   }, {
     description: 'should write directories to the right folder relatively',
-    expectedLink: '../fixtures/wow',
+    expectedLink: path.join('..', 'fixtures', 'wow'),
     options: { relative: true },
   },].forEach(function(test) {
     it(test.description, function(done) {
