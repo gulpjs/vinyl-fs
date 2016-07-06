@@ -20,6 +20,7 @@ var writeFile = fo.writeFile;
 var getModeDiff = fo.getModeDiff;
 var getTimesDiff = fo.getTimesDiff;
 var getOwnerDiff = fo.getOwnerDiff;
+var isValidUnixId = fo.isValidUnixId;
 var updateMetadata = fo.updateMetadata;
 
 var resolution = defaultResolution();
@@ -127,6 +128,33 @@ describe('isOwner', function() {
     var result = isOwner(nonOwnerStat);
 
     expect(result).toEqual(true);
+
+    done();
+  });
+});
+
+describe('isValidUnixId', function() {
+
+  it('returns true if the given id is a valid unix id', function(done) {
+    var result = isValidUnixId(1000);
+
+    expect(result).toEqual(true);
+
+    done();
+  });
+
+  it('returns false if the given id is not a number', function(done) {
+    var result = isValidUnixId('root');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns false when the given id is less than 0', function(done) {
+    var result = isValidUnixId(-1);
+
+    expect(result).toEqual(false);
 
     done();
   });
