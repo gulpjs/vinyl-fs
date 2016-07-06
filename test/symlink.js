@@ -212,11 +212,11 @@ describe('symlink stream', function() {
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
       fs.existsSync(expectedPath).should.equal(true);
       bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
-      fs.readlinkSync(expectedPath).should.equal(path.join(__dirname, './fixtures/test.coffee'));
+      fs.readlinkSync(expectedPath).should.equal(inputPath);
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', assign({ cwd: __dirname }, {}));
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
@@ -337,13 +337,13 @@ describe('symlink stream', function() {
       buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
       buffered[0].base.should.equal(expectedBase, 'base should have changed');
       buffered[0].path.should.equal(expectedPath, 'path should have changed');
-      fs.readlinkSync(expectedPath).should.equal(path.join(__dirname, './fixtures/wow'));
+      fs.readlinkSync(expectedPath).should.equal(inputPath);
       fs.lstatSync(expectedPath).isDirectory().should.equal(false);
       fs.statSync(expectedPath).isDirectory().should.equal(true);
       done();
     };
 
-    var stream = vfs.symlink('./out-fixtures/', assign({ cwd: __dirname }, {}));
+    var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
