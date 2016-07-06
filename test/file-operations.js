@@ -492,7 +492,7 @@ describe('getOwnerDiff', function() {
     done();
   });
 
-  it('makes uid diff undefined if fs and vinyl uid are invalid', function(done) {
+  it('returns undefined if fs and vinyl uid are invalid', function(done) {
     var fsStat = {
       uid: undefined,
       gid: 1000,
@@ -501,14 +501,10 @@ describe('getOwnerDiff', function() {
       uid: undefined,
       gid: 1001,
     };
-    var expected = {
-      uid: undefined,
-      gid: 1001,
-    };
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    expect(result).toEqual(undefined);
 
     var fsStat = {
       uid: -1,
@@ -521,12 +517,12 @@ describe('getOwnerDiff', function() {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    expect(result).toEqual(undefined);
 
     done();
   });
 
-  it('makes gid diff undefined if fs and vinyl gid are invalid', function(done) {
+  it('returns undefined if fs and vinyl gid are invalid', function(done) {
     var fsStat = {
       uid: 1000,
       gid: undefined,
@@ -535,14 +531,10 @@ describe('getOwnerDiff', function() {
       uid: 1001,
       gid: undefined,
     };
-    var expected = {
-      uid: 1001,
-      gid: undefined,
-    };
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    expect(result).toEqual(undefined);
 
     fsStat = {
       uid: 1000,
@@ -555,7 +547,7 @@ describe('getOwnerDiff', function() {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    expect(result).toEqual(undefined);
 
     done();
   });
