@@ -19,6 +19,8 @@ var isOwner = fo.isOwner;
 var writeFile = fo.writeFile;
 var getModeDiff = fo.getModeDiff;
 var getTimesDiff = fo.getTimesDiff;
+var getOwnerDiff = fo.getOwnerDiff;
+var isValidUnixId = fo.isValidUnixId;
 var updateMetadata = fo.updateMetadata;
 
 var resolution = defaultResolution();
@@ -126,6 +128,33 @@ describe('isOwner', function() {
     var result = isOwner(nonOwnerStat);
 
     expect(result).toEqual(true);
+
+    done();
+  });
+});
+
+describe('isValidUnixId', function() {
+
+  it('returns true if the given id is a valid unix id', function(done) {
+    var result = isValidUnixId(1000);
+
+    expect(result).toEqual(true);
+
+    done();
+  });
+
+  it('returns false if the given id is not a number', function(done) {
+    var result = isValidUnixId('root');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns false when the given id is less than 0', function(done) {
+    var result = isValidUnixId(-1);
+
+    expect(result).toEqual(false);
 
     done();
   });
@@ -331,6 +360,198 @@ describe('getTimesDiff', function() {
 
     done();
   });
+});
+
+describe('getOwnerDiff', function() {
+
+  it('returns undefined if vinyl uid & gid are invalid', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: undefined,
+      gid: undefined,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    done();
+  });
+
+  it('returns undefined if vinyl uid & gid are both equal to counterparts', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    done();
+  });
+
+  it('returns a diff object if uid or gid do not match', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: 1001,
+      gid: 1000,
+    };
+    var expected = {
+      uid: 1001,
+      gid: 1000,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    vfsStat = {
+      uid: 1000,
+      gid: 1001,
+    };
+    expected = {
+      uid: 1000,
+      gid: 1001,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    done();
+  });
+
+  it('returns the fs uid if the vinyl uid is invalid', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: undefined,
+      gid: 1001,
+    };
+    var expected = {
+      uid: 1000,
+      gid: 1001,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    var vfsStat = {
+      uid: -1,
+      gid: 1001,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    done();
+  });
+
+  it('returns the fs gid if the vinyl gid is invalid', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: 1001,
+      gid: undefined,
+    };
+    var expected = {
+      uid: 1001,
+      gid: 1000,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    var vfsStat = {
+      uid: 1001,
+      gid: -1,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(expected);
+
+    done();
+  });
+
+  it('returns undefined if fs and vinyl uid are invalid', function(done) {
+    var fsStat = {
+      uid: undefined,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: undefined,
+      gid: 1001,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    var fsStat = {
+      uid: -1,
+      gid: 1000,
+    };
+    var vfsStat = {
+      uid: -1,
+      gid: 1001,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    done();
+  });
+
+  it('returns undefined if fs and vinyl gid are invalid', function(done) {
+    var fsStat = {
+      uid: 1000,
+      gid: undefined,
+    };
+    var vfsStat = {
+      uid: 1001,
+      gid: undefined,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    fsStat = {
+      uid: 1000,
+      gid: -1,
+    };
+    vfsStat = {
+      uid: 1001,
+      gid: -1,
+    };
+
+    var result = getOwnerDiff(fsStat, vfsStat);
+
+    expect(result).toEqual(undefined);
+
+    done();
+  });
+
 });
 
 describe('closeFd', function() {
