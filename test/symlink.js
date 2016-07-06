@@ -13,6 +13,7 @@ var del = require('del');
 
 var bufEqual = require('buffer-equal');
 var through = require('through2');
+var assign = require('object-assign');
 var File = require('vinyl');
 
 var should = require('should');
@@ -223,6 +224,46 @@ describe('symlink stream', function() {
     stream.end();
   });
 
+  it('should write buffer files to the right folder relatively', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/test.coffee');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/test.coffee');
+    var expectedContents = fs.readFileSync(inputPath);
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = parseInt('677', 8)  & ~process.umask();
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: expectedContents,
+      stat: {
+        mode: expectedMode,
+      },
+    });
+
+    var buffered = [];
+
+    var onEnd = function() {
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
+      fs.existsSync(expectedPath).should.equal(true);
+      bufEqual(fs.readFileSync(expectedPath), expectedContents).should.equal(true);
+      fs.readlinkSync(expectedPath).should.equal(path.join('..', 'fixtures', 'test.coffee'));
+      done();
+    };
+
+    var stream = vfs.symlink('./out-fixtures/', assign({ cwd: __dirname }, { relative: true }));
+
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
   it('should write streaming files to the right folder', function(done) {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
@@ -303,6 +344,48 @@ describe('symlink stream', function() {
     };
 
     var stream = vfs.symlink('./out-fixtures/', { cwd: __dirname });
+
+    var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
+    stream.pipe(bufferStream);
+    stream.write(expectedFile);
+    stream.end();
+  });
+
+  it('should write directories to the right folder relatively', function(done) {
+    var inputPath = path.join(__dirname, './fixtures/wow');
+    var inputBase = path.join(__dirname, './fixtures/');
+    var expectedPath = path.join(__dirname, './out-fixtures/wow');
+    var expectedBase = path.join(__dirname, './out-fixtures');
+    var expectedMode = parseInt('677', 8) & ~process.umask();
+
+    var expectedFile = new File({
+      base: inputBase,
+      cwd: __dirname,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isDirectory: function() {
+          return true;
+        },
+        mode: expectedMode,
+      },
+    });
+
+    var buffered = [];
+
+    var onEnd = function() {
+      buffered.length.should.equal(1);
+      buffered[0].should.equal(expectedFile);
+      buffered[0].cwd.should.equal(__dirname, 'cwd should have changed');
+      buffered[0].base.should.equal(expectedBase, 'base should have changed');
+      buffered[0].path.should.equal(expectedPath, 'path should have changed');
+      fs.readlinkSync(expectedPath).should.equal(path.join('..', 'fixtures', 'wow'));
+      fs.lstatSync(expectedPath).isDirectory().should.equal(false);
+      fs.statSync(expectedPath).isDirectory().should.equal(true);
+      done();
+    };
+
+    var stream = vfs.symlink('./out-fixtures/', assign({ cwd: __dirname }, { relative: true }));
 
     var bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
