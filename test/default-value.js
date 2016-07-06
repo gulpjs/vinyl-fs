@@ -10,8 +10,8 @@ describe('defaultVaule', function() {
     expect(defaultValue('defaultValue', 1)).toBe(1);
   });
 
-  it('returns the value if the value is undefined', function() {
-    expect(defaultValue('defaultValue', undefined)).toBe(undefined);
+  it('returns the default value if the value is undefined', function() {
+    expect(defaultValue('defaultValue', undefined)).toBe('defaultValue');
   });
 
   it('returns the default value if the value is null', function() {
