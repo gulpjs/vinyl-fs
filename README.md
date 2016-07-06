@@ -254,6 +254,14 @@ Type: `Number`
 
 Default: The process mode.
 
+##### `options.relative`
+
+Whether or not the symlink should be relative or absolute.
+
+Type: `Boolean`
+
+Default: `false`.
+
 ##### other
 
 Any through2-related options are documented in [through2].
