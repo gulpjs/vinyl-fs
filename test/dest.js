@@ -18,6 +18,7 @@ var expect = require('expect');
 var bufEqual = require('buffer-equal');
 var through = require('through2');
 var File = require('vinyl');
+var from = require('from2');
 
 var should = require('should');
 require('mocha');
@@ -1146,7 +1147,9 @@ describe('dest stream', function() {
     var inputPath = path.join(__dirname, './fixtures/test.coffee');
     var inputBase = path.join(__dirname, './fixtures/');
 
-    var contentStream = through.obj();
+    var contentStream = from(function(size, cb) {
+      cb(new Error('mocked error'));
+    });
     var expectedFile = new File({
       base: inputBase,
       cwd: __dirname,
@@ -1156,9 +1159,6 @@ describe('dest stream', function() {
 
     var stream = vfs.dest('./out-fixtures/', { cwd: __dirname });
     stream.write(expectedFile);
-    setTimeout(function() {
-      contentStream.emit('error', new Error('mocked error'));
-    }, 100);
     stream.on('error', function(err) {
       expect(err).toExist();
       done();
