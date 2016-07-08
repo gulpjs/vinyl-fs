@@ -1350,3 +1350,204 @@ describe('mkdirp', function() {
     });
   });
 });
+
+describe('createWriteStream', function() {
+
+  // These tests needed to use the `close` event because
+  // the file descriptor was not closed on windows
+
+  var inputPath = path.join(__dirname, './fixtures/test.coffee');
+  var expectedContents = fs.readFileSync(inputPath, 'utf-8');
+  var outputDir = path.join(__dirname, './out-fixtures/');
+  var outputPath = path.join(outputDir, './test.coffee');
+
+  beforeEach(function(done) {
+    // For some reason, the outputDir sometimes exists on Windows
+    // So we use our mkdirp to create it
+    fo.mkdirp(outputDir, done);
+  });
+
+  afterEach(function() {
+    return del(outputDir);
+  });
+
+  it('accepts just a file path and writes to it', function(done) {
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath);
+
+    outStream.on('close', function() {
+      var contents = fs.readFileSync(outputPath, 'utf-8');
+      expect(contents).toEqual(expectedContents);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('accepts flag option', function(done) {
+    // Write 12 stars then 12345 because the length of expected is 12
+    fs.writeFileSync(outputPath, '************12345');
+
+    var inStream = fs.createReadStream(inputPath);
+    // Replaces from the beginning of the file
+    var outStream = fo.createWriteStream(outputPath, { flag: 'r+' });
+
+    outStream.on('close', function() {
+      var contents = fs.readFileSync(outputPath, 'utf-8');
+      expect(contents).toEqual(expectedContents + '12345');
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('accepts append flag as option & places cursor at the end', function(done) {
+    fs.writeFileSync(outputPath, '12345');
+
+    var inStream = fs.createReadStream(inputPath);
+    // Appends to the end of the file
+    var outStream = fo.createWriteStream(outputPath, { flag: 'a' });
+
+    outStream.on('close', function() {
+      var contents = fs.readFileSync(outputPath, 'utf-8');
+      expect(contents).toEqual('12345' + expectedContents);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('accepts mode option', function(done) {
+    if (isWindows) {
+      console.log('Changing the mode of a file is not supported by node.js in Windows.');
+      this.skip();
+      return;
+    }
+
+    var expectedMode = parseInt('777', 8) & ~process.umask();
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, { mode: expectedMode });
+
+    outStream.on('finish', function() {
+      var stat = fs.statSync(outputPath);
+      expect(masked(stat.mode)).toEqual(expectedMode);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('uses default file mode if no mode options', function(done) {
+    var expectedMode = constants.DEFAULT_FILE_MODE & ~process.umask();
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath);
+
+    outStream.on('close', function() {
+      var stat = fs.statSync(outputPath);
+      expect(masked(stat.mode)).toEqual(expectedMode);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('accepts a flush function that is called before close emitted', function(done) {
+    var flushCalled = false;
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, {}, function(fd, cb) {
+      flushCalled = true;
+      cb();
+    });
+
+    outStream.on('close', function() {
+      expect(flushCalled).toEqual(true);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('can specify flush without options argument', function(done) {
+    var flushCalled = false;
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, function(fd, cb) {
+      flushCalled = true;
+      cb();
+    });
+
+    outStream.on('close', function() {
+      expect(flushCalled).toEqual(true);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('passes the file descriptor to flush', function(done) {
+    var flushCalled = false;
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, function(fd, cb) {
+      expect(fd).toBeA('number');
+      flushCalled = true;
+      cb();
+    });
+
+    outStream.on('close', function() {
+      expect(flushCalled).toEqual(true);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('passes a callback to flush to call when work is done', function(done) {
+    var flushCalled = false;
+    var timeoutCalled = false;
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, function(fd, cb) {
+      flushCalled = true;
+      setTimeout(function() {
+        timeoutCalled = true;
+        cb();
+      }, 250);
+    });
+
+    outStream.on('close', function() {
+      expect(flushCalled).toEqual(true);
+      expect(timeoutCalled).toEqual(true);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('emits an error if open fails', function(done) {
+    var badOutputPath = path.join(outputDir, './non-exist/test.coffee');
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(badOutputPath);
+
+    // There is no file descriptor if open fails so mark done in the error
+    outStream.on('error', function(err) {
+      expect(err).toBeAn(Error);
+      done();
+    });
+
+    inStream.pipe(outStream);
+  });
+
+  it('emits an error if write fails', function(done) {
+    // Create the file so it can be opened with `r`
+    fs.writeFileSync(outputPath, expectedContents);
+
+    var inStream = fs.createReadStream(inputPath);
+    var outStream = fo.createWriteStream(outputPath, { flag: 'r' });
+
+    outStream.on('error', function(err) {
+      expect(err).toBeAn(Error);
+    });
+
+    outStream.on('close', done);
+
+    inStream.pipe(outStream);
+  });
+});
