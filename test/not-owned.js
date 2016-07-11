@@ -1,75 +1,93 @@
 'use strict';
 
-var path = require('path');
-
-var expect = require('expect');
-
 var fs = require('graceful-fs');
 var File = require('vinyl');
+var expect = require('expect');
+var miss = require('mississippi');
 
 var vfs = require('../');
 
-describe('.dest() on not owned files', function() {
-  var outDir = path.join(__dirname, './not-owned/');
-  var outPath = path.join(outDir, 'not-owned.txt');
+var cleanup = require('./utils/cleanup');
+var applyUmask = require('./utils/apply-umask');
+var testConstants = require('./utils/test-constants');
 
-  var dirStats = fs.statSync(outDir);
-  var fileStats = fs.statSync(outPath);
+var from = miss.from;
+var pipe = miss.pipe;
+var concat = miss.concat;
+
+var notOwnedBase = testConstants.notOwnedBase;
+var notOwnedPath = testConstants.notOwnedPath;
+var contents = testConstants.contents;
+
+var clean = cleanup();
+
+describe('.dest() on not owned files', function() {
+
+  var dirStats = fs.statSync(notOwnedBase);
+  var fileStats = fs.statSync(notOwnedPath);
+
+  beforeEach(clean);
+  afterEach(clean);
 
   it('does not error if mtime is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
-      console.log('Test files not owned by root. ' +
-        'Please chown ' + outDir + ' and' + outPath + ' and try again.');
+      console.log('Test files not owned by root.');
+      console.log('Please chown ' + notOwnedBase + ' and' + notOwnedPath + ' and try again.');
       this.skip();
       return;
     }
 
-    var expectedFile = new File({
-      base: __dirname,
-      cwd: __dirname,
-      path: 'not-owned/not-owned.txt',
-      contents: new Buffer('Something new'),
+    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+
+    var earlier = Date.now() - 1000;
+
+    var file = new File({
+      base: notOwnedBase,
+      path: notOwnedPath,
+      contents: new Buffer(contents),
       stat: {
-        mtime: new Date(Date.now() - 1000),
+        mtime: new Date(earlier),
       },
     });
 
-    var stream = vfs.dest(outDir);
-    stream.write(expectedFile);
-    stream.on('error', function(err) {
-      expect(err).toNotExist();
-      done(err);
-    });
-    stream.on('end', done);
-    stream.end();
+    function assert() {
+      expect(futimesSpy.calls.length).toEqual(0);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(notOwnedBase),
+      concat(assert),
+    ], done);
   });
 
   it('does not error if mode is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
-      console.log('Test files not owned by root. ' +
-        'Please chown ' + outDir + ' and' + outPath + ' and try again.');
+      console.log('Test files not owned by root.');
+      console.log('Please chown ' + notOwnedBase + ' and' + notOwnedPath + ' and try again.');
       this.skip();
       return;
     }
 
-    var expectedFile = new File({
-      base: __dirname,
-      cwd: __dirname,
-      path: 'not-owned/not-owned.txt',
-      contents: new Buffer('Something new'),
+    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+
+    var file = new File({
+      base: notOwnedBase,
+      path: notOwnedPath,
+      contents: new Buffer(contents),
       stat: {
-        mode: parseInt('777', 8),
+        mode: applyUmask('777'),
       },
     });
 
-    var stream = vfs.dest(outDir);
-    stream.write(expectedFile);
-    stream.on('error', function(err) {
-      expect(err).toNotExist();
-      done(err);
-    });
-    stream.on('end', done);
-    stream.end();
-  });
+    function assert() {
+      expect(fchmodSpy.calls.length).toEqual(0);
+    }
 
+    pipe([
+      from.obj([file]),
+      vfs.dest(notOwnedBase),
+      concat(assert),
+    ], done);
+  });
 });
