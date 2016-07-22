@@ -1,15 +1,30 @@
 {
   "name": "vinyl-fs",
-  "description": "Vinyl adapter for the file system",
   "version": "2.4.4",
-  "homepage": "http://github.com/wearefractal/vinyl-fs",
-  "repository": "git://github.com/wearefractal/vinyl-fs.git",
-  "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
-  "main": "./index.js",
+  "description": "Vinyl adapter for the file system.",
+  "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
+  "contributors": [
+    "Eric Schoffstall <yo@contra.io>",
+    "Blaine Bublitz <blaine.bublitz@gmail.com>"
+  ],
+  "repository": "gulpjs/vinyl-fs",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "main": "index.js",
   "files": [
+    "LICENSE",
     "index.js",
     "lib"
   ],
+  "scripts": {
+    "lint": "eslint . && jscs index.js lib/ test/",
+    "pretest": "npm run lint",
+    "test": "mocha --async-only",
+    "cover": "istanbul cover _mocha --report lcovonly",
+    "coveralls": "npm run cover && istanbul-coveralls"
+  },
   "dependencies": {
     "duplexify": "^3.2.0",
     "flush-write-stream": "^1.0.0",
@@ -34,24 +49,21 @@
     "del": "^2.2.0",
     "eslint": "^1.10.3",
     "eslint-config-gulp": "^2.0.0",
-    "expect": "^1.14.0",
-    "github-changes": "^1.0.1",
-    "istanbul": "^0.3.0",
-    "istanbul-coveralls": "^1.0.1",
+    "expect": "^1.19.0",
+    "istanbul": "^0.4.3",
+    "istanbul-coveralls": "^1.0.3",
     "jscs": "^2.4.0",
     "jscs-preset-gulp": "^1.0.0",
     "mississippi": "^1.2.0",
-    "mocha": "^2.0.0"
+    "mocha": "^2.4.5"
   },
-  "scripts": {
-    "lint": "eslint . && jscs index.js lib/ test/",
-    "test": "npm run lint && mocha",
-    "cover": "istanbul cover _mocha",
-    "coveralls": "npm run cover && istanbul-coveralls",
-    "changelog": "github-changes -o gulpjs -r vinyl-fs -b master -f ./CHANGELOG.md --order-semver --use-commit-body"
-  },
-  "engines": {
-    "node": ">=0.10"
-  },
-  "license": "MIT"
+  "keywords": [
+    "gulp",
+    "vinyl-adapter",
+    "vinyl",
+    "file",
+    "file system",
+    "fs",
+    "streams"
+  ]
 }
