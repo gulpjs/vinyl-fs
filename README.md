@@ -112,7 +112,7 @@ Type: `Boolean`
 
 Default: `false`
 
-##### `options.followSymlinks` - `true` if you want
+##### `options.followSymlinks`
 
 Whether or not to recursively resolve symlinks to their targets. Setting to `false` to preserve them as symlinks and make `file.symlink` equal the original symlink's target path.
 
@@ -120,7 +120,7 @@ Type: `Boolean`
 
 Default: `true`
 
-##### `options.dots` - `true`
+##### `options.dots`
 
 Whether or not you want globs to match on dot files or not (e.g. `.gitignore`)
 
