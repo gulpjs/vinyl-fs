@@ -32,7 +32,7 @@ describe('.dest() on not owned files', function() {
   it('does not error if mtime is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
       console.log('Test files not owned by root.');
-      console.log('Please chown ' + notOwnedBase + ' and' + notOwnedPath + ' and try again.');
+      console.log('Please chown ' + notOwnedBase + ' and ' + notOwnedPath + ' and try again.');
       this.skip();
       return;
     }
@@ -64,7 +64,7 @@ describe('.dest() on not owned files', function() {
   it('does not error if mode is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
       console.log('Test files not owned by root.');
-      console.log('Please chown ' + notOwnedBase + ' and' + notOwnedPath + ' and try again.');
+      console.log('Please chown ' + notOwnedBase + ' and ' + notOwnedPath + ' and try again.');
       this.skip();
       return;
     }
