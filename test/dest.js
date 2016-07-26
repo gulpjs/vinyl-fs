@@ -29,6 +29,7 @@ var string = testStreams.string;
 
 function noop() {}
 
+var inputRelative = testConstants.inputRelative;
 var outputRelative = testConstants.outputRelative;
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -38,6 +39,18 @@ var outputRenamePath = testConstants.outputRenamePath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var contents = testConstants.contents;
+var sourcemapContents = testConstants.sourcemapContents;
+
+function makeSourceMap() {
+  return {
+    version: 3,
+    file: inputRelative,
+    names: [],
+    mappings: '',
+    sources: [inputRelative],
+    sourcesContent: [contents],
+  };
+}
 
 var clean = cleanup([outputBase]);
 
@@ -74,7 +87,8 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: null,
+      contents: new Buffer(contents),
+      sourceMap: makeSourceMap(),
     });
 
     function assert(files) {
@@ -93,11 +107,12 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: null,
+      contents: new Buffer(contents),
+      sourceMap: makeSourceMap(),
     });
 
     function assert(files) {
-      expect(files.length).toEqual(1);
+      expect(files.length).toEqual(2);
       expect(files).toInclude(file);
     }
 
@@ -108,27 +123,45 @@ describe('.dest()', function() {
     ], done);
   });
 
-  it('accepts the sourcemap option as an object', function(done) {
-    var options = {
-      sourcemaps: {
-        addComment: false,
-      },
-    };
-
+  it('inlines sourcemaps when option is true', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: null,
+      contents: new Buffer(contents),
+      sourceMap: makeSourceMap(),
     });
 
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files).toInclude(file);
+      expect(files[0].contents.toString()).toMatch(new RegExp(sourcemapContents));
     }
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputBase, options),
+      vfs.dest(outputBase, { sourcemaps: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('generates an extra File when option is a string', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: new Buffer(contents),
+      sourceMap: makeSourceMap(),
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(2);
+      expect(files).toInclude(file);
+      expect(files[0].contents.toString()).toMatch(new RegExp('//# sourceMappingURL=test.txt.map'));
+      expect(files[1].contents).toEqual(JSON.stringify(makeSourceMap()));
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { sourcemaps: '.' }),
       concat(assert),
     ], done);
   });

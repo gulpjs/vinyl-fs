@@ -37,6 +37,7 @@ var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
 // Used for contents of files
 var contents = 'Hello World!';
+var sourcemapContents = '//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9maXh0dXJlcyIsIm5hbWVzIjpbXSwibWFwcGluZ3MiOiIiLCJzb3VyY2VzIjpbIi4vZml4dHVyZXMiXSwic291cmNlc0NvbnRlbnQiOlsiSGVsbG8gV29ybGQhIl19';
 
 module.exports = {
   inputRelative: inputRelative,
@@ -63,4 +64,5 @@ module.exports = {
   symlinkNestedFirst: symlinkNestedFirst,
   symlinkNestedSecond: symlinkNestedSecond,
   contents: contents,
+  sourcemapContents: sourcemapContents,
 };
