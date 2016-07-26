@@ -105,7 +105,7 @@ describe('.src()', function() {
     ], assert);
   });
 
-  it('passes through writes', function(done) {
+  it.skip('passes through writes', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
