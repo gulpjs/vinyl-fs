@@ -33,7 +33,6 @@
     "gulp-sourcemaps": "1.6.0",
     "is-valid-glob": "^0.3.0",
     "lazystream": "^1.0.0",
-    "lodash.isequal": "^4.0.0",
     "merge-stream": "^1.0.0",
     "object-assign": "^4.0.0",
     "strip-bom": "^2.0.0",
