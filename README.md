@@ -120,7 +120,7 @@ Type: `Boolean`
 
 Default: `true`
 
-##### `options.dots`
+##### `options.dot`
 
 Whether or not you want globs to match on dot files or not (e.g. `.gitignore`)
 
