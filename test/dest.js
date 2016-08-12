@@ -33,10 +33,13 @@ var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
+var inputPathLarge = testConstants.inputPathLarge;
+var outputPathLarge = testConstants.outputPathLarge;
 var outputRenamePath = testConstants.outputRenamePath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var contents = testConstants.contents;
+var contentsLarge = testConstants.contentsLarge;
 
 var clean = cleanup([outputBase]);
 
@@ -295,6 +298,30 @@ describe('.dest()', function() {
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(outputContents).toEqual(contents);
+    };
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('writes large streaming files to the right folder', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPathLarge,
+      contents: fs.createReadStream(inputPathLarge),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPathLarge, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(files).toInclude(file);
+      expect(files[0].base).toEqual(outputBase, 'base should have changed');
+      expect(files[0].path).toEqual(outputPathLarge, 'path should have changed');
+      expect(outputContents).toEqual(contentsLarge);
     };
 
     pipe([

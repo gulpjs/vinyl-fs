@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path');
+var fs = require('graceful-fs');
 
 // Input/output relative paths
 var inputRelative = './fixtures/';
@@ -11,6 +12,8 @@ var outputBase = path.join(__dirname, '..', outputRelative);
 // Used for file tests
 var inputPath = path.join(inputBase, './test.txt');
 var outputPath = path.join(outputBase, './test.txt');
+var inputPathLarge = path.join(inputBase, './test-large.txt');
+var outputPathLarge = path.join(outputBase, './test-large.txt');
 // Used for directory tests
 var inputDirpath = path.join(inputBase, './foo');
 var outputDirpath = path.join(outputBase, './foo');
@@ -37,6 +40,7 @@ var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
 // Used for contents of files
 var contents = 'Hello World!';
+var contentsLarge = fs.readFileSync(inputPathLarge, 'utf8');
 
 module.exports = {
   inputRelative: inputRelative,
@@ -45,6 +49,8 @@ module.exports = {
   outputBase: outputBase,
   inputPath: inputPath,
   outputPath: outputPath,
+  inputPathLarge: inputPathLarge,
+  outputPathLarge: outputPathLarge,
   inputDirpath: inputDirpath,
   outputDirpath: outputDirpath,
   inputNestedPath: inputNestedPath,
@@ -63,4 +69,5 @@ module.exports = {
   symlinkNestedFirst: symlinkNestedFirst,
   symlinkNestedSecond: symlinkNestedSecond,
   contents: contents,
+  contentsLarge: contentsLarge,
 };

@@ -38,10 +38,13 @@ var from = miss.from;
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
+var inputPathLarge = testConstants.inputPathLarge;
+var outputPathLarge = testConstants.outputPathLarge;
 var outputDirpath = testConstants.outputDirpath;
 var outputNestedPath = testConstants.outputNestedPath;
 var outputNestedDirpath = testConstants.outputNestedDirpath;
 var contents = testConstants.contents;
+var contentsLarge = testConstants.contentsLarge;
 
 var clean = cleanup([outputBase]);
 
@@ -1450,6 +1453,19 @@ describe('createWriteStream', function() {
     pipe([
       from([contents]),
       createWriteStream(outputPath),
+    ], assert);
+  });
+
+  it('accepts just a file path and writes a large file to it', function(done) {
+    function assert(err) {
+      var outputContents = fs.readFileSync(outputPathLarge, 'utf8');
+      expect(outputContents).toEqual(contentsLarge);
+      done(err);
+    }
+
+    pipe([
+      fs.createReadStream(inputPathLarge),
+      createWriteStream(outputPathLarge),
     ], assert);
   });
 
