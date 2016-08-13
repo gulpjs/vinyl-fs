@@ -1,7 +1,6 @@
 'use strict';
 
 var path = require('path');
-var fs = require('graceful-fs');
 
 // Input/output relative paths
 var inputRelative = './fixtures/';
@@ -40,7 +39,12 @@ var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
 // Used for contents of files
 var contents = 'Hello World!';
-var contentsLarge = fs.readFileSync(inputPathLarge, 'utf8');
+var contentsLarge = '';
+var idx = 0;
+while (idx++ < 2000) {
+  contentsLarge += '[' + idx + '] Hello World!\n';
+}
+
 
 module.exports = {
   inputRelative: inputRelative,

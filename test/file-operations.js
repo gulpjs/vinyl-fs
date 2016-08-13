@@ -19,6 +19,7 @@ var statMode = require('./utils/stat-mode');
 var mockError = require('./utils/mock-error');
 var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
 var mkdirp = fo.mkdirp;
@@ -35,10 +36,11 @@ var createWriteStream = fo.createWriteStream;
 var pipe = miss.pipe;
 var from = miss.from;
 
+var string = testStreams.string;
+
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
-var inputPathLarge = testConstants.inputPathLarge;
 var outputPathLarge = testConstants.outputPathLarge;
 var outputDirpath = testConstants.outputDirpath;
 var outputNestedPath = testConstants.outputNestedPath;
@@ -1464,7 +1466,7 @@ describe('createWriteStream', function() {
     }
 
     pipe([
-      fs.createReadStream(inputPathLarge),
+      string(contentsLarge),
       createWriteStream(outputPathLarge),
     ], assert);
   });

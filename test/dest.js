@@ -25,6 +25,7 @@ var count = testStreams.count;
 var rename = testStreams.rename;
 var includes = testStreams.includes;
 var slowCount = testStreams.slowCount;
+var string = testStreams.string;
 
 function noop() {}
 
@@ -311,7 +312,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPathLarge,
-      contents: fs.createReadStream(inputPathLarge),
+      contents: string(contentsLarge),
     });
 
     function assert(files) {

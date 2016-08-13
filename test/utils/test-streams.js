@@ -4,7 +4,21 @@ var miss = require('mississippi');
 var expect = require('expect');
 
 var to = miss.to;
+var from = miss.from;
 var through = miss.through;
+
+function string(str) {
+  return from(function(size, next) {
+    if (str.length <= 0) {
+      next(null, null);
+      return;
+    }
+
+    var chunk = str.slice(0, size);
+    str = str.slice(size);
+    next(null, chunk);
+  });
+}
 
 function rename(filepath) {
   return through.obj(function(file, enc, cb) {
@@ -46,6 +60,7 @@ function slowCount(value) {
 }
 
 module.exports = {
+  string: string,
   rename: rename,
   includes: includes,
   count: count,

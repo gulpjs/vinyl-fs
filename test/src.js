@@ -191,7 +191,7 @@ describe('.src()', function() {
 
   it('globs files with default settings', function(done) {
     function assert(files) {
-      expect(files.length).toEqual(5);
+      expect(files.length).toEqual(4);
     }
 
     pipe([
@@ -204,7 +204,7 @@ describe('.src()', function() {
     var cwd = path.relative(process.cwd(), __dirname);
 
     function assert(files) {
-      expect(files.length).toEqual(5);
+      expect(files.length).toEqual(4);
     }
 
     pipe([
