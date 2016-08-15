@@ -25,6 +25,7 @@ var count = testStreams.count;
 var rename = testStreams.rename;
 var includes = testStreams.includes;
 var slowCount = testStreams.slowCount;
+var string = testStreams.string;
 
 function noop() {}
 
@@ -295,6 +296,30 @@ describe('.dest()', function() {
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(outputContents).toEqual(contents);
+    };
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('writes large streaming files to the right folder', function(done) {
+    var size = 40000;
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: string(size),
+    });
+
+    function assert(files) {
+      var stats = fs.lstatSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(files).toInclude(file);
+      expect(stats.size).toEqual(size);
     };
 
     pipe([
