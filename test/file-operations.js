@@ -19,6 +19,7 @@ var statMode = require('./utils/stat-mode');
 var mockError = require('./utils/mock-error');
 var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
 var mkdirp = fo.mkdirp;
@@ -34,6 +35,8 @@ var createWriteStream = fo.createWriteStream;
 
 var pipe = miss.pipe;
 var from = miss.from;
+
+var string = testStreams.string;
 
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -1449,6 +1452,22 @@ describe('createWriteStream', function() {
 
     pipe([
       from([contents]),
+      createWriteStream(outputPath),
+    ], assert);
+  });
+
+  it('accepts just a file path and writes a large file to it', function(done) {
+    var size = 40000;
+
+    function assert(err) {
+      var stats = fs.lstatSync(outputPath);
+
+      expect(stats.size).toEqual(size);
+      done(err);
+    }
+
+    pipe([
+      string(size),
       createWriteStream(outputPath),
     ], assert);
   });
