@@ -3,8 +3,8 @@
 var path = require('path');
 
 // Input/output relative paths
-var inputRelative = './fixtures/';
-var outputRelative = './out-fixtures/';
+var inputRelative = './fixtures';
+var outputRelative = './out-fixtures';
 // Input/Output base directories
 var inputBase = path.join(__dirname, '..', inputRelative);
 var outputBase = path.join(__dirname, '..', outputRelative);
