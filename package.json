@@ -14,7 +14,7 @@
     "duplexify": "^3.2.0",
     "glob-stream": "^5.3.2",
     "graceful-fs": "^4.0.0",
-    "gulp-sourcemaps": "^1.5.2",
+    "gulp-sourcemaps": "1.6.0",
     "is-valid-glob": "^0.3.0",
     "lazystream": "^1.0.0",
     "lodash.isequal": "^4.0.0",
