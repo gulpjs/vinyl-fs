@@ -35,6 +35,11 @@ var symlinkPath = path.join(outputBase, './test-symlink');
 var symlinkDirpath = path.join(outputBase, './test-symlink-dir');
 var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
+// Used for hardlink tests
+var linkNestedTarget = path.join(inputBase, './foo/bar/baz.txt');
+var linkDirpath = path.join(outputBase, './test-link-dir');
+var linkNestedFirst = path.join(outputBase, './foo/baz-link-1.txt');
+var linkNestedSecond = path.join(outputBase, './foo/baz-link-2.txt');
 // Used for contents of files
 var contents = 'Hello World!';
 
@@ -62,5 +67,9 @@ module.exports = {
   symlinkDirpath: symlinkDirpath,
   symlinkNestedFirst: symlinkNestedFirst,
   symlinkNestedSecond: symlinkNestedSecond,
+  linkNestedTarget: linkNestedTarget,
+  linkDirpath: linkDirpath,
+  linkNestedFirst: linkNestedFirst,
+  linkNestedSecond: linkNestedSecond,
   contents: contents,
 };
