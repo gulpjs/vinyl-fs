@@ -7,7 +7,10 @@
     "Eric Schoffstall <yo@contra.io>",
     "Blaine Bublitz <blaine.bublitz@gmail.com>"
   ],
-  "repository": "gulpjs/vinyl-fs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gulpjs/vinyl-fs"
+  },
   "license": "MIT",
   "engines": {
     "node": ">= 0.10"
