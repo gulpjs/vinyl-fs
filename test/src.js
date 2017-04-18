@@ -329,7 +329,7 @@ describe('.src()', function() {
   });
 
   it('streams a file changed after since', function(done) {
-    var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime - 1000);
+    var lastUpdateDate = new Date(+fs.statSync(inputPath).ctime - 1000);
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -343,7 +343,7 @@ describe('.src()', function() {
   });
 
   it('does not stream a file changed before since', function(done) {
-    var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime + 1000);
+    var lastUpdateDate = new Date(+fs.statSync(inputPath).ctime + 1000);
 
     function assert(files) {
       expect(files.length).toEqual(0);
