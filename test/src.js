@@ -355,6 +355,33 @@ describe('.src()', function() {
     ], done);
   });
 
+  it('streams a file changed after since (when file copy-pasted)', function(done) {
+    var testFilePath = inputPath + 'copy-paste-test';
+    var stat = fs.statSync(inputPath);
+    var fd, lastUpdateDate;
+
+    // When in OS user copy-paste file, its mtime does not changed
+    // So these lines below emulate copy-paste of macOS / Windows
+    fs.writeFileSync(testFilePath, 'test');
+    fd = fs.openSync(testFilePath, 'r+');
+    fs.futimesSync(fd, fs.statSync(testFilePath).atime, stat.mtime);
+
+    lastUpdateDate = new Date(+fs.statSync(testFilePath).mtime);
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].path).toEqual(testFilePath);
+    }
+
+    pipe([
+      vfs.src(testFilePath, { since: lastUpdateDate }),
+      concat(assert),
+    ], function() {
+      fs.unlinkSync(testFilePath);
+      done();
+    });
+  });
+
   it('streams a file with streaming contents', function(done) {
     var expectedContent = fs.readFileSync(inputPath);
 
