@@ -584,7 +584,7 @@ describe('.dest()', function() {
       contents: null,
     });
 
-    // `src()` adds this side-effect with `followSymlinks` option set to false
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
     file.symlink = inputRelativeSymlinkPath;
 
     function assert(files) {
