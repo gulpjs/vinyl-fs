@@ -39,7 +39,7 @@ describe('.src() with symlinks', function() {
     done();
   });
 
-  it('follows symlinks correctly', function(done) {
+  it('resolves symlinks correctly', function(done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -57,7 +57,7 @@ describe('.src() with symlinks', function() {
     ], done);
   });
 
-  it('follows directory symlinks correctly', function(done) {
+  it('resolves directory symlinks correctly', function(done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -75,7 +75,7 @@ describe('.src() with symlinks', function() {
     ], done);
   });
 
-  it('preserves file symlinks with followSymlinks option set to false', function(done) {
+  it('preserves file symlinks with resolveSymlinks option set to false', function(done) {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkPath);
 
     function assert(files) {
@@ -85,12 +85,12 @@ describe('.src() with symlinks', function() {
     }
 
     pipe([
-      vfs.src(symlinkPath, { followSymlinks: false }),
+      vfs.src(symlinkPath, { resolveSymlinks: false }),
       concat(assert),
     ], done);
   });
 
-  it('preserves directory symlinks with followSymlinks option set to false', function(done) {
+  it('preserves directory symlinks with resolveSymlinks option set to false', function(done) {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkDirpath);
 
     function assert(files) {
@@ -100,7 +100,7 @@ describe('.src() with symlinks', function() {
     }
 
     pipe([
-      vfs.src(symlinkDirpath, { followSymlinks: false }),
+      vfs.src(symlinkDirpath, { resolveSymlinks: false }),
       concat(assert),
     ], done);
   });
