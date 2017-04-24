@@ -112,7 +112,7 @@ Type: `Boolean`
 
 Default: `false`
 
-##### `options.followSymlinks`
+##### `options.resolveSymlinks`
 
 Whether or not to recursively resolve symlinks to their targets. Setting to `false` to preserve them as symlinks and make `file.symlink` equal the original symlink's target path.
 
