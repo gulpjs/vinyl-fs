@@ -40,7 +40,6 @@
     "strip-bom": "^2.0.0",
     "strip-bom-stream": "^1.0.0",
     "through2": "^2.0.0",
-    "vali-date": "^1.0.0",
     "value-or-function": "^2.0.0",
     "vinyl": "^2.0.0",
     "vinyl-prepare": "gulpjs/vinyl-prepare"
