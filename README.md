@@ -233,6 +233,8 @@ Returns a stream that accepts [vinyl] `File` objects, create a symbolic link (i.
 __Note: The file will be modified after being written to this stream.__
   - `cwd`, `base`, and `path` will be overwritten to match the folder.
 
+__Note: On Windows, directory links are created using Junctions by default. Use the `useJunctions` option to disable this behavior.__
+
 #### Options
 
 - Values passed to the options must be of the right type, otherwise they will be ignored.
@@ -260,7 +262,15 @@ Whether or not the symlink should be relative or absolute.
 
 Type: `Boolean`
 
-Default: `false`.
+Default: `false`
+
+##### `options.useJunctions`
+
+Whether or not a directory symlink should be created as a `junction`.
+
+Type: `Boolean`
+
+Default: `true` on Windows, `false` on all other platforms
 
 ##### other
 
