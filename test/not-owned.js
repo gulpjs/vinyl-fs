@@ -31,8 +31,12 @@ describe('.dest() on not owned files', function() {
 
   it('does not error if mtime is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
-      console.log('Test files not owned by root.');
+      console.log('Test files not owned by root:');
       console.log('Please chown ' + notOwnedBase + ' and ' + notOwnedPath + ' and try again.');
+      if ((fileStats.mode & parseInt('022', 8)) !== parseInt('022', 8)) {
+        console.log('Test file not writable by non-owners:');
+        console.log('Please chmod ' + notOwnedPath + ' to 666 and try again.');
+      }
       this.skip();
       return;
     }
@@ -63,8 +67,12 @@ describe('.dest() on not owned files', function() {
 
   it('does not error if mode is different', function(done) {
     if (dirStats.uid !== 0 || fileStats.uid !== 0) {
-      console.log('Test files not owned by root.');
+      console.log('Test files not owned by root:');
       console.log('Please chown ' + notOwnedBase + ' and ' + notOwnedPath + ' and try again.');
+      if ((fileStats.mode & parseInt('022', 8)) !== parseInt('022', 8)) {
+        console.log('Test file not writable by non-owners:');
+        console.log('Please chmod ' + notOwnedPath + ' to 666 and try again.');
+      }
       this.skip();
       return;
     }
