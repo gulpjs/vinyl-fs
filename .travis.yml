@@ -8,7 +8,7 @@ node_js:
   - '0.10'
 before_script:
   - find test -type d -exec chmod g+s {} \;
-  - sudo chown root test/fixtures/not-owned/
   - sudo chown root test/fixtures/not-owned/not-owned.txt
+  - sudo chmod 666 test/fixtures/not-owned/not-owned.txt
 after_script:
   - npm run coveralls
