@@ -41,6 +41,7 @@
     "strip-bom-stream": "^1.0.0",
     "through2": "^2.0.0",
     "through2-filter": "^2.0.0",
+    "to-through": "^2.0.0",
     "value-or-function": "^2.0.0",
     "vinyl": "^2.0.0",
     "vinyl-prepare": "^0.1.1",

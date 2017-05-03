@@ -96,14 +96,6 @@ Type: `Boolean`
 
 Default: `true`
 
-##### `options.passthrough`
-
-Allows `.src` to be used in the middle of a pipeline (using a duplex stream) which passes through all objects received and adds all files globbed to the stream.
-
-Type: `Boolean`
-
-Default: `false`
-
 ##### `options.sourcemaps`
 
 Enables sourcemap support on files passed through the stream.  Will load inline sourcemaps and resolve sourcemap links from files. Uses [gulp-sourcemaps] under the hood.
