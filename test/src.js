@@ -105,7 +105,7 @@ describe('.src()', function() {
     ], assert);
   });
 
-  it.skip('passes through writes', function(done) {
+  it('passes through writes', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -328,7 +328,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('passes files through', function(done) {
+  it('can be used as a through stream and adds new files to the end', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -343,7 +343,19 @@ describe('.src()', function() {
 
     pipe([
       from.obj([file]),
-      vfs.src(inputPath, { passthrough: true }),
+      vfs.src(inputPath),
+      concat(assert),
+    ], done);
+  });
+
+  it('can be used at beginning and in the middle', function(done) {
+    function assert(files) {
+      expect(files.length).toEqual(2);
+    }
+
+    pipe([
+      vfs.src(inputPath),
+      vfs.src(inputPath),
       concat(assert),
     ], done);
   });
