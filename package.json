@@ -41,7 +41,7 @@
     "to-through": "^2.0.0",
     "value-or-function": "^2.0.0",
     "vinyl": "^2.0.0",
-    "vinyl-prepare": "^0.1.1",
+    "vinyl-prepare": "^0.2.0",
     "vinyl-sourcemap": "^0.4.0"
   },
   "devDependencies": {
