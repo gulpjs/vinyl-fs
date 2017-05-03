@@ -806,26 +806,6 @@ describe('.dest()', function() {
     });
   });
 
-  // TODO: need a better way to pass these options through
-  // Or maybe not at all since we fixed highWaterMark
-  it('passes options to through2', function(done) {
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: new Buffer(contents),
-    });
-
-    function assert(err) {
-      expect(err.message).toMatch(/Invalid non-string\/buffer chunk/);
-      done();
-    }
-
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { objectMode: false }),
-    ], assert);
-  });
-
   it('successfully processes files with streaming contents', function(done) {
     var file = new File({
       base: inputBase,
@@ -960,5 +940,27 @@ describe('.dest()', function() {
       from.obj([file]),
       vfs.dest(outputBase),
     ], assert);
+  });
+
+  it('does not pass options on to through2', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
+    var read = expect.createSpy().andReturn(false);
+
+    function assert() {
+      // Called never because it's not a valid option
+      expect(read.calls.length).toEqual(0);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { read: read }),
+      concat(assert),
+    ], done);
   });
 });

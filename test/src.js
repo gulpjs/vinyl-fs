@@ -360,11 +360,12 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('does not pass options.read on to through2', function(done) {
+  it('does not pass options on to through2', function(done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = expect.createSpy().andReturn(false);
 
     function assert() {
+      // Called once to resolve the option
       expect(read.calls.length).toEqual(1);
     }
 
