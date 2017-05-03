@@ -123,7 +123,6 @@ Default: `false`
 ##### other
 
 Any glob-related options are documented in [glob-stream] and [node-glob].
-Any through2-related options are documented in [through2].
 Those options are forwarded verbatim.
 
 ### `dest(folder[, options])`
@@ -212,11 +211,6 @@ Type: `Boolean`, `String` or `Object`
 
 Default: `undefined` (do not write sourcemaps)
 
-##### other
-
-Any through2-related options are documented in [through2].
-Those options are forwarded verbatim.
-
 ### `symlink(folder[, options])`
 
 Takes a folder path string or a function as the first argument and an options object as the second. If given a function, it will be called with each [vinyl] `File` object and must return a folder path.
@@ -264,18 +258,12 @@ Type: `Boolean`
 
 Default: `true` on Windows, `false` on all other platforms
 
-##### other
-
-Any through2-related options are documented in [through2].
-Those options are forwarded verbatim.
-
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [gulp-sourcemaps]: https://github.com/floridoo/gulp-sourcemaps
 [node-glob]: https://github.com/isaacs/node-glob
 [gaze]: https://github.com/shama/gaze
 [glob-watcher]: https://github.com/wearefractal/glob-watcher
 [vinyl]: https://github.com/wearefractal/vinyl
-[through2]: https://github.com/rvagg/through2
 
 [downloads-image]: http://img.shields.io/npm/dm/vinyl-fs.svg
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
