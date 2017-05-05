@@ -33,6 +33,8 @@ var leEncodedInputPath = path.join(inputBase, './bom-utf16le.txt');
 var symlinkNestedTarget = path.join(inputBase, './foo/bar/baz.txt');
 var symlinkPath = path.join(outputBase, './test-symlink');
 var symlinkDirpath = path.join(outputBase, './test-symlink-dir');
+var symlinkMultiDirpath = path.join(outputBase, './test-multi-layer-symlink-dir');
+var symlinkMultiDirpathSecond = path.join(outputBase, './test-multi-layer-symlink-dir2');
 var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
 // Used for contents of files
@@ -61,6 +63,8 @@ module.exports = {
   symlinkNestedTarget: symlinkNestedTarget,
   symlinkPath: symlinkPath,
   symlinkDirpath: symlinkDirpath,
+  symlinkMultiDirpath: symlinkMultiDirpath,
+  symlinkMultiDirpathSecond: symlinkMultiDirpathSecond,
   symlinkNestedFirst: symlinkNestedFirst,
   symlinkNestedSecond: symlinkNestedSecond,
   contents: contents,
