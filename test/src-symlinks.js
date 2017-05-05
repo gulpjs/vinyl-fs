@@ -19,6 +19,8 @@ var outputDirpath = testConstants.outputDirpath;
 var symlinkNestedTarget = testConstants.symlinkNestedTarget;
 var symlinkPath = testConstants.symlinkPath;
 var symlinkDirpath = testConstants.symlinkDirpath;
+var symlinkMultiDirpath = testConstants.symlinkMultiDirpath;
+var symlinkMultiDirpathSecond = testConstants.symlinkMultiDirpathSecond;
 var symlinkNestedFirst = testConstants.symlinkNestedFirst;
 var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 
@@ -33,6 +35,8 @@ describe('.src() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.mkdirSync(outputDirpath);
     fs.symlinkSync(inputDirpath, symlinkDirpath);
+    fs.symlinkSync(symlinkDirpath, symlinkMultiDirpath);
+    fs.symlinkSync(symlinkMultiDirpath, symlinkMultiDirpathSecond);
     fs.symlinkSync(inputPath, symlinkPath);
     fs.symlinkSync(symlinkNestedTarget, symlinkNestedSecond);
     fs.symlinkSync(symlinkNestedSecond, symlinkNestedFirst);
@@ -71,6 +75,24 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkDirpath),
+      concat(assert),
+    ], done);
+  });
+
+  it('resolves nested symlinks to directories correctly', function(done) {
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      // The path should be the symlink itself
+      expect(files[0].path).toEqual(symlinkMultiDirpathSecond);
+      // But the contents should be null
+      expect(files[0].contents).toEqual(null);
+      // And the stats should have been updated
+      expect(files[0].stat.isSymbolicLink()).toEqual(false);
+      expect(files[0].stat.isDirectory()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(symlinkMultiDirpathSecond),
       concat(assert),
     ], done);
   });
