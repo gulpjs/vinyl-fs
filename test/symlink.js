@@ -734,7 +734,7 @@ describe('symlink stream', function() {
   it('does not pass options on to through2', function(done) {
     var file = new File({
       base: inputBase,
-      path: inputPath,
+      path: inputDirpath,
       contents: null,
     });
 
