@@ -1473,8 +1473,8 @@ describe('createWriteStream', function() {
   });
 
   it('accepts flag option', function(done) {
-    // Write 12 stars then 12345 because the length of expected is 12
-    fs.writeFileSync(outputPath, '************12345');
+    // Write 13 stars then 12345 because the length of expected is 13
+    fs.writeFileSync(outputPath, '*************12345');
 
     function assert(err) {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
