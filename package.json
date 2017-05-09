@@ -26,6 +26,7 @@
     "coveralls": "npm run cover && istanbul-coveralls"
   },
   "dependencies": {
+    "es6-weak-map": "^2.0.2",
     "flush-write-stream": "^1.0.0",
     "glob-stream": "^6.1.0",
     "graceful-fs": "^4.0.0",
