@@ -126,4 +126,41 @@ describe('.src() with symlinks', function() {
       concat(assert),
     ], done);
   });
+
+  it('recieves a file with symbolic link stats when resolveSymlinks is a function', function(done) {
+
+    function resolveSymlinks(file) {
+      expect(file).toExist();
+      expect(file.stat).toExist();
+      expect(file.stat.isSymbolicLink()).toEqual(true);
+
+      return true;
+    }
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      // And the stats should have been updated
+      expect(files[0].stat.isSymbolicLink()).toEqual(false);
+      expect(files[0].stat.isFile()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(symlinkNestedFirst, { resolveSymlinks: resolveSymlinks }),
+      concat(assert),
+    ], done);
+  });
+
+  it('only calls resolveSymlinks once-per-file if it is a function', function(done) {
+
+    var spy = expect.createSpy().andReturn(true);
+
+    function assert() {
+      expect(spy.calls.length).toEqual(1);
+    }
+
+    pipe([
+      vfs.src(symlinkNestedFirst, { resolveSymlinks: spy }),
+      concat(assert),
+    ], done);
+  });
 });
