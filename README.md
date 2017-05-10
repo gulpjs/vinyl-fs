@@ -242,6 +242,14 @@ Type: `Number`
 
 Default: The process mode.
 
+##### `options.overwrite`
+
+Whether or not existing files with the same path should be overwritten. Can also be a function that takes in a file and returns `true` or `false`.
+
+Type: `Boolean` or `Function`
+
+Default: `true` (always overwrite existing files)
+
 ##### `options.relative`
 
 Whether or not the symlink should be relative or absolute.
