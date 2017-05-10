@@ -542,6 +542,124 @@ describe('symlink stream', function() {
     ], assert);
   });
 
+  it('does not overwrite links with overwrite option set to false', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(existingContents);
+    }
+
+    // Write expected file which should not be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase, { overwrite: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('overwrites links with overwrite option set to true', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(contents);
+    }
+
+    // This should be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase, { overwrite: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not overwrite links with overwrite option set to a function that returns false', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function overwrite(f) {
+      expect(f).toEqual(file);
+      return false;
+    }
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(existingContents);
+    }
+
+    // Write expected file which should not be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase, { overwrite: overwrite }),
+      concat(assert),
+    ], done);
+  });
+
+  it('overwrites links with overwrite option set to a function that returns true', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function overwrite(f) {
+      expect(f).toEqual(file);
+      return true;
+    }
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(contents);
+    }
+
+    // This should be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase, { overwrite: overwrite }),
+      concat(assert),
+    ], done);
+  });
+
   it('emits an end event', function(done) {
     var symlinkStream = vfs.symlink(outputBase);
 
