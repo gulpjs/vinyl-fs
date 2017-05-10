@@ -30,6 +30,8 @@ var getModeDiff = fo.getModeDiff;
 var getTimesDiff = fo.getTimesDiff;
 var getOwnerDiff = fo.getOwnerDiff;
 var isValidUnixId = fo.isValidUnixId;
+var isFatalOverwriteError = fo.isFatalOverwriteError;
+var isFatalUnlinkError = fo.isFatalUnlinkError;
 var updateMetadata = fo.updateMetadata;
 var createWriteStream = fo.createWriteStream;
 
@@ -168,6 +170,70 @@ describe('isValidUnixId', function() {
 
     done();
   });
+});
+
+describe('isFatalOverwriteError', function() {
+
+  it('returns false if not given any error', function(done) {
+    var result = isFatalOverwriteError(null);
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns true if code != EEXIST', function(done) {
+    var result = isFatalOverwriteError({ code: 'EOTHER' });
+
+    expect(result).toEqual(true);
+
+    done();
+  });
+
+  it('returns false if code == EEXIST and flag == wx', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'wx');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns true if error.code == EEXIST and file.flag != wx', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'w');
+
+    expect(result).toEqual(true);
+
+    done();
+  });
+
+});
+
+describe('isFatalUnlinkError', function() {
+
+  it('returns false if not given any error', function(done) {
+    var result = isFatalUnlinkError(null);
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns false if code == ENOENT', function(done) {
+    var result = isFatalUnlinkError({ code: 'ENOENT' }, 'wx');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns true if code != ENOENT', function(done) {
+    var result = isFatalUnlinkError({ code: 'EOTHER' });
+
+    expect(result).toEqual(true);
+
+    done();
+  });
+
 });
 
 describe('getModeDiff', function() {
