@@ -17,9 +17,6 @@ var outputDirpath = path.join(outputBase, './foo');
 // Used for nested tests
 var inputNestedPath = path.join(inputDirpath, './test.txt');
 var outputNestedPath = path.join(outputDirpath, './test.txt');
-// Used for nested directory tests
-var inputNestedDirpath = path.join(inputDirpath, './bar/baz/');
-var outputNestedDirpath = path.join(outputDirpath, './bar/baz/');
 // Used for rename tests
 var outputRenamePath = path.join(outputBase, './foo2.txt');
 // Used for not-owned tests
@@ -53,8 +50,6 @@ module.exports = {
   inputNestedPath: inputNestedPath,
   outputNestedPath: outputNestedPath,
   outputRenamePath: outputRenamePath,
-  inputNestedDirpath: inputNestedDirpath,
-  outputNestedDirpath: outputNestedDirpath,
   notOwnedBase: notOwnedBase,
   notOwnedPath: notOwnedPath,
   bomInputPath: bomInputPath,
