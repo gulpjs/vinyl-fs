@@ -7,11 +7,11 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var mkdirp = require('fs-mkdirp-stream/mkdirp');
 
 var fo = require('../lib/file-operations');
 var constants = require('../lib/constants');
 
-var DEFAULT_DIR_MODE = constants.DEFAULT_DIR_MODE;
 var DEFAULT_FILE_MODE = constants.DEFAULT_FILE_MODE;
 
 var cleanup = require('./utils/cleanup');
@@ -22,7 +22,6 @@ var applyUmask = require('./utils/apply-umask');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
-var mkdirp = fo.mkdirp;
 var closeFd = fo.closeFd;
 var isOwner = fo.isOwner;
 var writeFile = fo.writeFile;
@@ -43,9 +42,6 @@ var string = testStreams.string;
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
-var outputDirpath = testConstants.outputDirpath;
-var outputNestedPath = testConstants.outputNestedPath;
-var outputNestedDirpath = testConstants.outputNestedDirpath;
 var contents = testConstants.contents;
 
 var clean = cleanup([outputBase]);
@@ -1275,226 +1271,6 @@ describe('updateMetadata', function() {
   });
 
   // TODO: forward fchown error tests
-});
-
-describe('mkdirp', function() {
-
-  beforeEach(clean);
-  afterEach(clean);
-
-  beforeEach(function(done) {
-    fs.mkdir(outputBase, function(err) {
-      if (err) {
-        return done(err);
-      }
-
-      // Linux inherits the setgid of the directory and it messes up our assertions
-      // So we explixitly set the mode to 777 before each test
-      fs.chmod(outputBase, '777', done);
-    });
-  });
-
-  it('makes a single directory', function(done) {
-    mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toExist();
-
-      done();
-    });
-  });
-
-  it('makes single directory w/ default mode', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
-    mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
-
-      done();
-    });
-  });
-
-  it('makes multiple directories', function(done) {
-    mkdirp(outputNestedDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputNestedDirpath)).toExist();
-
-      done();
-    });
-  });
-
-  it('makes multiple directories w/ default mode', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
-    mkdirp(outputNestedDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputNestedDirpath)).toEqual(defaultMode);
-
-      done();
-    });
-  });
-
-  it('makes directory with custom mode', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('700');
-
-    mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toEqual(mode);
-
-      done();
-    });
-  });
-
-  it('can create a directory with setgid permission', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('2700');
-
-    mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toEqual(mode);
-
-      done();
-    });
-  });
-
-  it('does not change directory mode if exists and no mode given', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('700');
-
-    mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
-
-      mkdirp(outputDirpath, function(err2) {
-        expect(err2).toNotExist();
-        expect(statMode(outputDirpath)).toEqual(mode);
-
-        done();
-      });
-    });
-  });
-
-  it('makes multiple directories with custom mode', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('700');
-
-    mkdirp(outputNestedDirpath, mode, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputNestedDirpath)).toEqual(mode);
-
-      done();
-    });
-  });
-
-  it('uses default mode on intermediate directories', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var intermediateDirpath = path.dirname(outputNestedDirpath);
-    var mode = applyUmask('700');
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
-    mkdirp(outputNestedDirpath, mode, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
-      expect(statMode(intermediateDirpath)).toEqual(defaultMode);
-
-      done();
-    });
-  });
-
-  it('changes mode of existing directory', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('700');
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
-    mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
-
-      mkdirp(outputDirpath, mode, function(err2) {
-        expect(err2).toNotExist();
-        expect(statMode(outputDirpath)).toEqual(mode);
-
-        done();
-      });
-    });
-  });
-
-  it('errors with EEXIST if file in path', function(done) {
-    mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-
-      fs.writeFile(outputNestedPath, contents, function(err2) {
-        expect(err2).toNotExist();
-
-        mkdirp(outputNestedPath, function(err3) {
-          expect(err3).toExist();
-          expect(err3.code).toEqual('EEXIST');
-
-          done();
-        });
-      });
-    });
-  });
-
-  it('does not change mode of existing file', function(done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = applyUmask('700');
-
-    mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-
-      fs.writeFile(outputNestedPath, contents, function(err2) {
-        expect(err2).toNotExist();
-
-        var expectedMode = statMode(outputNestedPath);
-
-        mkdirp(outputNestedPath, mode, function(err3) {
-          expect(err3).toExist();
-          expect(statMode(outputNestedPath)).toEqual(expectedMode);
-
-          done();
-        });
-      });
-    });
-  });
 });
 
 describe('createWriteStream', function() {
