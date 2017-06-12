@@ -34,7 +34,7 @@
     "koalas": "^1.0.1",
     "lazystream": "^1.0.0",
     "lead": "^1.0.0",
-    "object-assign": "^4.0.0",
+    "object-assign": "^4.1.1",
     "pumpify": "^1.3.5",
     "strip-bom": "^2.0.0",
     "strip-bom-stream": "^1.0.0",
