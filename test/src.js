@@ -173,6 +173,34 @@ describe('.src()', function() {
     ], done);
   });
 
+  it('does not strip anything that looks like a utf8-encoded BOM from utf16be-encoded files with streaming contents', function(done) {
+    var expectedContent = fs.readFileSync(beEncodedInputPath);
+
+    function assertContent(contents) {
+      expect(contents).toMatch(expectedContent);
+    }
+
+    function compareContents(file, enc, cb) {
+      pipe([
+        file.contents,
+        concat(assertContent),
+      ], function(err) {
+        cb(err, file);
+      });
+    }
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isStream()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(beEncodedInputPath, { buffer: false }),
+      through.obj(compareContents),
+      concat(assert),
+    ], done);
+  });
+
   // This goes for any non-UTF-8 encoding.
   // UTF-16-LE is enough to demonstrate this is done properly.
   it('does not strip anything that looks like a utf8-encoded BOM from utf16le-encoded files', function(done) {
@@ -185,6 +213,34 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(leEncodedInputPath),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not strip anything that looks like a utf8-encoded BOM from utf16le-encoded files with streaming contents', function(done) {
+    var expectedContent = fs.readFileSync(leEncodedInputPath);
+
+    function assertContent(contents) {
+      expect(contents).toMatch(expectedContent);
+    }
+
+    function compareContents(file, enc, cb) {
+      pipe([
+        file.contents,
+        concat(assertContent),
+      ], function(err) {
+        cb(err, file);
+      });
+    }
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isStream()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(leEncodedInputPath, { buffer: false }),
+      through.obj(compareContents),
       concat(assert),
     ], done);
   });
