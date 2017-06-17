@@ -1,16 +1,20 @@
 'use strict';
 
-var del = require('del');
+var rimraf = require('rimraf');
 var expect = require('expect');
 
-function cleanup(globs) {
-  return function() {
+function cleanup(glob) {
+  return function(cb) {
     this.timeout(20000);
 
     expect.restoreSpies();
 
+    if (!glob) {
+      return cb();
+    }
+
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
-    return del(globs);
+    rimraf(glob, cb);
   };
 }
 

@@ -45,7 +45,6 @@
     "vinyl-sourcemap": "^0.4.0"
   },
   "devDependencies": {
-    "del": "^2.2.0",
     "eslint": "^1.10.3",
     "eslint-config-gulp": "^2.0.0",
     "expect": "^1.19.0",
@@ -54,7 +53,8 @@
     "jscs": "^2.4.0",
     "jscs-preset-gulp": "^1.0.0",
     "mississippi": "^1.2.0",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "rimraf": "^2.6.1"
   },
   "keywords": [
     "gulp",

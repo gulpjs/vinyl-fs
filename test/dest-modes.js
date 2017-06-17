@@ -29,7 +29,7 @@ var inputNestedPath = testConstants.inputNestedPath;
 var outputNestedPath = testConstants.outputNestedPath;
 var contents = testConstants.contents;
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 describe('.dest() with custom modes', function() {
 

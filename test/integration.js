@@ -21,7 +21,7 @@ var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
 var content = testConstants.content;
 
-var clean = cleanup([base]);
+var clean = cleanup(base);
 
 describe('integrations', function() {
 
