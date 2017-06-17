@@ -52,7 +52,7 @@ function makeSourceMap() {
   };
 }
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 describe('.dest()', function() {
 

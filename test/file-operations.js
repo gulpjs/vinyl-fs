@@ -44,7 +44,7 @@ var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
 var contents = testConstants.contents;
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 function noop() {}
 

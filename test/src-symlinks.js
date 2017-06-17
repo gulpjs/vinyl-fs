@@ -24,7 +24,7 @@ var symlinkMultiDirpathSecond = testConstants.symlinkMultiDirpathSecond;
 var symlinkNestedFirst = testConstants.symlinkNestedFirst;
 var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 describe('.src() with symlinks', function() {
 

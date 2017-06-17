@@ -35,7 +35,7 @@ var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var contents = testConstants.contents;
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 describe('symlink stream', function() {
 
