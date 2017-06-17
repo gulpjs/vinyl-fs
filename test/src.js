@@ -152,7 +152,7 @@ describe('.src()', function() {
     }
 
     pipe([
-      vfs.src(bomInputPath, { stripBOM: false }),
+      vfs.src(bomInputPath, { removeBOM: false }),
       concat(assert),
     ], done);
   });
