@@ -20,7 +20,7 @@ var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var contents = testConstants.contents;
 
-var clean = cleanup([outputBase]);
+var clean = cleanup(outputBase);
 
 describe('.dest() with custom owner', function() {
 
