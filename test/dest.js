@@ -606,34 +606,6 @@ describe('.dest()', function() {
     ], done);
   });
 
-  it('creates symlinks when the `symlink` attribute is set on the file', function(done) {
-    var inputRelativeSymlinkPath = 'wow';
-
-    var file = new File({
-      base: inputBase,
-      path: inputDirpath,
-      contents: null,
-    });
-
-    // `src()` adds this side-effect with `resolveSymlinks` option set to false
-    file.symlink = inputRelativeSymlinkPath;
-
-    function assert(files) {
-      var symlink = fs.readlinkSync(outputDirpath);
-
-      expect(files.length).toEqual(1);
-      expect(file.symlink).toEqual(symlink);
-      expect(files[0].symlink).toEqual(symlink);
-      expect(files[0].path).toEqual(outputDirpath);
-    }
-
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
-  });
-
   it('emits a finish event', function(done) {
     var destStream = vfs.dest(outputBase);
 
