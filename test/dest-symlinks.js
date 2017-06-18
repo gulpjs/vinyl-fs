@@ -9,6 +9,7 @@ var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
+var isDirectory = require('./utils/is-directory-mock');
 var testConstants = require('./utils/test-constants');
 
 var from = miss.from;
