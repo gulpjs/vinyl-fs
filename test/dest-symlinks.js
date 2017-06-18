@@ -28,7 +28,7 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describe.only('.dest() with symlinks', function() {
+describe('.dest() with symlinks', function() {
 
   beforeEach(clean);
   afterEach(clean);
