@@ -18,17 +18,13 @@ var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
 
-var inputRelative = testConstants.inputRelative;
-var outputRelative = testConstants.outputRelative;
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var outputPath = testConstants.outputPath;
-var outputRenamePath = testConstants.outputRenamePath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var contents = testConstants.contents;
-var sourcemapContents = testConstants.sourcemapContents;
 
 var clean = cleanup(outputBase);
 
