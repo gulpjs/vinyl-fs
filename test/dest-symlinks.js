@@ -40,20 +40,20 @@ describe.only('.dest() with symlinks', function() {
   it('creates symlinks when the `symlink` attribute is set on the file', function(done) {
     var file = new File({
       base: inputBase,
-      path: inputDirpath,
+      path: inputPath,
       contents: null,
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
-    file.symlink = inputDirpath;
+    file.symlink = inputPath;
 
     function assert(files) {
-      var symlink = fs.readlinkSync(outputDirpath);
+      var symlink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
       expect(file.symlink).toEqual(symlink);
       expect(files[0].symlink).toEqual(symlink);
-      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].path).toEqual(outputPath);
     }
 
     pipe([
@@ -83,6 +83,269 @@ describe.only('.dest() with symlinks', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { relative: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('(*nix) creates a link for a directory', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(inputDirpath);
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) creates a junction for a directory', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      // When creating a junction, it seems Windows appends a separator
+      expect(outputLink).toEqual(inputDirpath + path.sep);
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) options can disable junctions for a directory', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(inputDirpath);
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { useJunctions: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) options can disable junctions for a directory (as a function)', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function useJunctions(f) {
+      expect(f).toExist();
+      expect(f).toBe(file);
+      return false;
+    }
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(inputDirpath);
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { useJunctions: useJunctions }),
+      concat(assert),
+    ], done);
+  });
+
+  it('(*nix) can create relative links for directories', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { relative: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) relative option is ignored when junctions are used', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      // When creating a junction, it seems Windows appends a separator
+      expect(outputLink).toEqual(inputDirpath + path.sep);
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { useJunctions: true, relative: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) can create relative links for directories when junctions are disabled', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isDirectory: isDirectory,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
+
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
+
+      expect(files.length).toEqual(1);
+      expect(files).toInclude(file);
+      expect(files[0].base).toEqual(outputBase, 'base should have changed');
+      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
+      expect(stats.isDirectory()).toEqual(true);
+      expect(lstats.isDirectory()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { useJunctions: false, relative: true }),
       concat(assert),
     ], done);
   });
@@ -214,45 +477,6 @@ describe.only('.dest() with symlinks', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
-    ], done);
-  });
-
-  it('(windows) can create relative links for directories when junctions are disabled', function(done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
-    var file = new File({
-      base: inputBase,
-      path: inputDirpath,
-      contents: null,
-      stat: {
-        isDirectory: isDirectory,
-      },
-    });
-
-    // `src()` adds this side-effect with `resolveSymlinks` option set to false
-    file.symlink = inputDirpath;
-
-    function assert(files) {
-      var stats = fs.statSync(outputDirpath);
-      var lstats = fs.lstatSync(outputDirpath);
-      var outputLink = fs.readlinkSync(outputDirpath);
-
-      expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
-    }
-
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: false, relative: true }),
       concat(assert),
     ], done);
   });
