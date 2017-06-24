@@ -110,6 +110,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -142,6 +143,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -167,6 +169,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -191,6 +194,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
@@ -215,6 +219,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -249,6 +254,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -286,6 +292,7 @@ describe('symlink stream', function() {
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       // When creating a junction, it seems Windows appends a separator
+      expect(files[0].symlink + path.sep).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputDirpath + path.sep);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -322,6 +329,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -364,6 +372,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -400,6 +409,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -437,6 +447,7 @@ describe('symlink stream', function() {
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       // When creating a junction, it seems Windows appends a separator
+      expect(files[0].symlink + path.sep).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(inputDirpath + path.sep);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -473,6 +484,7 @@ describe('symlink stream', function() {
       expect(files).toInclude(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
