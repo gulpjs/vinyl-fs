@@ -230,6 +230,25 @@ describe('symlink stream', function() {
     ], done);
   });
 
+  it('emits Vinyl objects that are symbolic', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isSymbolic()).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase),
+      concat(assert),
+    ], done);
+  });
+
   it('(*nix) creates a link for a directory', function(done) {
     if (isWindows) {
       this.skip();

@@ -12,6 +12,7 @@ var vfs = require('../');
 var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var isDirectory = require('./utils/is-directory-mock');
+var isSymbolicLink = require('./utils/is-symbolic-link-mock');
 var testConstants = require('./utils/test-constants');
 
 var from = miss.from;
@@ -25,6 +26,11 @@ var outputPath = testConstants.outputPath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var contents = testConstants.contents;
+// For not-exists tests
+var neInputBase = testConstants.neInputBase;
+var neOutputBase = testConstants.neOutputBase;
+var neInputDirpath = testConstants.neInputDirpath;
+var neOutputDirpath = testConstants.neOutputDirpath;
 
 var clean = cleanup(outputBase);
 
@@ -33,11 +39,14 @@ describe('.dest() with symlinks', function() {
   beforeEach(clean);
   afterEach(clean);
 
-  it('creates symlinks when the `symlink` attribute is set on the file', function(done) {
+  it('creates symlinks when `file.isSymbolic()` is true', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -59,11 +68,90 @@ describe('.dest() with symlinks', function() {
     ], done);
   });
 
+  it('does not create symlinks when `file.isSymbolic()` is false', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isSymbolicLink: function() {
+          return false;
+        },
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputPath;
+
+    function assert(files) {
+      var symlinkExists = fs.existsSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(symlinkExists).toBe(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('errors if missing a `.symlink` property', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
+    });
+
+    function assert(err) {
+      expect(err).toExist();
+      // TODO: Should we assert anything else about this err?
+      done();
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+    ], assert);
+  });
+
+  it('emits Vinyl files that are symbolic', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputPath;
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isSymbolic()).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+      concat(assert),
+    ], done);
+  });
+
   it('can create relative links', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -94,7 +182,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -130,7 +218,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -167,7 +255,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -203,7 +291,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -245,7 +333,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -270,6 +358,83 @@ describe('.dest() with symlinks', function() {
     ], done);
   });
 
+  it('(*nix) receives a virtual symbolic directory and creates a symlink', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: neInputBase,
+      path: neInputDirpath,
+      contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = neInputDirpath;
+
+    function assert(files) {
+      var lstats = fs.lstatSync(neOutputDirpath);
+      var outputLink = fs.readlinkSync(neOutputDirpath);
+      var linkTargetExists = fs.existsSync(outputLink);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(neInputDirpath);
+      expect(linkTargetExists).toEqual(false);
+      expect(lstats.isSymbolicLink()).toEqual(true);
+    }
+
+    pipe([
+      // This could also be from a different Vinyl adapter
+      from.obj([file]),
+      vfs.dest(neOutputBase),
+      concat(assert),
+    ], done);
+  });
+
+  // There's no way to determine the proper type of link to create with a dangling link
+  // So we just create a 'file' type symlink
+  // There's also no real way to test the type that was created
+  it('(windows) receives a virtual symbolic directory and creates a symlink', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: neInputBase,
+      path: neInputDirpath,
+      contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = neInputDirpath;
+
+    function assert(files) {
+      var lstats = fs.lstatSync(neOutputDirpath);
+      var outputLink = fs.readlinkSync(neOutputDirpath);
+      var linkTargetExists = fs.existsSync(outputLink);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(neInputDirpath);
+      expect(linkTargetExists).toEqual(false);
+      expect(lstats.isSymbolicLink()).toEqual(true);
+    }
+
+    pipe([
+      // This could also be from a different Vinyl adapter
+      from.obj([file]),
+      vfs.dest(neOutputBase),
+      concat(assert),
+    ], done);
+  });
+
   it('(windows) relativeSymlinks option is ignored when junctions are used', function(done) {
     if (!isWindows) {
       this.skip();
@@ -281,7 +446,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -317,6 +482,9 @@ describe('.dest() with symlinks', function() {
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -348,7 +516,7 @@ describe('.dest() with symlinks', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isSymbolicLink: isSymbolicLink,
       },
     });
 
@@ -383,6 +551,9 @@ describe('.dest() with symlinks', function() {
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -414,6 +585,9 @@ describe('.dest() with symlinks', function() {
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -444,6 +618,9 @@ describe('.dest() with symlinks', function() {
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
@@ -479,6 +656,9 @@ describe('.dest() with symlinks', function() {
       base: inputBase,
       path: inputPath,
       contents: null,
+      stat: {
+        isSymbolicLink: isSymbolicLink,
+      },
     });
 
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
