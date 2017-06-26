@@ -307,6 +307,36 @@ describe('.dest() with symlinks', function() {
     ], done);
   });
 
+  it('(windows) supports relative option when link is not for a directory', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputPath;
+
+    function assert(files) {
+      var outputLink = fs.readlinkSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
+    }
+
+    pipe([
+      from.obj([file]),
+      // The useJunctions option is ignored when file is not a directory
+      vfs.dest(outputBase, { useJunctions: true, relative: true }),
+      concat(assert),
+    ], done);
+  });
+
   it('(windows) can create relative links for directories when junctions are disabled', function(done) {
     if (!isWindows) {
       this.skip();
