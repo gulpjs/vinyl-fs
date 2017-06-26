@@ -7,6 +7,7 @@ var miss = require('mississippi');
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
+var isWindows = require('./utils/is-windows');
 var testConstants = require('./utils/test-constants');
 
 var pipe = miss.pipe;

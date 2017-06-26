@@ -34,6 +34,11 @@ var symlinkMultiDirpath = path.join(outputBase, './test-multi-layer-symlink-dir'
 var symlinkMultiDirpathSecond = path.join(outputBase, './test-multi-layer-symlink-dir2');
 var symlinkNestedFirst = path.join(outputBase, './test-multi-layer-symlink');
 var symlinkNestedSecond = path.join(outputBase, './foo/baz-link.txt');
+// Paths that don't exist
+var neInputBase = path.join(inputBase, './not-exists/');
+var neOutputBase = path.join(outputBase, './not-exists/');
+var neInputDirpath = path.join(neInputBase, './foo');
+var neOutputDirpath = path.join(neOutputBase, './foo');
 // Used for contents of files
 var contents = 'Hello World!\n';
 var sourcemapContents = '//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9maXh0dXJlcyIsIm5hbWVzIjpbXSwibWFwcGluZ3MiOiIiLCJzb3VyY2VzIjpbIi4vZml4dHVyZXMiXSwic291cmNlc0NvbnRlbnQiOlsiSGVsbG8gV29ybGQhXG4iXX0=';
@@ -62,6 +67,10 @@ module.exports = {
   symlinkMultiDirpathSecond: symlinkMultiDirpathSecond,
   symlinkNestedFirst: symlinkNestedFirst,
   symlinkNestedSecond: symlinkNestedSecond,
+  neInputBase: neInputBase,
+  neOutputBase: neOutputBase,
+  neInputDirpath: neInputDirpath,
+  neOutputDirpath: neOutputDirpath,
   contents: contents,
   sourcemapContents: sourcemapContents,
 };

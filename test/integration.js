@@ -4,21 +4,29 @@ var path = require('path');
 
 var fs = require('graceful-fs');
 var miss = require('mississippi');
+var expect = require('expect');
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
+var isWindows = require('./utils/is-windows');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
 var pipe = miss.pipe;
+var concat = miss.concat;
 
 var count = testStreams.count;
 
 var base = testConstants.outputBase;
+var inputDirpath = testConstants.inputDirpath;
+var outputDirpath = testConstants.outputDirpath;
+var symlinkDirpath = testConstants.symlinkDirpath;
 var inputBase = path.join(base, './in/');
 var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
+var outputSymlink = path.join(symlinkDirpath, './foo');
+var outputDirpathSymlink = path.join(outputDirpath, './foo');
 var content = testConstants.content;
 
 var clean = cleanup(base);
@@ -47,6 +55,104 @@ describe('integrations', function() {
       vfs.src(inputGlob, { buffer: false }),
       count(expectedCount),
       vfs.dest(outputBase),
+    ], done);
+  });
+
+  it('(*nix) sources a directory, creates a symlink and copies the symlink', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    function assert(files) {
+      var symlinkResult = fs.readlinkSync(outputSymlink);
+      var destResult = fs.readlinkSync(outputDirpathSymlink);
+
+      expect(symlinkResult).toEqual(inputDirpath);
+      expect(destResult).toEqual(inputDirpath);
+      expect(files[0].symlink).toEqual(inputDirpath);
+    }
+
+    pipe([
+      vfs.src(inputDirpath),
+      vfs.symlink(symlinkDirpath),
+      vfs.dest(outputDirpath),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) sources a directory, creates a junction and copies the junction', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    function assert(files) {
+      // Junctions add an ending separator
+      var expected = inputDirpath + path.sep;
+      var symlinkResult = fs.readlinkSync(outputSymlink);
+      var destResult = fs.readlinkSync(outputDirpathSymlink);
+
+      expect(symlinkResult).toEqual(expected);
+      expect(destResult).toEqual(expected);
+      expect(files[0].symlink).toEqual(inputDirpath);
+    }
+
+    pipe([
+      vfs.src(inputDirpath),
+      vfs.symlink(symlinkDirpath),
+      vfs.dest(outputDirpath),
+      concat(assert),
+    ], done);
+  });
+
+  it('(*nix) sources a symlink and copies it', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    fs.mkdirSync(base);
+    fs.mkdirSync(symlinkDirpath);
+    fs.symlinkSync(inputDirpath, outputSymlink);
+
+    function assert(files) {
+      var destResult = fs.readlinkSync(outputDirpathSymlink);
+
+      expect(destResult).toEqual(inputDirpath);
+      expect(files[0].symlink).toEqual(inputDirpath);
+    }
+
+    pipe([
+      vfs.src(outputSymlink, { resolveSymlinks: false }),
+      vfs.dest(outputDirpath),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) sources a junction and copies it', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    fs.mkdirSync(base);
+    fs.mkdirSync(symlinkDirpath);
+    fs.symlinkSync(inputDirpath, outputSymlink, 'junction');
+
+    function assert(files) {
+      // Junctions add an ending separator
+      var expected = inputDirpath + path.sep;
+      var destResult = fs.readlinkSync(outputDirpathSymlink);
+
+      expect(destResult).toEqual(expected);
+      expect(files[0].symlink).toEqual(inputDirpath);
+    }
+
+    pipe([
+      vfs.src(outputSymlink, { resolveSymlinks: false }),
+      vfs.dest(outputDirpath),
+      concat(assert),
     ], done);
   });
 });
