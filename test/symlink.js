@@ -449,6 +449,36 @@ describe('symlink stream', function() {
     ], done);
   });
 
+  it('(windows) supports relative option when link is not for a directory', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    function assert(files) {
+      var outputLink = fs.readlinkSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(files).toInclude(file);
+      expect(files[0].base).toEqual(outputBase, 'base should have changed');
+      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
+    }
+
+    pipe([
+      from.obj([file]),
+      // The useJunctions option is ignored when file is not a directory
+      vfs.symlink(outputBase, { useJunctions: true, relative: true }),
+      concat(assert),
+    ], done);
+  });
+
   it('(windows) can create relative links for directories when junctions are disabled', function(done) {
     if (!isWindows) {
       this.skip();
