@@ -41,7 +41,7 @@ vfs.src(['./js/**/*.js', '!./js/vendor/*.js'])
 Takes a glob string or an array of glob strings as the first argument and an options object as the second.
 Returns a stream of [vinyl] `File` objects.
 
-__Note: UTF-8 BOM will be stripped from all UTF-8 files read with `.src` unless disabled in the options.__
+__Note: UTF-8 BOM will be removed from all UTF-8 files read with `.src` unless disabled in the options.__
 
 #### Globs
 
@@ -90,7 +90,7 @@ Default: `undefined`
 
 ##### `options.removeBOM`
 
-Causes the BOM to be stripped on UTF-8 encoded files. Set to `false` if you need the BOM for some reason.
+Causes the BOM to be removed on UTF-8 encoded files. Set to `false` if you need the BOM for some reason.
 
 Type: `Boolean`
 
