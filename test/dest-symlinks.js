@@ -78,7 +78,7 @@ describe('.dest() with symlinks', function() {
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputBase, { relative: true }),
+      vfs.dest(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
   });
@@ -265,12 +265,12 @@ describe('.dest() with symlinks', function() {
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputBase, { relative: true }),
+      vfs.dest(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
   });
 
-  it('(windows) relative option is ignored when junctions are used', function(done) {
+  it('(windows) relativeSymlinks option is ignored when junctions are used', function(done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -302,12 +302,12 @@ describe('.dest() with symlinks', function() {
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: true, relative: true }),
+      vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
     ], done);
   });
 
-  it('(windows) supports relative option when link is not for a directory', function(done) {
+  it('(windows) supports relativeSymlinks option when link is not for a directory', function(done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -332,7 +332,7 @@ describe('.dest() with symlinks', function() {
     pipe([
       from.obj([file]),
       // The useJunctions option is ignored when file is not a directory
-      vfs.dest(outputBase, { useJunctions: true, relative: true }),
+      vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
     ], done);
   });
@@ -371,7 +371,7 @@ describe('.dest() with symlinks', function() {
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: false, relative: true }),
+      vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
       concat(assert),
     ], done);
   });
