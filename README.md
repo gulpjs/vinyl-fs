@@ -182,7 +182,7 @@ Default: `true` (always overwrite existing files)
 ##### `options.sourcemaps`
 
 Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`.
-Specifying a `string` is shorthand for the path option.
+Specifying a `string` path will write external sourcemaps at the given path.
 
 Examples:
 
