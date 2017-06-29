@@ -175,7 +175,7 @@ Default: The process `mode`.
 
 Whether or not existing files with the same path should be overwritten.
 
-Type: `Boolean` or `Function`
+Type: `Boolean`
 
 Default: `true` (always overwrite existing files)
 
@@ -257,7 +257,7 @@ Default: The process mode.
 
 Whether or not existing files with the same path should be overwritten.
 
-Type: `Boolean` or `Function`
+Type: `Boolean`
 
 Default: `true` (always overwrite existing files)
 
