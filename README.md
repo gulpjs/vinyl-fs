@@ -41,7 +41,7 @@ vfs.src(['./js/**/*.js', '!./js/vendor/*.js'])
 Takes a glob string or an array of glob strings as the first argument and an options object as the second.
 Returns a stream of [vinyl] `File` objects.
 
-__Note: UTF-8 BOM will be stripped from all UTF-8 files read with `.src` unless disabled in the options.__
+__Note: UTF-8 BOM will be removed from all UTF-8 files read with `.src` unless disabled in the options.__
 
 #### Globs
 
@@ -62,7 +62,7 @@ fs.src(['*.js', '!b*.js'])
 #### Options
 
 - Values passed to the options must be of the right type, otherwise they will be ignored.
-- All options can be passed a function instead of a value. The function must return a value of the right type, otherwise it will be ignored.
+- All options can be passed a function instead of a value. The function will be called with the [vinyl] `File` object as its only argument and must return a value of the right type for the option.
 
 ##### `options.buffer`
 
@@ -88,9 +88,9 @@ Type: `Date` or `Number`
 
 Default: `undefined`
 
-##### `options.stripBOM`
+##### `options.removeBOM`
 
-Causes the BOM to be stripped on UTF-8 encoded files. Set to `false` if you need the BOM for some reason.
+Causes the BOM to be removed on UTF-8 encoded files. Set to `false` if you need the BOM for some reason.
 
 Type: `Boolean`
 
@@ -98,7 +98,7 @@ Default: `true`
 
 ##### `options.sourcemaps`
 
-Enables sourcemap support on files passed through the stream.  Will load inline sourcemaps and resolve sourcemap links from files. Uses [gulp-sourcemaps] under the hood.
+Enables sourcemap support on files passed through the stream.  Will load inline sourcemaps and resolve sourcemap links from files.
 
 Type: `Boolean`
 
@@ -114,7 +114,7 @@ Default: `true`
 
 ##### `options.dot`
 
-Whether or not you want globs to match on dot files or not (e.g. `.gitignore`)
+Whether or not you want globs to match on dot files or not (e.g. `.gitignore`). __Note: This option is not resolved from a function because it is passed verbatim to node-glob.__
 
 Type: `Boolean`
 
@@ -173,43 +173,46 @@ Default: The process `mode`.
 
 ##### `options.overwrite`
 
-Whether or not existing files with the same path should be overwritten. Can also be a function that takes in a file and returns `true` or `false`.
+Whether or not existing files with the same path should be overwritten.
 
-Type: `Boolean` or `Function`
+Type: `Boolean`
 
 Default: `true` (always overwrite existing files)
 
 ##### `options.sourcemaps`
 
 Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`.
-Specifying a `string` is shorthand for the path option. Uses [gulp-sourcemaps] under the hood.
+Specifying a `string` path will write external sourcemaps at the given path.
 
 Examples:
 
 ```js
 // Write as inline comments
-vfs.dest('./', {
-  sourcemaps: true
-});
+vfs.dest('./', { sourcemaps: true });
 
 // Write as files in the same folder
-vfs.dest('./', {
-  sourcemaps: '.'
-});
-
-// Any other options are passed through to [gulp-sourcemaps]
-vfs.dest('./', {
-  sourcemaps: {
-    path: '.',
-    addComment: false,
-    includeContent: false
-  }
-});
+vfs.dest('./', { sourcemaps: '.' });
 ```
 
-Type: `Boolean`, `String` or `Object`
+Type: `Boolean` or `String`
 
 Default: `undefined` (do not write sourcemaps)
+
+##### `options.relativeSymlinks`
+
+When creating a symlink, whether or not the created symlink should be relative. If `false`, the symlink will be absolute. __Note: This option will be ignored if a `junction` is being created.__
+
+Type: `Boolean`
+
+Default: `false`
+
+##### `options.useJunctions`
+
+When creating a symlink, whether or not a directory symlink should be created as a `junction`.
+
+Type: `Boolean`
+
+Default: `true` on Windows, `false` on all other platforms
 
 ### `symlink(folder[, options])`
 
@@ -234,6 +237,14 @@ Type: `String`
 
 Default: `process.cwd()`
 
+##### `options.mode`
+
+The mode the symlinks should be created with.
+
+Type: `Number`
+
+Default: The `mode` of the input file (`file.stat.mode`) if any, or the process mode if the input file has no `mode` property.
+
 ##### `options.dirMode`
 
 The mode the directory should be created with.
@@ -244,15 +255,15 @@ Default: The process mode.
 
 ##### `options.overwrite`
 
-Whether or not existing files with the same path should be overwritten. Can also be a function that takes in a file and returns `true` or `false`.
+Whether or not existing files with the same path should be overwritten.
 
-Type: `Boolean` or `Function`
+Type: `Boolean`
 
 Default: `true` (always overwrite existing files)
 
-##### `options.relative`
+##### `options.relativeSymlinks`
 
-Whether or not the symlink should be relative or absolute.
+Whether or not the created symlinks should be relative. If `false`, the symlink will be absolute. __Note: This option will be ignored if a `junction` is being created.__
 
 Type: `Boolean`
 
@@ -267,7 +278,6 @@ Type: `Boolean`
 Default: `true` on Windows, `false` on all other platforms
 
 [glob-stream]: https://github.com/gulpjs/glob-stream
-[gulp-sourcemaps]: https://github.com/floridoo/gulp-sourcemaps
 [node-glob]: https://github.com/isaacs/node-glob
 [gaze]: https://github.com/shama/gaze
 [glob-watcher]: https://github.com/wearefractal/glob-watcher
