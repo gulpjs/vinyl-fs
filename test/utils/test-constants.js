@@ -24,8 +24,14 @@ var notOwnedBase = path.join(inputBase, './not-owned/');
 var notOwnedPath = path.join(notOwnedBase, 'not-owned.txt');
 // Used for BOM tests
 var bomInputPath = path.join(inputBase, './bom-utf8.txt');
-var beEncodedInputPath = path.join(inputBase, './bom-utf16be.txt');
-var leEncodedInputPath = path.join(inputBase, './bom-utf16le.txt');
+var beBomInputPath = path.join(inputBase, './bom-utf16be.txt');
+var leBomInputPath = path.join(inputBase, './bom-utf16le.txt');
+var bomContents = 'This file is saved as UTF-X with the appropriate BOM.\n';
+var beNotBomInputPath = path.join(inputBase, './not-bom-utf16be.txt');
+var leNotBomInputPath = path.join(inputBase, './not-bom-utf16le.txt');
+// Used for encoding tests
+var encodedInputPath = path.join(inputBase, './enc-gb2312.txt');
+var encodedContents = '\u5b54\u5b50\u8bf4\u590d\u6d3b\u8282\u5f69\u86cb\n';
 // Used for symlink tests
 var symlinkNestedTarget = path.join(inputBase, './foo/bar/baz.txt');
 var symlinkPath = path.join(outputBase, './test-symlink');
@@ -58,8 +64,13 @@ module.exports = {
   notOwnedBase: notOwnedBase,
   notOwnedPath: notOwnedPath,
   bomInputPath: bomInputPath,
-  beEncodedInputPath: beEncodedInputPath,
-  leEncodedInputPath: leEncodedInputPath,
+  beBomInputPath: beBomInputPath,
+  leBomInputPath: leBomInputPath,
+  beNotBomInputPath: beNotBomInputPath,
+  leNotBomInputPath: leNotBomInputPath,
+  bomContents: bomContents,
+  encodedInputPath: encodedInputPath,
+  encodedContents: encodedContents,
   symlinkNestedTarget: symlinkNestedTarget,
   symlinkPath: symlinkPath,
   symlinkDirpath: symlinkDirpath,
