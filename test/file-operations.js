@@ -1030,10 +1030,9 @@ describe('updateMetadata', function() {
 
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
-    // Use the mtime/atime of this file to have proper resolution
-    var stats = fs.statSync(__filename);
-    var mtime = stats.mtime;
-    var atime = stats.atime;
+    // Use new atime/mtime
+    var atime = new Date(Date.now() - 2048);
+    var mtime = new Date(Date.now() - 1024);
     var mtimeEarlier = mtime.getTime() - 1000;
     var atimeEarlier = atime.getTime() - 1000;
 
@@ -1051,12 +1050,15 @@ describe('updateMetadata', function() {
 
     updateMetadata(fd, file, function() {
       expect(futimesSpy.calls.length).toEqual(1);
-      var stats = fs.fstatSync(fd);
+      // Var stats = fs.fstatSync(fd);
+
+      var atimeSpy = futimesSpy.calls[0].arguments[1];
+      var mtimeSpy = futimesSpy.calls[0].arguments[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
-      expect(stats.mtime.getTime()).toEqual(mtimeEarlier);
+      expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
       expect(file.stat.atime).toEqual(new Date(atimeEarlier));
-      expect(stats.atime.getTime()).toEqual(atimeEarlier);
+      expect(atimeSpy.getTime()).toEqual(atimeEarlier);
 
       fs.close(fd, done);
     });
@@ -1193,10 +1195,9 @@ describe('updateMetadata', function() {
     var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
-    // Use the mtime/atime of this file to have proper resolution
-    var stats = fs.statSync(__filename);
-    var mtime = stats.mtime;
-    var atime = stats.atime;
+    // Use new atime/mtime
+    var atime = new Date(Date.now() - 2048);
+    var mtime = new Date(Date.now() - 1024);
     var mtimeEarlier = mtime.getTime() - 1000;
     var atimeEarlier = atime.getTime() - 1000;
 
@@ -1219,12 +1220,13 @@ describe('updateMetadata', function() {
       expect(fchmodSpy.calls.length).toEqual(1);
       expect(futimesSpy.calls.length).toEqual(1);
 
-      var stats = fs.fstatSync(fd);
+      var atimeSpy = futimesSpy.calls[0].arguments[1];
+      var mtimeSpy = futimesSpy.calls[0].arguments[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
-      expect(stats.mtime.getTime()).toEqual(mtimeEarlier);
+      expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
       expect(file.stat.atime).toEqual(new Date(atimeEarlier));
-      expect(stats.atime.getTime()).toEqual(atimeEarlier);
+      expect(atimeSpy.getTime()).toEqual(atimeEarlier);
 
       fs.close(fd, done);
     });

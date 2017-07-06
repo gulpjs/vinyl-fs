@@ -68,8 +68,8 @@ describe('.dest() with custom times', function() {
       return;
     }
 
-    // Use the mtime of this file to have proper resolution
-    var mtime = fs.statSync(__filename).mtime;
+    // Use new mtime
+    var mtime = new Date(Date.now() - 2048);
 
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
@@ -83,10 +83,14 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      var stats = fs.lstatSync(outputPath);
-
       expect(futimesSpy.calls.length).toEqual(1);
-      expect(stats.mtime.getTime()).toEqual(mtime.getTime());
+
+      // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
+      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+
+      expect(mtimeSpy.getTime())
+        .toEqual(mtime.getTime());
+
       expect(file.stat.mtime).toEqual(mtime);
     }
 
@@ -136,8 +140,8 @@ describe('.dest() with custom times', function() {
       return;
     }
 
-    // Use the mtime of this file to have proper resolution
-    var mtime = fs.lstatSync(__filename).mtime;
+    // Use new mtime
+    var mtime = new Date(Date.now() - 2048);
     var invalidAtime = new Date(undefined);
 
     var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
@@ -153,10 +157,11 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      var stats = fs.lstatSync(outputPath);
-
       expect(futimesSpy.calls.length).toEqual(1);
-      expect(stats.mtime.getTime()).toEqual(mtime.getTime());
+
+      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+
+      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
     }
 
     pipe([
@@ -172,9 +177,11 @@ describe('.dest() with custom times', function() {
       return;
     }
 
-    // Use the atime/mtime of this file to have proper resolution
-    var atime = fs.lstatSync(__filename).atime;
-    var mtime = fs.lstatSync(__filename).mtime;
+    // Use new atime/mtime
+    var atime = new Date(Date.now() - 2048);
+    var mtime = new Date(Date.now() - 1024);
+
+    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
 
     var file = new File({
       base: inputBase,
@@ -187,10 +194,13 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      var stats = fs.lstatSync(outputPath);
+      expect(futimesSpy.calls.length).toEqual(1);
 
-      expect(stats.atime.getTime()).toEqual(atime.getTime());
-      expect(stats.mtime.getTime()).toEqual(mtime.getTime());
+      var atimeSpy = futimesSpy.calls[0].arguments[1];
+      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+
+      expect(atimeSpy.getTime()).toEqual(atime.getTime());
+      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
       expect(file.stat.mtime).toEqual(mtime);
       expect(file.stat.atime).toEqual(atime);
     };
