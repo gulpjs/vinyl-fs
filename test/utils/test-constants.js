@@ -29,6 +29,7 @@ var leBomInputPath = path.join(inputBase, './bom-utf16le.txt');
 var bomContents = 'This file is saved as UTF-X with the appropriate BOM.\n';
 var beNotBomInputPath = path.join(inputBase, './not-bom-utf16be.txt');
 var leNotBomInputPath = path.join(inputBase, './not-bom-utf16le.txt');
+var ranBomInputPath = path.join(inputBase, './ranbom.bin');
 // Used for encoding tests
 var encodedInputPath = path.join(inputBase, './enc-gb2312.txt');
 var encodedContents = '\u5b54\u5b50\u8bf4\u590d\u6d3b\u8282\u5f69\u86cb\n';
@@ -68,6 +69,7 @@ module.exports = {
   leBomInputPath: leBomInputPath,
   beNotBomInputPath: beNotBomInputPath,
   leNotBomInputPath: leNotBomInputPath,
+  ranBomInputPath: ranBomInputPath,
   bomContents: bomContents,
   encodedInputPath: encodedInputPath,
   encodedContents: encodedContents,

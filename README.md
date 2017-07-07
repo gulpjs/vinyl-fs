@@ -99,9 +99,11 @@ Default: `true`
 ##### `options.encoding`
 
 Optionally transcode from the given encoding. The default is `'utf8'`. We use
-[iconv-lite], please refer to its Wiki for a list of supported encodings.
+[iconv-lite], please refer to its Wiki for a list of supported encodings. You
+can set this to `false` to avoid any transcoding, and effectively just pass
+around raw binary data.
 
-Type: `String`
+Type: `String` or `Boolean`
 
 Default: `'utf8'`
 
@@ -193,9 +195,11 @@ Default: `true` (always overwrite existing files)
 ##### `options.encoding`
 
 Optionally transcode to the given encoding. The default is `'utf8'`. We use
-[iconv-lite], please refer to its Wiki for a list of supported encodings.
+[iconv-lite], please refer to its Wiki for a list of supported encodings. You
+can set this to `false` to avoid any transcoding, and effectively just pass
+around raw binary data.
 
-Type: `String`
+Type: `String` or `Boolean`
 
 Default: `'utf8'`.
 

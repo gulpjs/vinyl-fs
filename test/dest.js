@@ -40,6 +40,7 @@ var outputRenamePath = testConstants.outputRenamePath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var encodedInputPath = testConstants.encodedInputPath;
+var ranBomInputPath = testConstants.ranBomInputPath;
 var contents = testConstants.contents;
 var sourcemapContents = testConstants.sourcemapContents;
 var bomContents = testConstants.bomContents;
@@ -606,6 +607,50 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not do any transcoding with encoding option set to false (buffer)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: expectedContents,
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not do any transcoding with encoding option set to false (stream)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: fs.createReadStream(ranBomInputPath),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: false }),
       concat(assert),
     ], done);
   });

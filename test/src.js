@@ -3,7 +3,6 @@
 var path = require('path');
 
 var fs = require('graceful-fs');
-var iconv = require('iconv-lite');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
@@ -25,9 +24,10 @@ var beBomInputPath = testConstants.beBomInputPath;
 var leBomInputPath = testConstants.leBomInputPath;
 var beNotBomInputPath = testConstants.beNotBomInputPath;
 var leNotBomInputPath = testConstants.leNotBomInputPath;
-var bomContents = testConstants.bomContents;
+var ranBomInputPath = testConstants.ranBomInputPath;
 var encodedInputPath = testConstants.encodedInputPath;
 var encodedContents = testConstants.encodedContents;
+var bomContents = testConstants.bomContents;
 var contents = testConstants.contents;
 
 describe('.src()', function() {
@@ -474,6 +474,90 @@ describe('.src()', function() {
     ], done);
   });
 
+  it('does not do any transcoding with encoding option set to false (buffer)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].contents).toMatch(expectedContents);
+    }
+
+    pipe([
+      vfs.src(ranBomInputPath, { encoding: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not do any transcoding with encoding option set to false (stream)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+
+    function assertContent(contents) {
+      expect(contents).toMatch(expectedContents);
+    }
+
+    function compareContents(file, enc, cb) {
+      pipe([
+        file.contents,
+        concat(assertContent),
+      ], function(err) {
+        cb(err, file);
+      });
+    }
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isStream()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(ranBomInputPath, { encoding: false, buffer: false }),
+      through.obj(compareContents),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not remove utf8 BOM with encoding option set to false (buffer)', function(done) {
+    var expectedContents = fs.readFileSync(bomInputPath);
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].contents).toMatch(expectedContents);
+    }
+
+    pipe([
+      vfs.src(bomInputPath, { encoding: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not remove utf8 BOM with encoding option set to false (stream)', function(done) {
+    var expectedContents = fs.readFileSync(bomInputPath);
+
+    function assertContent(contents) {
+      expect(contents).toMatch(expectedContents);
+    }
+
+    function compareContents(file, enc, cb) {
+      pipe([
+        file.contents,
+        concat(assertContent),
+      ], function(err) {
+        cb(err, file);
+      });
+    }
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isStream()).toEqual(true);
+    }
+
+    pipe([
+      vfs.src(bomInputPath, { encoding: false, buffer: false }),
+      through.obj(compareContents),
+      concat(assert),
+    ], done);
+  });
+
   it('transcodes gb2312 to utf8 with encoding option (buffer)', function(done) {
     var expectedContents = new Buffer(encodedContents);
 
@@ -489,7 +573,7 @@ describe('.src()', function() {
   });
 
   it('transcodes gb2312 to utf8 with encoding option (stream)', function(done) {
-    var expectedContents = iconv.encode(encodedContents, 'utf8');
+    var expectedContents = new Buffer(encodedContents);
 
     function assertContent(contents) {
       expect(contents).toMatch(expectedContents);
