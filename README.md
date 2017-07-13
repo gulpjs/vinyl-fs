@@ -135,7 +135,7 @@ If they differ and the running process owns the file, the corresponding filesyst
 If they don't differ or the process doesn't own the file, the attempt is skipped silently.
 __This functionality is disabled on Windows operating systems or any other OS that doesn't support `process.getuid` or `process.geteuid` in node. This is due to Windows having very unexpected results through usage of `fs.fchmod` and `fs.futimes`.__
 
-__Note: The `fs.futimes()` method internally casts `stat.mtime` and `stat.atime` to floats, which causes precision lost in 32bit Node.js.__
+__Note: The `fs.futimes()` method internally converts `stat.mtime` and `stat.atime` timestamps to seconds; this division by `1000` may cause some loss of precision in 32-bit Node.js.__
 
 If the file has a `symlink` attribute specifying a target path, then a symlink will be created.
 
