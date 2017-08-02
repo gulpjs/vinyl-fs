@@ -20,7 +20,6 @@
   ],
   "scripts": {
     "lint": "eslint . && jscs index.js lib/ test/",
-    "pretest": "npm run lint",
     "test": "mocha --async-only",
     "cover": "istanbul cover _mocha --report lcovonly",
     "coveralls": "npm run cover && istanbul-coveralls"
@@ -45,7 +44,7 @@
     "vinyl-sourcemap": "^1.0.0"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
+    "eslint": "^4.3.0",
     "eslint-config-gulp": "^2.0.0",
     "expect": "^1.19.0",
     "istanbul": "^0.4.3",
