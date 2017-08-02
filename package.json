@@ -49,8 +49,6 @@
     "expect": "^1.19.0",
     "istanbul": "^0.4.3",
     "istanbul-coveralls": "^1.0.3",
-    "jscs": "^2.4.0",
-    "jscs-preset-gulp": "^1.0.0",
     "mississippi": "^1.2.0",
     "mocha": "^2.4.5",
     "rimraf": "^2.6.1"
