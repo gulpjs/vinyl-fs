@@ -19,13 +19,13 @@ test_script:
   - query session
   - node --version
   - npm --version
-  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > success.txt 2> failure.txt
+  - cmd: psexec.exe -i 1 -l "C:\Program Files (x86)\nodejs\npm.cmd" test
 
-on_finish:
-  - type success.txt
+# on_finish:
+#   - type success.txt
 
-on_failure:
-  - type failure.txt
+# on_failure:
+#   - type failure.txt
 
 build: off
 
