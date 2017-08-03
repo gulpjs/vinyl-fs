@@ -18,10 +18,11 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > output.txt 2> output.txt
+  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > success.txt 2> failure.txt
 
 after_test:
-  - type output.txt
+  - type success.txt
+  - type failure.txt
 
 build: off
 
