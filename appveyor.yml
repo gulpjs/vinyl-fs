@@ -18,13 +18,13 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe -l cmd.exe /c npm test
+  - cmd: psexec.exe -i -l cmd.exe /c npm test
 
-on_success:
-  - type success.txt
+# on_success:
+#   - type success.txt
 
-on_failure:
-  - type failure.txt
+# on_failure:
+#   - type failure.txt
 
 build: off
 
