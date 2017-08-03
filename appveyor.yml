@@ -18,7 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe -d -l "C:\\Program Files (x86)\\nodejs\\npm test"
+  - cmd: psexec.exe -d -l npm test
 
 build: off
 
