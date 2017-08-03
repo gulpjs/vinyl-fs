@@ -20,8 +20,10 @@ test_script:
   - npm --version
   - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > success.txt 2> failure.txt
 
-after_test:
+on_success:
   - type success.txt
+
+on_failure:
   - type failure.txt
 
 build: off
