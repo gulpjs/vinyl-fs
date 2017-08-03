@@ -17,7 +17,7 @@ install:
 test_script:
   - node --version
   - npm --version
-  - cmd: npm test
+  - cmd: psexec.exe -d -l "npm test"
 
 build: off
 
