@@ -18,7 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe \\marklap -l "C:\Program Files (x86)\nodejs\npm.cmd" test
+  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > echo
 
 build: off
 
