@@ -18,7 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe \127.0.0.1 -l "C:\Program Files (x86)\nodejs\npm.cmd" test
+  - cmd: psexec.exe \\127.0.0.1 -l "C:\Program Files (x86)\nodejs\npm.cmd" test
 
 # on_finish:
 #   - type success.txt
