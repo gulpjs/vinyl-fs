@@ -18,7 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe \\localhost -l cmd.exe /c npm test
+  - cmd: psexec.exe \\localhost -u appveyor -l cmd.exe /c npm test
 
 # on_finish:
 #   - type success.txt
