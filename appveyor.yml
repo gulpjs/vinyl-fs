@@ -18,7 +18,10 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > echo 2> echo
+  - cmd: psexec.exe -l "C:\Program Files (x86)\nodejs\npm.cmd" test > output.txt 2> output.txt
+
+after_test:
+  - type output.txt
 
 build: off
 
