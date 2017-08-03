@@ -18,7 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
-  - cmd: psexec.exe \\127.0.0.1 -l cmd.exe /c npm test
+  - cmd: psexec.exe -l cmd.exe /c npm test
 
 # on_finish:
 #   - type success.txt
