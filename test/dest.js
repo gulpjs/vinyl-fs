@@ -17,9 +17,10 @@ var testStreams = require('./utils/test-streams');
 var isDirectory = require('./utils/is-directory-mock');
 var testConstants = require('./utils/test-constants');
 
+var join = testStreams.join;
+
 var from = miss.from;
 var pipe = miss.pipe;
-var concat = miss.concat;
 
 var count = testStreams.count;
 var rename = testStreams.rename;
@@ -99,7 +100,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { sourcemaps: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -119,7 +120,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { sourcemaps: '.' }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -140,7 +141,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { sourcemaps: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -162,7 +163,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { sourcemaps: '.' }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -182,7 +183,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputRelative, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -202,7 +203,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -226,7 +227,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -253,7 +254,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputRelative, { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -286,7 +287,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputFn, { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -310,7 +311,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -334,7 +335,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -358,7 +359,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -386,7 +387,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -411,7 +412,7 @@ describe('.dest()', function() {
       rename(outputRenamePath),
       includes({ path: outputRenamePath }),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -433,7 +434,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -511,7 +512,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -538,7 +539,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -570,7 +571,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -602,7 +603,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -646,6 +647,7 @@ describe('.dest()', function() {
 
   it('allows backpressure when piped to another, slower stream', function(done) {
     this.timeout(20000);
+    this.slow(10000);
 
     var expectedCount = 24;
     var highwatermarkFiles = [];
@@ -721,6 +723,7 @@ describe('.dest()', function() {
   });
 
   it('sinks the stream if all the readable event handlers are removed', function(done) {
+    this.slow(1000);
     var expectedCount = 17;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -864,7 +867,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -932,7 +935,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { read: read }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });

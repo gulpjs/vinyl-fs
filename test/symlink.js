@@ -18,9 +18,9 @@ var isDirectory = require('./utils/is-directory-mock');
 var testConstants = require('./utils/test-constants');
 
 var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
 
+var mochaPump = testStreams.mochaPump;
+var join = testStreams.join;
 var count = testStreams.count;
 var slowCount = testStreams.slowCount;
 
@@ -67,10 +67,10 @@ describe('symlink stream', function() {
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputRelative, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -87,10 +87,10 @@ describe('symlink stream', function() {
       expect(files[0].cwd).toEqual(process.cwd(), 'cwd should not have changed');
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -114,10 +114,10 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputRelative, { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -147,10 +147,10 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputFn, { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -173,10 +173,10 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -198,10 +198,10 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -223,10 +223,10 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -260,10 +260,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -298,10 +298,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -335,10 +335,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { useJunctions: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -378,10 +378,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { useJunctions: useJunctions }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -415,10 +415,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -453,10 +453,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -482,11 +482,11 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       // The useJunctions option is ignored when file is not a directory
       vfs.symlink(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -520,10 +520,10 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { useJunctions: false, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -549,10 +549,10 @@ describe('symlink stream', function() {
       expect(files[0].stat.mode).toEqual(fileMode);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputDirpath, { mode: fileMode, dirMode: dirMode }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -578,7 +578,7 @@ describe('symlink stream', function() {
       done();
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputDirpath),
     ], assert);
@@ -604,10 +604,10 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { overwrite: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -631,10 +631,10 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { overwrite: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -663,10 +663,10 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -695,10 +695,10 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -713,13 +713,15 @@ describe('symlink stream', function() {
       contents: null,
     });
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       symlinkStream,
     ]);
   });
 
   it('emits a finish event', function(done) {
+    this.timeout(20000);
+
     var symlinkStream = vfs.symlink(outputBase);
 
     symlinkStream.on('finish', done);
@@ -730,7 +732,7 @@ describe('symlink stream', function() {
       contents: null,
     });
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       symlinkStream,
     ]);
@@ -748,7 +750,7 @@ describe('symlink stream', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
@@ -758,6 +760,7 @@ describe('symlink stream', function() {
   });
 
   it('allows backpressure when piped to another, slower stream', function(done) {
+    this.slow(10000);
     this.timeout(20000);
 
     var expectedCount = 24;
@@ -771,7 +774,7 @@ describe('symlink stream', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj(highwatermarkFiles),
       count(expectedCount),
       vfs.symlink(outputBase),
@@ -802,7 +805,7 @@ describe('symlink stream', function() {
       done(err);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       symlinkStream,
     ], assert);
@@ -827,13 +830,14 @@ describe('symlink stream', function() {
       done(err);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       symlinkStream,
     ], assert);
   });
 
   it('sinks the stream if all the readable event handlers are removed', function(done) {
+    this.slow(1000);
     var expectedCount = 17;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -849,7 +853,7 @@ describe('symlink stream', function() {
 
     symlinkStream.on('readable', noop);
 
-    pipe([
+    mochaPump(this, [
       from.obj(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
@@ -878,7 +882,7 @@ describe('symlink stream', function() {
 
     symlinkStream.on('data', noop);
 
-    pipe([
+    mochaPump(this, [
       from.obj(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
@@ -906,10 +910,10 @@ describe('symlink stream', function() {
       expect(read.calls.length).toEqual(0);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.symlink(outputBase, { read: read }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });

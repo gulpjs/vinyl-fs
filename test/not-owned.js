@@ -10,10 +10,12 @@ var vfs = require('../');
 var cleanup = require('./utils/cleanup');
 var applyUmask = require('./utils/apply-umask');
 var testConstants = require('./utils/test-constants');
+var testStreams = require('./utils/test-streams');
+
+var join = testStreams.join;
 
 var from = miss.from;
 var pipe = miss.pipe;
-var concat = miss.concat;
 
 var notOwnedBase = testConstants.notOwnedBase;
 var notOwnedPath = testConstants.notOwnedPath;
@@ -79,7 +81,7 @@ describe('.dest() on not owned files', function() {
     pipe([
       from.obj([file]),
       vfs.dest(notOwnedBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -107,7 +109,7 @@ describe('.dest() on not owned files', function() {
     pipe([
       from.obj([file]),
       vfs.dest(notOwnedBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });

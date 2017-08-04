@@ -31,6 +31,7 @@ describe('integrations', function() {
   it('does not exhaust available file descriptors when streaming thousands of files', function(done) {
     // This can be a very slow test on boxes with slow disk i/o
     this.timeout(0);
+    this.slow(60000);
 
     // Make a ton of files. Changed from hard links due to Windows failures
     var expectedCount = 6000;

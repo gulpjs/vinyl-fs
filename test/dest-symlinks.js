@@ -13,10 +13,12 @@ var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var isDirectory = require('./utils/is-directory-mock');
 var testConstants = require('./utils/test-constants');
+var testStreams = require('./utils/test-streams');
+
+var join = testStreams.join;
+var mochaPump = testStreams.mochaPump;
 
 var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -52,10 +54,10 @@ describe('.dest() with symlinks', function() {
       expect(files[0].path).toEqual(outputPath);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -76,10 +78,10 @@ describe('.dest() with symlinks', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -112,10 +114,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -149,10 +151,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -185,10 +187,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { useJunctions: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -227,10 +229,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { useJunctions: useJunctions }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -263,10 +265,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -300,10 +302,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -329,11 +331,11 @@ describe('.dest() with symlinks', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       // The useJunctions option is ignored when file is not a directory
       vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -369,10 +371,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -399,10 +401,10 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -430,10 +432,10 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: true }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -465,10 +467,10 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -500,10 +502,10 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
+    mochaPump(this, [
       from.obj([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });
