@@ -18,10 +18,11 @@ test_script:
   # - where npm
   - node --version
   - npm --version
-  - whoami /groups
+  # - whoami /groups
   # - icacls %APPVEYOR_BUILD_FOLDER% /grant appveyor:(OI)(CI)F
-  - icacls %APPVEYOR_BUILD_FOLDER%\test /grant appveyor:F /T
-  - cmd: psexec.exe \\localhost -w %APPVEYOR_BUILD_FOLDER% -l cmd.exe /c npm test
+  # - icacls %APPVEYOR_BUILD_FOLDER%\test /grant appveyor:F /T
+  # - cmd: psexec.exe \\localhost -w %APPVEYOR_BUILD_FOLDER% -l cmd.exe /c npm test
+  runas /trustlevel:0x20000 "cmd.exe /c npm test"
 
 # on_finish:
 #   - type success.txt
