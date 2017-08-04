@@ -1,18 +1,22 @@
 # http://www.appveyor.com/docs/appveyor-yml
 # http://www.appveyor.com/docs/lang/nodejs-iojs
 
+matrix:
+  allow_failures:
+    - nodejs_version: "8"
+    - nonadmin: true
 environment:
   matrix:
     # node.js
+    - nodejs_version: "8"
     - nodejs_version: "6"
+    - nodejs_version: "6"
+      nonatmin: true
     - nodejs_version: "5"
     - nodejs_version: "4"
     - nodejs_version: "0.12"
     - nodejs_version: "0.10"
-    - allow_failures:
-      - nodejs_version: "8"
-      - nodejs_version: "6"
-        nonadmin: true
+
 
 install:
   - ps: Install-Product node $env:nodejs_version
