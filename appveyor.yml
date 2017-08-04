@@ -4,11 +4,14 @@
 environment:
   matrix:
     # node.js
-    - nodejs_version: "0.10"
-    - nodejs_version: "0.12"
-    - nodejs_version: "4"
-    - nodejs_version: "5"
+    # - nodejs_version: "8"
+    # - nodejs_version: "6"
     - nodejs_version: "6"
+      nonadmin: true
+    # - nodejs_version: "5"
+    # - nodejs_version: "4"
+    # - nodejs_version: "0.12"
+    # - nodejs_version: "0.10"
 
 install:
   - ps: Install-Product node $env:nodejs_version
@@ -17,7 +20,10 @@ install:
 test_script:
   - node --version
   - npm --version
-  - cmd: npm test
+  - icacls test /grant:r "appvyr-win\appveyor:(OI)(CI)(F)" /inheritance:d
+  - cmd: if "%nonadmin%"=="true" (psexec -accepteula -l -w %CD% \\localhost cmd /c md test\out-fixtures) else  (md test\out-fixtures)
+  - icacls test\out-fixtures
+  - cmd: if "%nonadmin%"=="true" (psexec -accepteula -l -w %CD% \\localhost cmd /c npm test) else  (npm test)
 
 build: off
 
