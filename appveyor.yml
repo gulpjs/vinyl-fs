@@ -9,7 +9,7 @@ environment:
     - nodejs_version: "4"
     - nodejs_version: "0.12"
     - nodejs_version: "0.10"
-    allow_failures:
+    - allow_failures:
       - nodejs_version: "8"
       - nodejs_version: "6"
         nonadmin: true
