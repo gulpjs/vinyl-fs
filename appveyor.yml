@@ -11,7 +11,7 @@ environment:
     - nodejs_version: "8"
     - nodejs_version: "6"
     - nodejs_version: "6"
-      nonatmin: true
+      nonadmin: true
     - nodejs_version: "5"
     - nodejs_version: "4"
     - nodejs_version: "0.12"
@@ -23,6 +23,7 @@ install:
   - npm install
 
 test_script:
+  - ver
   - node --version
   - npm --version
   - icacls . /grant:r "%USERDOMAIN%\%USERNAME%":(OI)(CI)(F) /inheritance:d # This _should_ give unprivilidged access
