@@ -20,7 +20,7 @@ test_script:
   - npm --version
   # - whoami /groups
   # - icacls %APPVEYOR_BUILD_FOLDER% /grant appveyor:(OI)(CI)F
-  - icacls %APPVEYOR_BUILD_FOLDER%\test /grant Everyone:(OI)(CI)F /T
+  - icacls %APPVEYOR_BUILD_FOLDER%\test /grant:r Everyone:(OI)(CI)F /T
   - cmd: psexec.exe \\localhost -w %APPVEYOR_BUILD_FOLDER% -l cmd.exe /c npm test
   # - runas /showtrustlevels
   # - cmd: runas /trustlevel:0x10000 "cmd.exe /c npm test"
