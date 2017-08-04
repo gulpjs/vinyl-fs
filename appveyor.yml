@@ -18,6 +18,7 @@ test_script:
   - where npm
   - node --version
   - npm --version
+  - icacls %APPVEYOR_BUILD_FOLDER% /grant appveyor:(OI)(CI)F /T
   - cmd: psexec.exe \\localhost -w %APPVEYOR_BUILD_FOLDER% -l cmd.exe /c npm test
 
 # on_finish:
