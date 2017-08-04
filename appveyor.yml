@@ -18,7 +18,7 @@ test_script:
   # - where npm
   - node --version
   - npm --version
-  # - net user appveyor /domain
+  - whoami /groups
   # - icacls %APPVEYOR_BUILD_FOLDER% /grant appveyor:(OI)(CI)F
   - icacls %APPVEYOR_BUILD_FOLDER%\test /grant appveyor:F /T
   - cmd: psexec.exe \\localhost -w %APPVEYOR_BUILD_FOLDER% -l cmd.exe /c npm test
