@@ -25,7 +25,7 @@ install:
 test_script:
   - node --version
   - npm --version
-  - icacls . /grant:r "%USERDOMAIN%\%USERNAME%":(OI)(CI)(F)" /inheritance:d # This _should_ give unprivilidged access
+  - icacls . /grant:r "%USERDOMAIN%\%USERNAME%":(OI)(CI)(F) /inheritance:d # This _should_ give unprivilidged access
   - icacls test\fixtures
   - cmd: if "%nonadmin%"=="true" (psexec -accepteula -l -w %CD% \\localhost cmd /c md test\out-fixtures) else  (md test\out-fixtures)
   - icacls test\out-fixtures
