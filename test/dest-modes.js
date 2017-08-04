@@ -14,10 +14,12 @@ var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
 var isDirectory = require('./utils/is-directory-mock');
 var testConstants = require('./utils/test-constants');
+var testStreams = require('./utils/test-streams');
+
+var join = testStreams.join;
 
 var from = miss.from;
 var pipe = miss.pipe;
-var concat = miss.concat;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -62,7 +64,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -90,7 +92,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -118,7 +120,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -147,7 +149,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -176,7 +178,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -201,7 +203,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -234,7 +236,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -271,7 +273,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file1, file2]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -302,7 +304,7 @@ describe('.dest() with custom modes', function() {
         mode: expectedFileMode,
         dirMode: expectedDirMode,
       }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -333,7 +335,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -368,7 +370,7 @@ describe('.dest() with custom modes', function() {
     pipe([
       from.obj([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 

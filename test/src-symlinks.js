@@ -8,9 +8,12 @@ var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var testConstants = require('./utils/test-constants');
+var testStreams = require('./utils/test-streams');
+
+var join = testStreams.join;
+var reportWarningAndSkip = testStreams.reportWarningAndSkip;
 
 var pipe = miss.pipe;
-var concat = miss.concat;
 
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -32,14 +35,20 @@ describe('.src() with symlinks', function() {
   afterEach(clean);
 
   beforeEach(function(done) {
-    fs.mkdirSync(outputBase);
-    fs.mkdirSync(outputDirpath);
-    fs.symlinkSync(inputDirpath, symlinkDirpath);
-    fs.symlinkSync(symlinkDirpath, symlinkMultiDirpath);
-    fs.symlinkSync(symlinkMultiDirpath, symlinkMultiDirpathSecond);
-    fs.symlinkSync(inputPath, symlinkPath);
-    fs.symlinkSync(symlinkNestedTarget, symlinkNestedSecond);
-    fs.symlinkSync(symlinkNestedSecond, symlinkNestedFirst);
+    try {
+      fs.mkdirSync(outputBase);
+      fs.mkdirSync(outputDirpath);
+      fs.symlinkSync(inputDirpath, symlinkDirpath);
+      fs.symlinkSync(symlinkDirpath, symlinkMultiDirpath);
+      fs.symlinkSync(symlinkMultiDirpath, symlinkMultiDirpathSecond);
+      fs.symlinkSync(inputPath, symlinkPath);
+      fs.symlinkSync(symlinkNestedTarget, symlinkNestedSecond);
+      fs.symlinkSync(symlinkNestedSecond, symlinkNestedFirst);
+    } catch (ex) {
+      if (!reportWarningAndSkip(this, ex)) {
+        throw ex;
+      }
+    }
     done();
   });
 
@@ -57,7 +66,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkNestedFirst),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -75,7 +84,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkDirpath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -93,7 +102,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkMultiDirpathSecond),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -108,7 +117,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkPath, { resolveSymlinks: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -123,7 +132,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkDirpath, { resolveSymlinks: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -146,7 +155,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkNestedFirst, { resolveSymlinks: resolveSymlinks }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -160,7 +169,7 @@ describe('.src() with symlinks', function() {
 
     pipe([
       vfs.src(symlinkNestedFirst, { resolveSymlinks: spy }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });

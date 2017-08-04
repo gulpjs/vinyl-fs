@@ -10,10 +10,13 @@ var miss = require('mississippi');
 var vfs = require('../');
 
 var testConstants = require('./utils/test-constants');
+var testStreams = require('./utils/test-streams');
 
+var join = testStreams.join;
+
+var concat = miss.concat;
 var pipe = miss.pipe;
 var from = miss.from;
-var concat = miss.concat;
 var through = miss.through;
 
 var inputBase = testConstants.inputBase;
@@ -99,9 +102,13 @@ describe('.src()', function() {
       done();
     }
 
+    function never(files) {
+      assert('this function should not be invoked', files);
+    }
+
     pipe([
       vfs.src('./fixtures/noexist.coffee'),
-      concat(),
+      join(never),
     ], assert);
   });
 
@@ -124,7 +131,7 @@ describe('.src()', function() {
 
     pipe([
       srcStream,
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -139,7 +146,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(bomInputPath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -153,7 +160,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(bomInputPath, { removeBOM: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -169,7 +176,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(beEncodedInputPath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -197,7 +204,7 @@ describe('.src()', function() {
     pipe([
       vfs.src(beEncodedInputPath, { buffer: false }),
       through.obj(compareContents),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -213,7 +220,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(leEncodedInputPath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -241,7 +248,7 @@ describe('.src()', function() {
     pipe([
       vfs.src(leEncodedInputPath, { buffer: false }),
       through.obj(compareContents),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -252,7 +259,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src('./fixtures/*.txt', { cwd: __dirname }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -265,7 +272,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src('./fixtures/*.txt', { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -281,7 +288,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputDirGlob),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -296,7 +303,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src('./fixtures/f*/', { cwd: cwd }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -310,7 +317,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputDirpath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -324,7 +331,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputPath, { read: false }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -338,7 +345,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputPath, { since: lastUpdateDate }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -351,7 +358,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputPath, { since: lastUpdateDate }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -380,7 +387,7 @@ describe('.src()', function() {
     pipe([
       vfs.src(inputPath, { buffer: false }),
       through.obj(compareContents),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -400,7 +407,7 @@ describe('.src()', function() {
     pipe([
       from.obj([file]),
       vfs.src(inputPath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -412,7 +419,7 @@ describe('.src()', function() {
     pipe([
       vfs.src(inputPath),
       vfs.src(inputPath),
-      concat(assert),
+      join(assert),
     ], done);
   });
 
@@ -427,7 +434,7 @@ describe('.src()', function() {
 
     pipe([
       vfs.src(inputPath, { read: read }),
-      concat(assert),
+      join(assert),
     ], done);
   });
 });
