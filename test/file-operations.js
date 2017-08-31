@@ -29,6 +29,7 @@ var getModeDiff = fo.getModeDiff;
 var getTimesDiff = fo.getTimesDiff;
 var getOwnerDiff = fo.getOwnerDiff;
 var isValidUnixId = fo.isValidUnixId;
+var getFlags = fo.getFlags;
 var isFatalOverwriteError = fo.isFatalOverwriteError;
 var isFatalUnlinkError = fo.isFatalUnlinkError;
 var reflectStat = fo.reflectStat;
@@ -167,6 +168,25 @@ describe('isValidUnixId', function() {
     var result = isValidUnixId(-1);
 
     expect(result).toEqual(false);
+
+    done();
+  });
+});
+
+describe('getFlags', function() {
+
+  it('returns wx if overwrite is false', function(done) {
+    var result = getFlags(false);
+
+    expect(result).toEqual('wx');
+
+    done();
+  });
+
+  it('returns w if overwrite is true', function(done) {
+    var result = getFlags(true);
+
+    expect(result).toEqual('w');
 
     done();
   });
