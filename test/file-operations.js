@@ -29,6 +29,7 @@ var getModeDiff = fo.getModeDiff;
 var getTimesDiff = fo.getTimesDiff;
 var getOwnerDiff = fo.getOwnerDiff;
 var isValidUnixId = fo.isValidUnixId;
+var getFlags = fo.getFlags;
 var isFatalOverwriteError = fo.isFatalOverwriteError;
 var isFatalUnlinkError = fo.isFatalUnlinkError;
 var reflectStat = fo.reflectStat;
@@ -172,6 +173,53 @@ describe('isValidUnixId', function() {
   });
 });
 
+describe('getFlags', function() {
+
+  it('returns wx if overwrite is false and append is false', function(done) {
+    var result = getFlags({
+      overwrite: false,
+      append: false,
+    });
+
+    expect(result).toEqual('wx');
+
+    done();
+  });
+
+  it('returns w if overwrite is true and append is false', function(done) {
+    var result = getFlags({
+      overwrite: true,
+      append: false,
+    });
+
+    expect(result).toEqual('w');
+
+    done();
+  });
+
+  it('returns ax if overwrite is false and append is true', function(done) {
+    var result = getFlags({
+      overwrite: false,
+      append: true,
+    });
+
+    expect(result).toEqual('ax');
+
+    done();
+  });
+
+  it('returns a if overwrite is true and append is true', function(done) {
+    var result = getFlags({
+      overwrite: true,
+      append: true,
+    });
+
+    expect(result).toEqual('a');
+
+    done();
+  });
+});
+
 describe('isFatalOverwriteError', function() {
 
   it('returns false if not given any error', function(done) {
@@ -190,7 +238,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns false if code == EEXIST and flag == wx', function(done) {
+  it('returns false if code == EEXIST and flags == wx', function(done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'wx');
 
     expect(result).toEqual(false);
@@ -198,7 +246,15 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns true if error.code == EEXIST and file.flag != wx', function(done) {
+  it('returns false if code == EEXIST and flags == ax', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'ax');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns true if error.code == EEXIST and flags == w', function(done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'w');
 
     expect(result).toEqual(true);
@@ -206,6 +262,13 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
+  it('returns true if error.code == EEXIST and flags == a', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'a');
+
+    expect(result).toEqual(true);
+
+    done();
+  });
 });
 
 describe('isFatalUnlinkError', function() {
@@ -784,10 +847,10 @@ describe('writeFile', function() {
     });
   });
 
-  it('accepts a different flag in options', function(done) {
+  it('accepts a different flags in options', function(done) {
     var length = contents.length;
     var options = {
-      flag: 'w+',
+      flags: 'w+',
     };
 
     writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
@@ -813,7 +876,7 @@ describe('writeFile', function() {
     var expected = initial + toWrite;
 
     var options = {
-      flag: 'a',
+      flags: 'a',
     };
 
     writeFile(outputPath, new Buffer(toWrite), options, function(err, fd) {
@@ -843,7 +906,7 @@ describe('writeFile', function() {
 
   it('passes a file descriptor if write call errors', function(done) {
     var options = {
-      flag: 'r',
+      flags: 'r',
     };
 
     writeFile(inputPath, new Buffer(contents), options, function(err, fd) {
@@ -1398,7 +1461,7 @@ describe('createWriteStream', function() {
     ], assert);
   });
 
-  it('accepts flag option', function(done) {
+  it('accepts flags option', function(done) {
     // Write 13 stars then 12345 because the length of expected is 13
     fs.writeFileSync(outputPath, '*************12345');
 
@@ -1411,7 +1474,7 @@ describe('createWriteStream', function() {
     pipe([
       from([contents]),
       // Replaces from the beginning of the file
-      createWriteStream(outputPath, { flag: 'r+' }),
+      createWriteStream(outputPath, { flags: 'r+' }),
     ], assert);
   });
 
@@ -1427,7 +1490,7 @@ describe('createWriteStream', function() {
     pipe([
       from([contents]),
       // Appends to the end of the file
-      createWriteStream(outputPath, { flag: 'a' }),
+      createWriteStream(outputPath, { flags: 'a' }),
     ], assert);
   });
 
@@ -1572,7 +1635,7 @@ describe('createWriteStream', function() {
 
     pipe([
       from([contents]),
-      createWriteStream(outputPath, { flag: 'r' }),
+      createWriteStream(outputPath, { flags: 'r' }),
     ], assert);
   });
 });
