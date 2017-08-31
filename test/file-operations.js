@@ -175,18 +175,46 @@ describe('isValidUnixId', function() {
 
 describe('getFlags', function() {
 
-  it('returns wx if overwrite is false', function(done) {
-    var result = getFlags(false);
+  it('returns wx if overwrite is false and append is false', function(done) {
+    var result = getFlags({
+      overwrite: false,
+      append: false,
+    });
 
     expect(result).toEqual('wx');
 
     done();
   });
 
-  it('returns w if overwrite is true', function(done) {
-    var result = getFlags(true);
+  it('returns w if overwrite is true and append is false', function(done) {
+    var result = getFlags({
+      overwrite: true,
+      append: false,
+    });
 
     expect(result).toEqual('w');
+
+    done();
+  });
+
+  it('returns ax if overwrite is false and append is true', function(done) {
+    var result = getFlags({
+      overwrite: false,
+      append: true,
+    });
+
+    expect(result).toEqual('ax');
+
+    done();
+  });
+
+  it('returns a if overwrite is true and append is true', function(done) {
+    var result = getFlags({
+      overwrite: true,
+      append: true,
+    });
+
+    expect(result).toEqual('a');
 
     done();
   });
@@ -218,7 +246,15 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns true if error.code == EEXIST and flags != wx', function(done) {
+  it('returns false if code == EEXIST and flags == ax', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'ax');
+
+    expect(result).toEqual(false);
+
+    done();
+  });
+
+  it('returns true if error.code == EEXIST and flags == w', function(done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'w');
 
     expect(result).toEqual(true);
@@ -226,6 +262,13 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
+  it('returns true if error.code == EEXIST and flags == a', function(done) {
+    var result = isFatalOverwriteError({ code: 'EEXIST' }, 'a');
+
+    expect(result).toEqual(true);
+
+    done();
+  });
 });
 
 describe('isFatalUnlinkError', function() {

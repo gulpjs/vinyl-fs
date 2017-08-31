@@ -181,6 +181,14 @@ Type: `Boolean`
 
 Default: `true` (always overwrite existing files)
 
+##### `options.append`
+
+Whether or not new data should be appended after existing file contents (if any).
+
+Type: `Boolean`
+
+Default: `false` (always replace existing contents, if any)
+
 ##### `options.sourcemaps`
 
 Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`.
