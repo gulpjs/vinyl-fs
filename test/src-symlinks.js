@@ -127,7 +127,7 @@ describe('.src() with symlinks', function() {
     ], done);
   });
 
-  it('recieves a file with symbolic link stats when resolveSymlinks is a function', function(done) {
+  it('receives a file with symbolic link stats when resolveSymlinks is a function', function(done) {
 
     function resolveSymlinks(file) {
       expect(file).toExist();
