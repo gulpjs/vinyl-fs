@@ -40,7 +40,7 @@
     "resolve-options": "^1.0.0",
     "through2": "^2.0.0",
     "to-through": "^2.0.0",
-    "value-or-function": "^2.0.0",
+    "value-or-function": "^3.0.0",
     "vinyl": "^2.0.0",
     "vinyl-sourcemap": "^1.0.0"
   },
