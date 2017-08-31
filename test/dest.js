@@ -606,6 +606,65 @@ describe('.dest()', function() {
     ], done);
   });
 
+  it('appends content with append option set to true', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: new Buffer(contents),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(existingContents + contents);
+    }
+
+    // This should be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { append: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('appends content with append option set to a function that returns true', function(done) {
+    var existingContents = 'Lorem Ipsum';
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: new Buffer(contents),
+    });
+
+    function append(f) {
+      expect(f).toEqual(file);
+      return true;
+    }
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(existingContents + contents);
+    }
+
+    // This should be overwritten
+    fs.mkdirSync(outputBase);
+    fs.writeFileSync(outputPath, existingContents);
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { append: append }),
+      concat(assert),
+    ], done);
+  });
+
   it('emits a finish event', function(done) {
     var destStream = vfs.dest(outputBase);
 
