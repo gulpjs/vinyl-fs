@@ -31,6 +31,8 @@ var getOwnerDiff = fo.getOwnerDiff;
 var isValidUnixId = fo.isValidUnixId;
 var isFatalOverwriteError = fo.isFatalOverwriteError;
 var isFatalUnlinkError = fo.isFatalUnlinkError;
+var reflectStat = fo.reflectStat;
+var reflectLinkStat = fo.reflectLinkStat;
 var updateMetadata = fo.updateMetadata;
 var createWriteStream = fo.createWriteStream;
 
@@ -41,7 +43,9 @@ var string = testStreams.string;
 
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
+var neInputDirpath = testConstants.neInputDirpath;
 var outputPath = testConstants.outputPath;
+var symlinkPath = testConstants.symlinkDirpath;
 var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
@@ -889,6 +893,84 @@ describe('writeFile', function() {
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, done);
+    });
+  });
+});
+
+describe('reflectStat', function() {
+
+  beforeEach(clean);
+  afterEach(clean);
+
+  beforeEach(function(done) {
+    mkdirp(outputBase, done);
+  });
+
+  it('passes the error if stat fails', function(done) {
+
+    var file = new File();
+
+    reflectStat(neInputDirpath, file, function(err) {
+      expect(err).toExist();
+
+      done();
+    });
+  });
+
+  it('updates the vinyl with filesystem stats', function(done) {
+    var file = new File();
+
+    fs.symlinkSync(inputPath, symlinkPath);
+
+    reflectStat(symlinkPath, file, function() {
+      // There appears to be a bug in the Windows implementation which causes
+      // the sync versions of stat and lstat to return unsigned 32-bit ints
+      // whilst the async versions returns signed 32-bit ints... This affects
+      // dev but possibly others as well?
+      fs.stat(symlinkPath, function(err, stat) {
+        expect(file.stat).toEqual(stat);
+
+        done();
+      });
+    });
+  });
+});
+
+describe('reflectLinkStat', function() {
+
+  beforeEach(clean);
+  afterEach(clean);
+
+  beforeEach(function(done) {
+    mkdirp(outputBase, done);
+  });
+
+  it('passes the error if lstat fails', function(done) {
+
+    var file = new File();
+
+    reflectLinkStat(neInputDirpath, file, function(err) {
+      expect(err).toExist();
+
+      done();
+    });
+  });
+
+  it('updates the vinyl with filesystem symbolic stats', function(done) {
+    var file = new File();
+
+    fs.symlinkSync(inputPath, symlinkPath);
+
+    reflectLinkStat(symlinkPath, file, function() {
+      // There appears to be a bug in the Windows implementation which causes
+      // the sync versions of stat and lstat to return unsigned 32-bit ints
+      // whilst the async versions returns signed 32-bit ints... This affects
+      // dev but possibly others as well?
+      fs.lstat(symlinkPath, function(err, stat) {
+        expect(file.stat).toEqual(stat);
+
+        done();
+      });
     });
   });
 });
