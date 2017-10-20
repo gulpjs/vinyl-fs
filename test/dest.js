@@ -14,7 +14,7 @@ var statMode = require('./utils/stat-mode');
 var mockError = require('./utils/mock-error');
 var applyUmask = require('./utils/apply-umask');
 var testStreams = require('./utils/test-streams');
-var isDirectory = require('./utils/is-directory-mock');
+var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 
 var from = miss.from;
@@ -368,7 +368,7 @@ describe('.dest()', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
       },
     });
 
@@ -828,7 +828,7 @@ describe('.dest()', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
       },
     });
 
@@ -851,7 +851,7 @@ describe('.dest()', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
         mode: applyUmask('000'),
       },
     });
@@ -876,7 +876,7 @@ describe('.dest()', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
       },
     });
 

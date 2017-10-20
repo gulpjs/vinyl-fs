@@ -211,10 +211,11 @@ Default: `false`
 ##### `options.useJunctions`
 
 When creating a symlink, whether or not a directory symlink should be created as a `junction`.
+This option is only relevant on Windows and ignored elsewhere.
 
 Type: `Boolean`
 
-Default: `true` on Windows, `false` on all other platforms
+Default: `true`
 
 ### `symlink(folder[, options])`
 
@@ -238,14 +239,6 @@ The working directory the folder is relative to.
 Type: `String`
 
 Default: `process.cwd()`
-
-##### `options.mode`
-
-The mode the symlinks should be created with.
-
-Type: `Number`
-
-Default: The `mode` of the input file (`file.stat.mode`) if any, or the process mode if the input file has no `mode` property.
 
 ##### `options.dirMode`
 
@@ -274,10 +267,11 @@ Default: `false`
 ##### `options.useJunctions`
 
 Whether or not a directory symlink should be created as a `junction`.
+This option is only relevant on Windows and ignored elsewhere.
 
 Type: `Boolean`
 
-Default: `true` on Windows, `false` on all other platforms
+Default: `true`
 
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob

@@ -1,5 +1,6 @@
 'use strict';
 
+var os = require('os');
 var path = require('path');
 
 var fs = require('graceful-fs');
@@ -23,6 +24,9 @@ var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
 var inputBase = path.join(base, './in/');
+var inputDirpath = testConstants.inputDirpath;
+var outputDirpath = testConstants.outputDirpath;
+var symlinkDirpath = testConstants.symlinkDirpath;
 var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
 var outputSymlink = path.join(symlinkDirpath, './foo');
@@ -58,7 +62,7 @@ describe('integrations', function() {
     ], done);
   });
 
-  it('(*nix) sources a directory, creates a symlink and copies the symlink', function(done) {
+  it('(*nix) sources a directory, creates a symlink and copies it', function(done) {
     if (isWindows) {
       this.skip();
       return;
@@ -70,6 +74,7 @@ describe('integrations', function() {
 
       expect(symlinkResult).toEqual(inputDirpath);
       expect(destResult).toEqual(inputDirpath);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
@@ -81,7 +86,7 @@ describe('integrations', function() {
     ], done);
   });
 
-  it('(windows) sources a directory, creates a junction and copies the junction', function(done) {
+  it('(windows) sources a directory, creates a junction and copies it', function(done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -95,6 +100,7 @@ describe('integrations', function() {
 
       expect(symlinkResult).toEqual(expected);
       expect(destResult).toEqual(expected);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
@@ -120,6 +126,34 @@ describe('integrations', function() {
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(inputDirpath);
+      expect(files[0].isSymbolic()).toEqual(true);
+      expect(files[0].symlink).toEqual(inputDirpath);
+    }
+
+    pipe([
+      vfs.src(outputSymlink, { resolveSymlinks: false }),
+      vfs.dest(outputDirpath),
+      concat(assert),
+    ], done);
+  });
+
+  it('(windows) sources a directory symlink and copies it', function(done) {
+    if (!isWindows) {
+      this.skip();
+      return;
+    }
+
+    fs.mkdirSync(base);
+    fs.mkdirSync(symlinkDirpath);
+    fs.symlinkSync(inputDirpath, outputSymlink, 'dir');
+
+    function assert(files) {
+      // 'dir' symlinks add an ending separator
+      var expected = inputDirpath + path.sep;
+      var destResult = fs.readlinkSync(outputDirpathSymlink);
+
+      expect(destResult).toEqual(expected);
+      expect(files[0].isSymbolic()).toEqual(true);
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
@@ -146,6 +180,7 @@ describe('integrations', function() {
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(expected);
+      expect(files[0].isSymbolic()).toEqual(true);
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 

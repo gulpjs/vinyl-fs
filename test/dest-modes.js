@@ -12,7 +12,7 @@ var statMode = require('./utils/stat-mode');
 var mockError = require('./utils/mock-error');
 var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
-var isDirectory = require('./utils/is-directory-mock');
+var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 
 var from = miss.from;
@@ -135,7 +135,7 @@ describe('.dest() with custom modes', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
         mode: expectedMode,
       },
     });
@@ -164,7 +164,7 @@ describe('.dest() with custom modes', function() {
       path: inputDirpath,
       contents: null,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
         mode: expectedMode,
       },
     });
@@ -251,7 +251,7 @@ describe('.dest() with custom modes', function() {
       base: inputBase,
       path: outputDirpath,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
         mode: startMode,
       },
     });
@@ -259,7 +259,7 @@ describe('.dest() with custom modes', function() {
       base: inputBase,
       path: outputDirpath,
       stat: {
-        isDirectory: isDirectory,
+        isDirectory: always(true),
         mode: expectedMode,
       },
     });
