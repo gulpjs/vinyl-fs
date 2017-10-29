@@ -211,7 +211,8 @@ Default: `false`
 ##### `options.useJunctions`
 
 When creating a symlink, whether or not a directory symlink should be created as a `junction`.
-This option is only relevant on Windows and ignored elsewhere.
+This option is only relevant on Windows and ignored elsewhere. Please refer to
+the caveats section below.
 
 Type: `Boolean`
 
@@ -267,11 +268,37 @@ Default: `false`
 ##### `options.useJunctions`
 
 Whether or not a directory symlink should be created as a `junction`.
-This option is only relevant on Windows and ignored elsewhere.
+This option is only relevant on Windows and ignored elsewhere. Please refer to
+the caveats section below.
 
 Type: `Boolean`
 
 Default: `true`
+
+#### Symbolic links on Windows
+
+When creating symbolic links on Windows, we pass a `type` argument to Node's
+`fs` module which specifies the kind of target we link to (one of `'file'`,
+`'dir'` or `'junction'`). Specifically, this will be `'file'` when the target
+is a regular file, `'junction'` if the target is a directory, or `'dir'` if
+the target is a directory and the user overrides the `useJunctions` option
+default.
+
+However if the user tries to make a "dangling" link, pointing to a non-existent
+target, we won't be able to determine automatically which type we should use.
+In these cases, `vinyl-fs` will behave slightly differently depending on
+whether the dangling link is being created via `symlink()` or via `dest()`.
+
+For dangling links created via `symlink()`, the incoming vinyl represents the
+target and so we will look to its stats to guess the desired type. In
+particular, if `isDirectory()` returns false then we'll create a `'file'` type
+link, otherwise we will create a `'junction'` or a `'dir'` type link depending
+on the value of the `useJunctions` option.
+
+For dangling links created via `dest()`, the incoming vinyl represents the link,
+typically read off disk via `src()` with the `resolveSymlinks` option set to 
+false. In this case we won't be able to make any reasonable guess as to the 
+type of link and we default to using `'file'`.
 
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
