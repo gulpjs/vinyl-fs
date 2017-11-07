@@ -23,6 +23,7 @@
     "object-assign": "^4.0.0",
     "readable-stream": "^2.0.4",
     "strip-bom": "^2.0.0",
+    "strip-bom-buf": "^1.0.0",
     "strip-bom-stream": "^1.0.0",
     "through2": "^2.0.0",
     "through2-filter": "^2.0.0",
