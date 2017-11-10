@@ -128,7 +128,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('strips BOM from utf8-encoded files by default', function(done) {
+  it('removes BOM from utf8-encoded files by default', function(done) {
     // U+FEFF takes up 3 bytes in UTF-8: http://mothereff.in/utf-8#%EF%BB%BF
     var expectedContent = fs.readFileSync(bomInputPath).slice(3);
 
@@ -143,7 +143,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('does not strip BOM from utf8-encoded files if option is false', function(done) {
+  it('does not remove BOM from utf8-encoded files if option is false', function(done) {
     var expectedContent = fs.readFileSync(bomInputPath);
 
     function assert(files) {
@@ -159,7 +159,7 @@ describe('.src()', function() {
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-BE is enough to demonstrate this is done properly.
-  it('does not strip anything that looks like a utf8-encoded BOM from utf16be-encoded files', function(done) {
+  it('does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files', function(done) {
     var expectedContent = fs.readFileSync(beEncodedInputPath);
 
     function assert(files) {
@@ -173,7 +173,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('does not strip anything that looks like a utf8-encoded BOM from utf16be-encoded files with streaming contents', function(done) {
+  it('does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files with streaming contents', function(done) {
     var expectedContent = fs.readFileSync(beEncodedInputPath);
 
     function assertContent(contents) {
@@ -203,7 +203,7 @@ describe('.src()', function() {
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-LE is enough to demonstrate this is done properly.
-  it('does not strip anything that looks like a utf8-encoded BOM from utf16le-encoded files', function(done) {
+  it('does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files', function(done) {
     var expectedContent = fs.readFileSync(leEncodedInputPath);
 
     function assert(files) {
@@ -217,7 +217,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('does not strip anything that looks like a utf8-encoded BOM from utf16le-encoded files with streaming contents', function(done) {
+  it('does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files with streaming contents', function(done) {
     var expectedContent = fs.readFileSync(leEncodedInputPath);
 
     function assertContent(contents) {
