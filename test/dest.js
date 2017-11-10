@@ -850,6 +850,36 @@ describe('.dest()', function() {
     ], done);
   });
 
+  it('errors when a non-Vinyl object is emitted', function(done) {
+    var file = {};
+
+    function assert(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Received a non-Vinyl object in `dest()`');
+      done();
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase),
+    ], assert);
+  });
+
+  it('errors when a buffer-mode stream is piped to it', function(done) {
+    var file = new Buffer('test');
+
+    function assert(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Received a non-Vinyl object in `dest()`');
+      done();
+    }
+
+    pipe([
+      from([file]),
+      vfs.dest(outputBase),
+    ], assert);
+  });
+
   it('errors if we cannot mkdirp', function(done) {
     var mkdirSpy = expect.spyOn(fs, 'mkdir').andCall(mockError);
 
