@@ -728,6 +728,36 @@ describe('symlink stream', function() {
     ]);
   });
 
+  it('errors when a non-Vinyl object is emitted', function(done) {
+    var file = {};
+
+    function assert(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Received a non-Vinyl object in `symlink()`');
+      done();
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase),
+    ], assert);
+  });
+
+  it('errors when a buffer-mode stream is piped to it', function(done) {
+    var file = new Buffer('test');
+
+    function assert(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Received a non-Vinyl object in `symlink()`');
+      done();
+    }
+
+    pipe([
+      from([file]),
+      vfs.symlink(outputBase),
+    ], assert);
+  });
+
   it('does not get clogged by highWaterMark', function(done) {
     var expectedCount = 17;
     var highwatermarkFiles = [];
