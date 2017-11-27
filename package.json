@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "mocha": "~1.17.0",
-    "should": "~2.1.1",
+    "should": "~3.0.1",
     "mocha-lcov-reporter": "0.0.1",
     "coveralls": "~2.6.1",
     "istanbul": "~0.2.3",
