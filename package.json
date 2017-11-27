@@ -30,7 +30,7 @@
     "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "engines": {
-    "node": ">= 0.4.0"
+    "node": ">= 0.9"
   },
   "licenses": [
     {
