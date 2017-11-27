@@ -4,11 +4,18 @@ var path = require('path');
 var fs = require('graceful-fs');
 
 var bufEqual = require('buffer-equal');
-var es = require('event-stream');
+var through = require('through2');
 var File = require('vinyl');
 
 var should = require('should');
 require('mocha');
+
+var dataWrap = function(fn) {
+  return function(data, enc, cb) {
+    fn(data);
+    cb();
+  };
+};
 
 describe('source stream', function() {
 
@@ -33,7 +40,7 @@ describe('source stream', function() {
     var stream = vfs.src("./fixtures/nothing.coffee");
 
     var buffered = [];
-    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
     stream.write(expectedFile);
     stream.end();
@@ -55,7 +62,7 @@ describe('source stream', function() {
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
@@ -73,11 +80,11 @@ describe('source stream', function() {
     var stream = vfs.src("./fixtures/wow/", {cwd: __dirname});
 
     var buffered = [];
-    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
-  it('should glob a file with read: false', function(done) {
+  it('should glob a file with with no contents', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
 
@@ -92,11 +99,11 @@ describe('source stream', function() {
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, read: false});
 
     var buffered = [];
-    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
-  it('should glob a file with buffer: false', function(done) {
+  it('should glob a file with streaming contents', function(done) {
     var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
     var expectedContent = fs.readFileSync(expectedPath);
 
@@ -105,17 +112,22 @@ describe('source stream', function() {
       should.exist(buffered[0].stat);
       buffered[0].path.should.equal(expectedPath);
       buffered[0].isStream().should.equal(true);
-      buffered[0].contents.pipe(es.wait(function(err, content){
-        should.not.exist(err);
-        bufEqual(Buffer(content), expectedContent);
-        done();
+
+      var contentBuffer = new Buffer([]);
+      var contentBufferStream = through(dataWrap(function(data){
+        contentBuffer = Buffer.concat([contentBuffer, data]);
       }));
+      buffered[0].contents.pipe(contentBufferStream);
+      buffered[0].contents.once('end', function(){
+        bufEqual(contentBuffer, expectedContent);
+        done();
+      });
     };
 
     var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, buffer: false});
     
     var buffered = [];
-    bufferStream = es.through(buffered.push.bind(buffered), onEnd);
+    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
     stream.pipe(bufferStream);
   });
 
