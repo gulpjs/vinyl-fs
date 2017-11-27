@@ -1,5 +1,5 @@
 module.exports = {
-  src: require('./lib/createInputStream'),
-  dest: require('./lib/createOutputStream'),
+  src: require('./lib/src'),
+  dest: require('./lib/dest'),
   watch: require('glob-watcher')
 };
