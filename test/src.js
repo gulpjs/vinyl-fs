@@ -53,7 +53,7 @@ describe('source stream', function() {
   });
 
   it('should pass through writes', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var expectedFile = new File({
@@ -63,24 +63,17 @@ describe('source stream', function() {
       contents: expectedContent
     });
 
-    var onEnd = function(){
-      buffered.length.should.equal(1);
-      buffered[0].should.equal(expectedFile);
-      bufEqual(buffered[0].contents, expectedContent).should.equal(true);
+    var stream = vfs.src('./fixtures/noexist.coffee');
+    stream.on('data', function(file){
+      file.should.equal(expectedFile);
+      bufEqual(file.contents, expectedContent).should.equal(true);
       done();
-    };
-
-    var stream = vfs.src("./fixtures/nothing.coffee");
-
-    var buffered = [];
-    bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
-    stream.pipe(bufferStream);
+    });
     stream.write(expectedFile);
-    stream.end();
   });
 
   it('should strip BOM from UTF-8-encoded files', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/bom-utf8.txt");
+    var expectedPath = path.join(__dirname, './fixtures/bom-utf8.txt');
     var expectedContent = fs.readFileSync(expectedPath)
       // U+FEFF takes up 3 bytes in UTF-8: http://mothereff.in/utf-8#%EF%BB%BF
       .slice(3);
@@ -94,7 +87,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/bom-utf8.txt", {cwd: __dirname});
+    var stream = vfs.src('./fixtures/bom-utf8.txt', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -104,7 +97,7 @@ describe('source stream', function() {
   it('should not strip anything that looks like a UTF-8-encoded BOM from UTF-16-BE-encoded files', function(done) {
     // Note: this goes for any non-UTF-8 encoding, but testing for UTF-16-BE
     // and UTF-16-LE is enough to demonstrate this is done properly.
-    var expectedPath = path.join(__dirname, "./fixtures/bom-utf16be.txt");
+    var expectedPath = path.join(__dirname, './fixtures/bom-utf16be.txt');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -116,7 +109,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/bom-utf16be.txt", {cwd: __dirname});
+    var stream = vfs.src('./fixtures/bom-utf16be.txt', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -126,7 +119,7 @@ describe('source stream', function() {
   it('should not strip anything that looks like a UTF-8-encoded BOM from UTF-16-LE-encoded files', function(done) {
     // Note: this goes for any non-UTF-8 encoding, but testing for UTF-16-BE
     // and UTF-16-LE is enough to demonstrate this is done properly.
-    var expectedPath = path.join(__dirname, "./fixtures/bom-utf16le.txt");
+    var expectedPath = path.join(__dirname, './fixtures/bom-utf16le.txt');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -138,7 +131,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/bom-utf16le.txt", {cwd: __dirname});
+    var stream = vfs.src('./fixtures/bom-utf16le.txt', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -146,7 +139,7 @@ describe('source stream', function() {
   });
 
   it('should glob a file with default settings', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -158,7 +151,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname});
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -166,7 +159,7 @@ describe('source stream', function() {
   });
 
   it('should glob a file with default settings and relative cwd', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -178,7 +171,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/*.coffee", {cwd: path.relative(process.cwd(), __dirname)});
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: path.relative(process.cwd(), __dirname)});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -186,7 +179,7 @@ describe('source stream', function() {
   });
 
   it('should glob a directory with default settings', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/wow");
+    var expectedPath = path.join(__dirname, './fixtures/wow');
 
     var onEnd = function(){
       buffered.length.should.equal(1);
@@ -196,7 +189,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/wow/", {cwd: __dirname});
+    var stream = vfs.src('./fixtures/wow/', {cwd: __dirname});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -204,7 +197,7 @@ describe('source stream', function() {
   });
 
   it('should glob a file with with no contents', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -215,7 +208,7 @@ describe('source stream', function() {
       done();
     };
 
-    var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, read: false});
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, read: false});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
@@ -223,7 +216,7 @@ describe('source stream', function() {
   });
 
   it('should glob a file with streaming contents', function(done) {
-    var expectedPath = path.join(__dirname, "./fixtures/test.coffee");
+    var expectedPath = path.join(__dirname, './fixtures/test.coffee');
     var expectedContent = fs.readFileSync(expectedPath);
 
     var onEnd = function(){
@@ -243,7 +236,7 @@ describe('source stream', function() {
       });
     };
 
-    var stream = vfs.src("./fixtures/*.coffee", {cwd: __dirname, buffer: false});
+    var stream = vfs.src('./fixtures/*.coffee', {cwd: __dirname, buffer: false});
 
     var buffered = [];
     bufferStream = through.obj(dataWrap(buffered.push.bind(buffered)), onEnd);
