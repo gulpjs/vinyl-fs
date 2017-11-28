@@ -50,7 +50,8 @@ fs.src(['*.js', '!b*.js'])
 ```
 
 - Possible options for the second argument:
-  - cwd - Specify the working directory the folder is relative to. Default is `process.cwd()`
+  - cwd - Specify the working directory the folder is relative to.
+    - Default is `process.cwd()`
   - base - Specify the folder relative to the cwd. Default is where the glob begins. This is used to determine the file names when saving in `.dest()`
   - buffer - `true` or `false` if you want to buffer the file.
     - Default value is `true`
@@ -60,6 +61,9 @@ fs.src(['*.js', '!b*.js'])
     - `false` will disable writing the file to disk via `.dest()`
   - since - `Date` or `number` if you only want files that have been modified since the time specified.
   - passthrough - `true` or `false` if you want a duplex stream which passes items through and emits globbed files.
+    - Default is `false`.
+  - sourcemaps - `true` or `false` if you want files to have sourcemaps enabled.
+    - Default is `false`.
   - Any glob-related options are documented in [glob-stream] and [node-glob]
 - Returns a Readable stream by default, or a Duplex stream if the `passthrough` option is set to `true`.
 - This stream emits matching [vinyl] File objects
