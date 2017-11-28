@@ -12,7 +12,7 @@
   ],
   "dependencies": {
     "duplexify": "^3.2.0",
-    "glob-stream": "^4.0.1",
+    "glob-stream": "^5.0.0",
     "glob-watcher": "^2.0.0",
     "graceful-fs": "^3.0.0",
     "merge-stream": "^0.1.7",
