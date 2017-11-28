@@ -30,7 +30,7 @@
     "through2": "^0.5.1"
   },
   "scripts": {
-    "test": "mocha --reporter spec && jshint",
+    "test": "mocha --reporter spec && jshint lib",
     "coveralls": "istanbul cover _mocha -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "engines": {
