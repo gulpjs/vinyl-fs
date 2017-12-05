@@ -59,28 +59,22 @@ describe('.dest()', function() {
   beforeEach(clean);
   afterEach(clean);
 
-  // TODO: make this work correctly
-  it.skip('throws on invalid folder (empty)', function(done) {
-    var stream;
-    try {
-      stream = vfs.dest();
-    } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
-      done();
+  it('throws on no folder argument', function(done) {
+    function noFolder() {
+      vfs.dest();
     }
+
+    expect(noFolder).toThrow('Invalid dest() folder argument. Please specify a non-empty string or a function.');
+    done();
   });
 
-  // TODO: make this work correctly
-  it.skip('throws on invalid folder (empty string)', function(done) {
-    var stream;
-    try {
-      stream = vfs.dest('');
-    } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
-      done();
+  it('throws on empty string folder argument', function(done) {
+    function emptyFolder() {
+      vfs.dest('');
     }
+
+    expect(emptyFolder).toThrow('Invalid dest() folder argument. Please specify a non-empty string or a function.');
+    done();
   });
 
   it('accepts the sourcemap option as true', function(done) {

@@ -40,16 +40,22 @@ describe('symlink stream', function() {
   beforeEach(clean);
   afterEach(clean);
 
-  // TODO: make this work correctly
-  it.skip('throws on invalid folder', function(done) {
-    var stream;
-    try {
-      stream = vfs.symlink();
-    } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
-      done();
+  it('throws on no folder argument', function(done) {
+    function noFolder() {
+      vfs.symlink();
     }
+
+    expect(noFolder).toThrow('Invalid symlink() folder argument. Please specify a non-empty string or a function.');
+    done();
+  });
+
+  it('throws on empty string folder argument', function(done) {
+    function emptyFolder() {
+      vfs.symlink('');
+    }
+
+    expect(emptyFolder).toThrow('Invalid symlink() folder argument. Please specify a non-empty string or a function.');
+    done();
   });
 
   it('passes through writes with cwd', function(done) {
