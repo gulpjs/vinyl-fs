@@ -6,7 +6,7 @@
 
 # vinyl-fs
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
 
 [Vinyl][vinyl] adapter for the file system.
 
@@ -326,13 +326,16 @@ scenario.
 
 [downloads-image]: http://img.shields.io/npm/dm/vinyl-fs.svg
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
-[npm-image]: https://badge.fury.io/js/vinyl-fs.svg
+[npm-image]: http://img.shields.io/npm/v/vinyl-fs.svg
 
 [travis-url]: https://travis-ci.org/gulpjs/vinyl-fs
-[travis-image]: https://travis-ci.org/gulpjs/vinyl-fs.svg?branch=master
+[travis-image]: http://img.shields.io/travis/gulpjs/vinyl-fs.svg?label=travis-ci
+
+[appveyor-url]: https://ci.appveyor.com/project/gulpjs/vinyl-fs
+[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/vinyl-fs.svg?label=appveyor
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
-[coveralls-image]: https://coveralls.io/repos/gulpjs/vinyl-fs/badge.svg
+[coveralls-image]: http://img.shields.io/coveralls/gulpjs/vinyl-fs/master.svg
 
 [gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.png
+[gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
