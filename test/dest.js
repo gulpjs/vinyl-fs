@@ -1022,22 +1022,21 @@ describe('.dest()', function() {
 
   it('does not marshall a Vinyl object with isSymbolic method', function(done) {
     var file = new File({
-      base: inputBase,
-      path: inputPath,
-      stat: {
-        mode: applyUmask('677'),
-      },
+      base: outputBase,
+      path: outputPath,
     });
 
     function assert(files) {
       expect(files.length).toEqual(1);
+      // Avoid comparing stats because they get reflected
+      delete files[0].stat;
       expect(files[0]).toMatch(file);
       expect(files[0]).toBe(file);
     }
 
     pipe([
       from.obj([file]),
-      vfs.dest(outputRelative),
+      vfs.dest(outputBase),
       concat(assert),
     ], done);
   });
@@ -1046,15 +1045,14 @@ describe('.dest()', function() {
     var file = new File({
       base: outputBase,
       path: outputPath,
-      stat: {
-        mode: applyUmask('677'),
-      },
     });
 
     breakPrototype(file);
 
     function assert(files) {
       expect(files.length).toEqual(1);
+      // Avoid comparing stats because they get reflected
+      delete files[0].stat;
       expect(files[0]).toMatch(file);
       expect(files[0]).toNotBe(file);
     }

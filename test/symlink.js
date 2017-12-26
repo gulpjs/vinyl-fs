@@ -14,6 +14,7 @@ var isWindows = require('./utils/is-windows');
 var testStreams = require('./utils/test-streams');
 var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
+var breakPrototype = require('./utils/break-prototype');
 
 var from = miss.from;
 var pipe = miss.pipe;
@@ -937,6 +938,52 @@ describe('symlink stream', function() {
     pipe([
       from.obj([file]),
       vfs.symlink(outputBase, { read: read }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not marshall a Vinyl object with isSymbolic method', function(done) {
+    var file = new File({
+      base: outputBase,
+      path: outputPath,
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      // Avoid comparing stats because they get reflected
+      delete files[0].stat;
+      expect(files[0]).toMatch(file);
+      expect(files[0]).toBe(file);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase),
+      concat(assert),
+    ], done);
+  });
+
+  it('marshalls a Vinyl object without isSymbolic to a newer Vinyl', function(done) {
+    var file = new File({
+      base: outputBase,
+      path: outputPath,
+      // Pre-set this because it is set by symlink
+      symlink: outputPath,
+    });
+
+    breakPrototype(file);
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      // Avoid comparing stats because they get reflected
+      delete files[0].stat;
+      expect(files[0]).toMatch(file);
+      expect(files[0]).toNotBe(file);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.symlink(outputBase),
       concat(assert),
     ], done);
   });
