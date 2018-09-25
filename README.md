@@ -96,6 +96,17 @@ Type: `Boolean`
 
 Default: `true`
 
+##### `options.encoding`
+
+Optionally transcode from the given encoding. The default is `'utf8'`. We use
+[iconv-lite], please refer to its Wiki for a list of supported encodings. You
+can set this to `false` to avoid any transcoding, and effectively just pass
+around raw binary data.
+
+Type: `String` or `Boolean`
+
+Default: `'utf8'`
+
 ##### `options.sourcemaps`
 
 Enables sourcemap support on files passed through the stream.  Will load inline sourcemaps and resolve sourcemap links from files.
@@ -189,6 +200,17 @@ Whether or not new data should be appended after existing file contents (if any)
 Type: `Boolean`
 
 Default: `false` (always replace existing contents, if any)
+
+##### `options.encoding`
+
+Optionally transcode to the given encoding. The default is `'utf8'`. We use
+[iconv-lite], please refer to its Wiki for a list of supported encodings. You
+can set this to `false` to avoid any transcoding, and effectively just pass
+around raw binary data.
+
+Type: `String` or `Boolean`
+
+Default: `'utf8'`.
 
 ##### `options.sourcemaps`
 
@@ -323,6 +345,7 @@ scenario.
 [gaze]: https://github.com/shama/gaze
 [glob-watcher]: https://github.com/wearefractal/glob-watcher
 [vinyl]: https://github.com/wearefractal/vinyl
+[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
 
 [downloads-image]: http://img.shields.io/npm/dm/vinyl-fs.svg
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
