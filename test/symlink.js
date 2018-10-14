@@ -6,6 +6,7 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var saferBuffer = require('safer-buffer');
 
 var vfs = require('../');
 
@@ -19,6 +20,8 @@ var breakPrototype = require('./utils/break-prototype');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+
+var Buffer = saferBuffer.Buffer;
 
 var count = testStreams.count;
 var slowCount = testStreams.slowCount;
@@ -165,7 +168,7 @@ describe('symlink stream', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -751,7 +754,7 @@ describe('symlink stream', function() {
   });
 
   it('errors when a buffer-mode stream is piped to it', function(done) {
-    var file = new Buffer('test');
+    var file = Buffer.from('test');
 
     function assert(err) {
       expect(err).toExist();

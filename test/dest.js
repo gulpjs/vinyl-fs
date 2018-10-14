@@ -6,6 +6,7 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var saferBuffer = require('safer-buffer');
 
 var vfs = require('../');
 
@@ -21,6 +22,8 @@ var breakPrototype = require('./utils/break-prototype');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+
+var Buffer = saferBuffer.Buffer;
 
 var count = testStreams.count;
 var rename = testStreams.rename;
@@ -82,7 +85,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -102,7 +105,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -122,7 +125,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -143,7 +146,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -231,7 +234,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -258,7 +261,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function outputFn(f) {
@@ -289,7 +292,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -389,7 +392,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -416,7 +419,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -436,7 +439,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(err) {
@@ -462,7 +465,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -489,7 +492,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -516,7 +519,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -543,7 +546,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function overwrite(f) {
@@ -575,7 +578,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function overwrite(f) {
@@ -607,7 +610,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -634,7 +637,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function append(f) {
@@ -668,7 +671,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer('1234567890'),
+      contents: Buffer.from('1234567890'),
     });
 
     pipe([
@@ -684,7 +687,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -707,7 +710,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -781,7 +784,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -810,7 +813,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -861,7 +864,7 @@ describe('.dest()', function() {
   });
 
   it('errors when a buffer-mode stream is piped to it', function(done) {
-    var file = new Buffer('test');
+    var file = Buffer.from('test');
 
     function assert(err) {
       expect(err).toExist();

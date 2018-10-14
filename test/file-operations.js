@@ -8,6 +8,7 @@ var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
 var mkdirp = require('fs-mkdirp-stream/mkdirp');
+var saferBuffer = require('safer-buffer');
 
 var fo = require('../lib/file-operations');
 var constants = require('../lib/constants');
@@ -39,6 +40,8 @@ var createWriteStream = fo.createWriteStream;
 
 var pipe = miss.pipe;
 var from = miss.from;
+
+var Buffer = saferBuffer.Buffer;
 
 var string = testStreams.string;
 
@@ -782,7 +785,7 @@ describe('writeFile', function() {
   });
 
   it('writes a file to the filesystem, does not close and returns the fd', function(done) {
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
@@ -799,7 +802,7 @@ describe('writeFile', function() {
   it('defaults to writing files with 0666 mode', function(done) {
     var expected = applyUmask('666');
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
@@ -823,7 +826,7 @@ describe('writeFile', function() {
       mode: expected,
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), options, function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
@@ -838,11 +841,11 @@ describe('writeFile', function() {
   it('defaults to opening files with write flag', function(done) {
     var length = contents.length;
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr) {
+      fs.read(fd, Buffer.alloc(length), 0, length, 0, function(readErr) {
         expect(readErr).toExist();
 
         fs.close(fd, done);
@@ -856,11 +859,11 @@ describe('writeFile', function() {
       flags: 'w+',
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), options, function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr, _, written) {
+      fs.read(fd, Buffer.alloc(length), 0, length, 0, function(readErr, _, written) {
         expect(readErr).toNotExist();
 
         expect(written.toString()).toEqual(contents);
@@ -882,7 +885,7 @@ describe('writeFile', function() {
       flags: 'a',
     };
 
-    writeFile(outputPath, new Buffer(toWrite), options, function(err, fd) {
+    writeFile(outputPath, Buffer.from(toWrite), options, function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 
@@ -899,7 +902,7 @@ describe('writeFile', function() {
   it('does not pass a file descriptor if open call errors', function(done) {
     var notExistDir = path.join(__dirname, './not-exist-dir/writeFile.txt');
 
-    writeFile(notExistDir, new Buffer(contents), function(err, fd) {
+    writeFile(notExistDir, Buffer.from(contents), function(err, fd) {
       expect(err).toExist();
       expect(typeof fd === 'number').toEqual(false);
 
@@ -912,7 +915,7 @@ describe('writeFile', function() {
       flags: 'r',
     };
 
-    writeFile(inputPath, new Buffer(contents), options, function(err, fd) {
+    writeFile(inputPath, Buffer.from(contents), options, function(err, fd) {
       expect(err).toExist();
       expect(typeof fd === 'number').toEqual(true);
 
@@ -935,7 +938,7 @@ describe('writeFile', function() {
     }
 
     var length = contents.length;
-    var buf = new Buffer(contents);
+    var buf = Buffer.from(contents);
     var content = new buffer.SlowBuffer(length);
     buf.copy(content, 0, 0, length);
 
@@ -954,7 +957,7 @@ describe('writeFile', function() {
   });
 
   it('does not error if options is falsey', function(done) {
-    writeFile(outputPath, new Buffer(contents), null, function(err, fd) {
+    writeFile(outputPath, Buffer.from(contents), null, function(err, fd) {
       expect(err).toNotExist();
       expect(typeof fd === 'number').toEqual(true);
 

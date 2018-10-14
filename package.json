@@ -54,7 +54,8 @@
     "jscs-preset-gulp": "^1.0.0",
     "mississippi": "^1.2.0",
     "mocha": "^3.5.0",
-    "rimraf": "^2.6.1"
+    "rimraf": "^2.6.1",
+    "safer-buffer": "^2.1.2"
   },
   "keywords": [
     "gulp",

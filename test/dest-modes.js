@@ -4,6 +4,7 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var saferBuffer = require('safer-buffer');
 
 var vfs = require('../');
 
@@ -18,6 +19,8 @@ var testConstants = require('./utils/test-constants');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+
+var Buffer = saferBuffer.Buffer;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -49,7 +52,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -191,7 +194,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -217,7 +220,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -287,7 +290,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputNestedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -319,7 +322,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -351,7 +354,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -385,7 +388,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },

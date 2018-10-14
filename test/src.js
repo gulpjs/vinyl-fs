@@ -6,6 +6,7 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var saferBuffer = require('safer-buffer');
 
 var vfs = require('../');
 
@@ -15,6 +16,8 @@ var pipe = miss.pipe;
 var from = miss.from;
 var concat = miss.concat;
 var through = miss.through;
+
+var Buffer = saferBuffer.Buffer;
 
 var inputBase = testConstants.inputBase;
 var inputPath = testConstants.inputPath;
@@ -109,7 +112,7 @@ describe('.src()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: fs.statSync(inputPath),
     });
 

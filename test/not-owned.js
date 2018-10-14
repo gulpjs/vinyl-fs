@@ -4,6 +4,7 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var miss = require('mississippi');
+var saferBuffer = require('safer-buffer');
 
 var vfs = require('../');
 
@@ -14,6 +15,8 @@ var testConstants = require('./utils/test-constants');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+
+var Buffer = saferBuffer.Buffer;
 
 var notOwnedBase = testConstants.notOwnedBase;
 var notOwnedPath = testConstants.notOwnedPath;
@@ -66,7 +69,7 @@ describe('.dest() on not owned files', function() {
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: new Date(earlier),
       },
@@ -94,7 +97,7 @@ describe('.dest() on not owned files', function() {
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: applyUmask('777'),
       },
