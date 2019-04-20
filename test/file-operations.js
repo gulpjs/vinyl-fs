@@ -22,6 +22,7 @@ var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
+var invalidFD = require('./utils/invalid-fd');
 
 var closeFd = fo.closeFd;
 var isOwner = fo.isOwner;
@@ -710,10 +711,6 @@ describe('getOwnerDiff', function() {
 });
 
 describe('closeFd', function() {
-  // This is just a very large number since node broke our tests by disallowing -1
-  // We're also doing some hacky version matching because node 0.12 accepts 10000 on Windows (and fails the test)
-  var invalidFd = process.version[1] === '0' ? -1 : 10000;
-
   it('calls the callback with propagated error if fd is not a number', function(done) {
     var propagatedError = new Error();
 
@@ -725,7 +722,14 @@ describe('closeFd', function() {
   });
 
   it('calls the callback with close error if no error to propagate', function(done) {
-    closeFd(null, invalidFd, function(err) {
+    var fd = invalidFD();
+
+    if (fd === 0) {
+      done(new Error('Unable to find an invalid file descriptor'));
+      return;
+    }
+
+    closeFd(null, fd, function(err) {
       expect(err).toExist();
 
       done();
@@ -733,9 +737,16 @@ describe('closeFd', function() {
   });
 
   it('calls the callback with propagated error if close errors', function(done) {
+    var fd = invalidFD();
+
+    if (fd === 0) {
+      done(new Error('Unable to find an invalid file descriptor'));
+      return;
+    }
+
     var propagatedError = new Error();
 
-    closeFd(propagatedError, invalidFd, function(err) {
+    closeFd(propagatedError, fd, function(err) {
       expect(err).toEqual(propagatedError);
 
       done();
