@@ -18,6 +18,12 @@
 
 While Vinyl provides a clean way to describe a file, we now need a way to access these files. Each file source needs what we call a "Vinyl adapter". A Vinyl adapter simply exposes a `src(globs)` and a `dest(folder)` method. Each return a stream. The `src` stream produces Vinyl objects, and the `dest` stream consumes Vinyl objects. Vinyl adapters can expose extra methods that might be specific to their input/output medium, such as the `symlink` method `vinyl-fs` provides.
 
+## vinyl-fs for enterprise
+
+Available as part of the Tidelift Subscription
+
+The maintainers of vinyl-fs and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-vinyl-fs?utm_source=npm-vinyl-fs&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
+
 ## Usage
 
 ```javascript
@@ -340,10 +346,3 @@ scenario.
 [gitter-url]: https://gitter.im/gulpjs/gulp
 [gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
 
----
-
-<div align="center">
-  <b><a href="https://tidelift.com/subscription/pkg/npm-vinyl-fs?utm_source=npm-vinyl-fs&utm_medium=referral&utm_campaign=readme">Get supported vinyl-fs with the Tidelift Subscription</a></b>
-  <br>
-  <sub>Tidelift gives software development teams a single source for purchasing and maintaining their software, with professional grade assurances from the experts who know it best, while seamlessly integrating with existing tools.</sub>
-</div>
