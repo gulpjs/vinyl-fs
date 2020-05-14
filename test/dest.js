@@ -21,6 +21,7 @@ var breakPrototype = require('./utils/break-prototype');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+var through = miss.through;
 
 var count = testStreams.count;
 var rename = testStreams.rename;
@@ -39,8 +40,12 @@ var outputPath = testConstants.outputPath;
 var outputRenamePath = testConstants.outputRenamePath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
+var encodedInputPath = testConstants.encodedInputPath;
+var ranBomInputPath = testConstants.ranBomInputPath;
 var contents = testConstants.contents;
 var sourcemapContents = testConstants.sourcemapContents;
+var bomContents = testConstants.bomContents;
+var encodedContents = testConstants.encodedContents;
 
 function makeSourceMap() {
   return {
@@ -658,6 +663,200 @@ describe('.dest()', function() {
       vfs.dest(outputBase, { append: append }),
       concat(assert),
     ], done);
+  });
+
+  it('does not do any transcoding with encoding option set to false (buffer)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: expectedContents,
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('does not do any transcoding with encoding option set to false (stream)', function(done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: fs.createReadStream(ranBomInputPath),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('transcodes utf8 to gb2312 with encoding option (buffer)', function(done) {
+    var expectedContents = fs.readFileSync(encodedInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: new Buffer(encodedContents),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'gb2312' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('transcodes utf8 to gb2312 with encoding option (stream)', function(done) {
+    var expectedContents = fs.readFileSync(encodedInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: from([encodedContents]),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'gb2312' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('sends utf8 downstream despite encoding option, preserve BOM if any (buffer)', function(done) {
+    var expectedString = '\ufeff' + bomContents.replace('X', '16-BE');
+    var expectedContents = new Buffer(expectedString);
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: expectedContents,
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isBuffer()).toEqual(true);
+      expect(files[0].contents).toMatch(expectedContents);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'utf16be' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('sends utf8 downstream despite encoding option, preserve BOM if any (stream)', function(done) {
+    var expectedString = '\ufeff' + bomContents.replace('X', '16-BE');
+    var expectedContents = new Buffer(expectedString);
+
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: from([expectedString]),
+    });
+
+    function assertContent(contents) {
+      expect(contents).toMatch(expectedContents);
+    }
+
+    function compareContents(file, enc, cb) {
+      pipe([
+        file.contents,
+        concat(assertContent),
+      ], function(err) {
+        cb(err, file);
+      });
+    }
+    function assert(files) {
+      expect(files.length).toEqual(1);
+      expect(files[0].isStream()).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'utf16be' }),
+      through.obj(compareContents),
+      concat(assert),
+    ], done);
+  });
+
+  it('reports unsupported encoding errors (buffer)', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: new Buffer(contents),
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(0);
+    }
+
+    function finish(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Unsupported encoding: fubar42');
+      done();
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'fubar42' }),
+      concat(assert),
+    ], finish);
+  });
+
+  it('reports unsupported encoding errors (stream)', function(done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: from([contents]),
+    });
+
+    function assert(files) {
+      expect(files.length).toEqual(0);
+    }
+
+    function finish(err) {
+      expect(err).toExist();
+      expect(err.message).toEqual('Unsupported encoding: fubar42');
+      done();
+    }
+
+    pipe([
+      from.obj([file]),
+      vfs.dest(outputBase, { encoding: 'fubar42' }),
+      concat(assert),
+    ], finish);
   });
 
   it('emits a finish event', function(done) {

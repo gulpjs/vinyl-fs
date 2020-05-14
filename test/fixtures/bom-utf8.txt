@@ -1,1 +1,1 @@
-﻿This file is saved as UTF-8 with BOM. 𝌆
+﻿This file is saved as UTF-8 with the appropriate BOM.
