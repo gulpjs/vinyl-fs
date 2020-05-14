@@ -30,7 +30,7 @@ var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
 var outputSymlink = path.join(symlinkDirpath, './foo');
 var outputDirpathSymlink = path.join(outputDirpath, './foo');
-var content = testConstants.content;
+var content = testConstants.contents;
 
 var clean = cleanup(base);
 
