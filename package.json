@@ -2,7 +2,7 @@
   "name": "vinyl-fs",
   "version": "3.0.3",
   "description": "Vinyl adapter for the file system.",
-  "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
+  "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",
     "Blaine Bublitz <blaine.bublitz@gmail.com>"
@@ -10,7 +10,7 @@
   "repository": "gulpjs/vinyl-fs",
   "license": "MIT",
   "engines": {
-    "node": ">= 0.10"
+    "node": ">=10.13.0"
   },
   "main": "index.js",
   "files": [
@@ -19,11 +19,9 @@
     "lib"
   ],
   "scripts": {
-    "lint": "eslint . && jscs index.js lib/ test/",
+    "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "mocha --async-only",
-    "cover": "istanbul cover _mocha --report lcovonly",
-    "coveralls": "npm run cover && istanbul-coveralls"
+    "test": "nyc mocha --async-only"
   },
   "dependencies": {
     "fs-mkdirp-stream": "^1.0.0",
@@ -46,16 +44,22 @@
     "vinyl-sourcemap": "^1.1.0"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
-    "eslint-config-gulp": "^2.0.0",
-    "expect": "^1.19.0",
-    "istanbul": "^0.4.3",
-    "istanbul-coveralls": "^1.0.3",
-    "jscs": "^2.4.0",
-    "jscs-preset-gulp": "^1.0.0",
+    "eslint": "^7.0.0",
+    "eslint-config-gulp": "^5.0.0",
+    "expect": "^26.0.1",
     "mississippi": "^1.2.0",
-    "mocha": "^3.5.0",
+    "mocha": "^7.1.2",
+    "nyc": "^15.0.1",
     "rimraf": "^2.6.1"
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true
   },
   "keywords": [
     "gulp",

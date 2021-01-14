@@ -6,7 +6,7 @@
 
 # vinyl-fs
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 [Vinyl][vinyl] adapter for the file system.
 
@@ -344,7 +344,11 @@ type of link and we default to using `'file'`, which may cause unexpected behavi
 if you are creating a "dangling" link to a directory. It is advised to avoid this
 scenario.
 
+## License
 
+MIT
+
+<!-- prettier-ignore-start -->
 [symbolic-caveats]: #symbolic-links-on-windows
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
@@ -352,20 +356,16 @@ scenario.
 [glob-watcher]: https://github.com/wearefractal/glob-watcher
 [vinyl]: https://github.com/wearefractal/vinyl
 [iconv-lite]: https://github.com/ashtuchkin/iconv-lite
-
-[downloads-image]: http://img.shields.io/npm/dm/vinyl-fs.svg
-[npm-url]: https://www.npmjs.com/package/vinyl-fs
-[npm-image]: http://img.shields.io/npm/v/vinyl-fs.svg
-
-[travis-url]: https://travis-ci.org/gulpjs/vinyl-fs
-[travis-image]: http://img.shields.io/travis/gulpjs/vinyl-fs.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/gulpjs/vinyl-fs
-[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/vinyl-fs.svg?label=appveyor
-
-[coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/vinyl-fs/master.svg
-
 [gitter-url]: https://gitter.im/gulpjs/gulp
 [gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
 
+[downloads-image]: https://img.shields.io/npm/dm/vinyl-fs.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/vinyl-fs
+[npm-image]: https://img.shields.io/npm/v/vinyl-fs.svg?style=flat-square
+
+[ci-url]: https://github.com/gulpjs/vinyl-fs/actions?query=workflow:dev
+[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/vinyl-fs/dev?style=flat-square
+
+[coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
+[coveralls-image]: http://img.shields.io/coveralls/gulpjs/vinyl-fs/master.svg
+<!-- prettier-ignore-end -->
