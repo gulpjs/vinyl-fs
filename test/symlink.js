@@ -386,7 +386,6 @@ describe('symlink stream', function() {
     });
 
     function useJunctions(f) {
-      expect(f).toExist();
       expect(f).toBe(file);
       return false;
     }
