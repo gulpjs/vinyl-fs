@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -37,8 +38,8 @@ describe('.src()', function() {
     try {
       stream = vfs.src();
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
       done();
     }
   });
@@ -48,8 +49,8 @@ describe('.src()', function() {
     try {
       stream = vfs.src('');
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
       done();
     }
   });
@@ -59,8 +60,8 @@ describe('.src()', function() {
     try {
       stream = vfs.src(123);
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
       done();
     }
   });
@@ -70,9 +71,9 @@ describe('.src()', function() {
     try {
       stream = vfs.src([['./fixtures/*.coffee']]);
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
-      expect(err.message).toInclude('Invalid glob argument');
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
+      expect(err.message).toMatch('Invalid glob argument');
       done();
     }
   });
@@ -82,8 +83,8 @@ describe('.src()', function() {
     try {
       stream = vfs.src(['']);
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
       done();
     }
   });
@@ -93,15 +94,15 @@ describe('.src()', function() {
     try {
       stream = vfs.src([]);
     } catch (err) {
-      expect(err).toExist();
-      expect(stream).toNotExist();
+      expect(err).toEqual(expect.anything());
+      expect(stream).not.toEqual(expect.anything());
       done();
     }
   });
 
   it('emits an error on file not existing', function(done) {
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       done();
     }
 
@@ -115,7 +116,7 @@ describe('.src()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: fs.statSync(inputPath),
     });
 
@@ -135,11 +136,11 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf8-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -149,10 +150,10 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf8-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -177,11 +178,11 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf8-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -191,10 +192,10 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf8-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -219,11 +220,11 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16be-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -233,10 +234,10 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16be-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -261,11 +262,11 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16be-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-BE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -275,10 +276,10 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16be-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-BE'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -303,11 +304,11 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16le-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -317,10 +318,10 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16le-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -345,11 +346,11 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16le-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-LE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -359,10 +360,10 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16le-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-LE'));
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -393,7 +394,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     };
 
     pipe([
@@ -406,7 +407,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -437,7 +438,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContent);
+      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
     }
 
     pipe([
@@ -450,7 +451,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -479,7 +480,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContents);
+      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -492,7 +493,7 @@ describe('.src()', function() {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContents);
+      expect(contents.toString()).toMatch(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -521,7 +522,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContents);
+      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -534,7 +535,7 @@ describe('.src()', function() {
     var expectedContents = fs.readFileSync(bomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContents);
+      expect(contents.toString()).toMatch(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -559,11 +560,11 @@ describe('.src()', function() {
   });
 
   it('transcodes gb2312 to utf8 with encoding option (buffer)', function(done) {
-    var expectedContents = new Buffer(encodedContents);
+    var expectedContents = Buffer.from(encodedContents);
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents).toMatch(expectedContents);
+      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -573,10 +574,10 @@ describe('.src()', function() {
   });
 
   it('transcodes gb2312 to utf8 with encoding option (stream)', function(done) {
-    var expectedContents = new Buffer(encodedContents);
+    var expectedContents = Buffer.from(encodedContents);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContents);
+      expect(contents.toString()).toMatch(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -606,7 +607,7 @@ describe('.src()', function() {
     }
 
     function finish(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Unsupported encoding: fubar42');
       done();
     }
@@ -623,7 +624,7 @@ describe('.src()', function() {
     }
 
     function finish(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Unsupported encoding: fubar42');
       done();
     }
@@ -709,7 +710,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(1);
       expect(files[0].path).toEqual(inputPath);
       expect(files[0].isNull()).toEqual(true);
-      expect(files[0].contents).toNotExist();
+      expect(files[0]).toHaveProperty('contents', null);
     }
 
     pipe([
@@ -749,7 +750,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(inputPath);
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContent);
+      expect(contents.toString()).toMatch(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -808,11 +809,11 @@ describe('.src()', function() {
 
   it('does not pass options on to through2', function(done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
-    var read = expect.createSpy().andReturn(false);
+    var read = sinon.fake.returns(false);
 
     function assert() {
       // Called once to resolve the option
-      expect(read.calls.length).toEqual(1);
+      expect(read.callCount).toEqual(1);
     }
 
     pipe([

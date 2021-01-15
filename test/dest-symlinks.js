@@ -106,7 +106,7 @@ describe('.dest() with symlinks', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Missing symlink property on symbolic vinyl');
       done();
     }
@@ -298,7 +298,7 @@ describe('.dest() with symlinks', function() {
     file.symlink = inputDirpath;
 
     function useJunctions(f) {
-      expect(f).toExist();
+      expect(f).toEqual(expect.anything());
       expect(f).toBe(file);
       return false;
     }
@@ -528,7 +528,7 @@ describe('.dest() with symlinks', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));

@@ -36,7 +36,7 @@ function rename(filepath) {
 
 function includes(obj) {
   return through.obj(function(file, enc, cb) {
-    expect(file).toInclude(obj);
+    expect(file.toString()).toContain(obj);
     cb(null, file);
   });
 }

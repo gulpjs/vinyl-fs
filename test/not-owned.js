@@ -3,6 +3,7 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -59,21 +60,21 @@ describe('.dest() on not owned files', function() {
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var earlier = Date.now() - 1000;
 
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: new Date(earlier),
       },
     });
 
     function assert() {
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
     }
 
     pipe([
@@ -89,19 +90,19 @@ describe('.dest() on not owned files', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: applyUmask('777'),
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
     }
 
     pipe([

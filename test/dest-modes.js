@@ -3,6 +3,7 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -49,7 +50,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -191,7 +192,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -217,7 +218,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -287,7 +288,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputNestedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -312,21 +313,21 @@ describe('.dest() with custom modes', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var expectedMode = applyUmask('777');
 
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
@@ -343,7 +344,7 @@ describe('.dest() with custom modes', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var startMode = applyUmask('3722');
     var expectedMode = applyUmask('722');
@@ -351,14 +352,14 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
     }
 
     fs.mkdirSync(outputBase);
@@ -380,20 +381,20 @@ describe('.dest() with custom modes', function() {
 
     var expectedMode = applyUmask('722');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(mockError);
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
 
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(fchmodSpy.callCount).toEqual(1);
       done();
     }
 

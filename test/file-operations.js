@@ -6,6 +6,7 @@ var buffer = require('buffer');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 var mkdirp = require('fs-mkdirp-stream/mkdirp');
 
@@ -76,14 +77,14 @@ describe('isOwner', function() {
       process.getuid = noop;
     }
 
-    getuidSpy = expect.spyOn(process, 'getuid').andReturn(ownerStat.uid);
-    geteuidSpy = expect.spyOn(process, 'geteuid').andReturn(ownerStat.uid);
+    getuidSpy = sinon.stub(process, 'getuid').returns(ownerStat.uid);
+    geteuidSpy = sinon.stub(process, 'geteuid').returns(ownerStat.uid);
 
     done();
   });
 
   afterEach(function(done) {
-    expect.restoreSpies();
+    sinon.restore();
 
     if (process.geteuid === noop) {
       delete process.geteuid;
@@ -103,8 +104,8 @@ describe('isOwner', function() {
 
     isOwner(ownerStat);
 
-    expect(getuidSpy.calls.length).toEqual(0);
-    expect(geteuidSpy.calls.length).toEqual(1);
+    expect(getuidSpy.callCount).toEqual(0);
+    expect(geteuidSpy.callCount).toEqual(1);
 
     done();
   });
@@ -114,7 +115,7 @@ describe('isOwner', function() {
 
     isOwner(ownerStat);
 
-    expect(getuidSpy.calls.length).toEqual(1);
+    expect(getuidSpy.callCount).toEqual(1);
 
     done();
   });
@@ -136,7 +137,8 @@ describe('isOwner', function() {
   });
 
   it('returns true when non-owner but root', function(done) {
-    expect.spyOn(process, 'geteuid').andReturn(0); // 0 is root uid
+    process.geteuid.restore();
+    sinon.stub(process, 'geteuid').returns(0);
 
     var result = isOwner(nonOwnerStat);
 
@@ -578,7 +580,7 @@ describe('getOwnerDiff', function() {
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
@@ -603,12 +605,12 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(expected);
 
-    var vfsStat = {
+    vfsStat = {
       uid: -1,
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
@@ -633,12 +635,12 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(expected);
 
-    var vfsStat = {
+    vfsStat = {
       uid: 1001,
       gid: -1,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
@@ -659,16 +661,16 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(undefined);
 
-    var fsStat = {
+    fsStat = {
       uid: -1,
       gid: 1000,
     };
-    var vfsStat = {
+    vfsStat = {
       uid: -1,
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(undefined);
 
@@ -698,7 +700,7 @@ describe('getOwnerDiff', function() {
       gid: -1,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(undefined);
 
@@ -723,7 +725,7 @@ describe('closeFd', function() {
 
   it('calls the callback with close error if no error to propagate', function(done) {
     closeFd(null, invalidFd, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
 
       done();
     });
@@ -744,12 +746,12 @@ describe('closeFd', function() {
 
     var fd = fs.openSync(inputPath, 'r');
 
-    var closeSpy = expect.spyOn(fs, 'close').andCallThrough();
+    var closeSpy = sinon.spy(fs, 'close');
 
     closeFd(propagatedError, fd, function(err) {
       closeSpy.restore();
 
-      expect(closeSpy.calls.length).toEqual(1);
+      expect(closeSpy.callCount).toEqual(1);
       expect(err).toEqual(propagatedError);
 
       done();
@@ -759,12 +761,12 @@ describe('closeFd', function() {
   it('calls the callback with no error if close succeeds & no propagated error', function(done) {
     var fd = fs.openSync(inputPath, 'r');
 
-    var spy = expect.spyOn(fs, 'close').andCallThrough();
+    var spy = sinon.spy(fs, 'close');
 
     closeFd(null, fd, function(err) {
-      spy.restore();
+      sinon.restore();
 
-      expect(spy.calls.length).toEqual(1);
+      expect(spy.callCount).toEqual(1);
       expect(err).toEqual(undefined);
 
       done();
@@ -782,8 +784,8 @@ describe('writeFile', function() {
   });
 
   it('writes a file to the filesystem, does not close and returns the fd', function(done) {
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, function() {
@@ -799,8 +801,8 @@ describe('writeFile', function() {
   it('defaults to writing files with 0666 mode', function(done) {
     var expected = applyUmask('666');
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, function() {
@@ -823,8 +825,8 @@ describe('writeFile', function() {
       mode: expected,
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), options, function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, function() {
@@ -838,12 +840,12 @@ describe('writeFile', function() {
   it('defaults to opening files with write flag', function(done) {
     var length = contents.length;
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr) {
-        expect(readErr).toExist();
+      fs.read(fd, Buffer.alloc(length), 0, length, 0, function(readErr) {
+        expect(readErr).toEqual(expect.anything());
 
         fs.close(fd, done);
       });
@@ -856,12 +858,12 @@ describe('writeFile', function() {
       flags: 'w+',
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), options, function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr, _, written) {
-        expect(readErr).toNotExist();
+      fs.read(fd, Buffer.alloc(length), 0, length, 0, function(readErr, _, written) {
+        expect(readErr).not.toEqual(expect.anything());
 
         expect(written.toString()).toEqual(contents);
 
@@ -882,8 +884,8 @@ describe('writeFile', function() {
       flags: 'a',
     };
 
-    writeFile(outputPath, new Buffer(toWrite), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(toWrite), options, function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, function() {
@@ -899,8 +901,8 @@ describe('writeFile', function() {
   it('does not pass a file descriptor if open call errors', function(done) {
     var notExistDir = path.join(__dirname, './not-exist-dir/writeFile.txt');
 
-    writeFile(notExistDir, new Buffer(contents), function(err, fd) {
-      expect(err).toExist();
+    writeFile(notExistDir, Buffer.from(contents), function(err, fd) {
+      expect(err).toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(false);
 
       done();
@@ -912,8 +914,8 @@ describe('writeFile', function() {
       flags: 'r',
     };
 
-    writeFile(inputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toExist();
+    writeFile(inputPath, Buffer.from(contents), options, function(err, fd) {
+      expect(err).toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, done);
@@ -922,7 +924,7 @@ describe('writeFile', function() {
 
   it('passes an error if called with string as data', function(done) {
     writeFile(outputPath, contents, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
 
       done();
     });
@@ -935,12 +937,12 @@ describe('writeFile', function() {
     }
 
     var length = contents.length;
-    var buf = new Buffer(contents);
+    var buf = Buffer.from(contents);
     var content = new buffer.SlowBuffer(length);
     buf.copy(content, 0, 0, length);
 
     writeFile(outputPath, content, function(err, fd) {
-      expect(err).toNotExist();
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, function() {
@@ -954,8 +956,8 @@ describe('writeFile', function() {
   });
 
   it('does not error if options is falsey', function(done) {
-    writeFile(outputPath, new Buffer(contents), null, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), null, function(err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, done);
@@ -977,7 +979,7 @@ describe('reflectStat', function() {
     var file = new File();
 
     reflectStat(neInputDirpath, file, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
 
       done();
     });
@@ -1016,7 +1018,7 @@ describe('reflectLinkStat', function() {
     var file = new File();
 
     reflectLinkStat(neInputDirpath, file, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
 
       done();
     });
@@ -1077,7 +1079,7 @@ describe('updateMetadata', function() {
     });
 
     updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
 
       done();
     });
@@ -1122,14 +1124,14 @@ describe('updateMetadata', function() {
       stat: {},
     });
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(0);
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
 
       fs.close(fd, done);
     });
@@ -1156,15 +1158,15 @@ describe('updateMetadata', function() {
       },
     });
 
-    expect.spyOn(process, 'geteuid').andReturn(9002);
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    sinon.stub(process, 'geteuid').returns(9002);
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(0);
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
 
       fs.close(fd, done);
     });
@@ -1176,7 +1178,7 @@ describe('updateMetadata', function() {
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
@@ -1197,11 +1199,11 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
       // Var stats = fs.fstatSync(fd);
 
-      var atimeSpy = futimesSpy.calls[0].arguments[1];
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.getCall(0).args[1];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
       expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
@@ -1218,7 +1220,7 @@ describe('updateMetadata', function() {
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCall(mockError);
+    var futimesSpy = sinon.stub(fs, 'futimes').callsFake(mockError);
 
     var now = Date.now();
     var then = now - 1000;
@@ -1237,8 +1239,8 @@ describe('updateMetadata', function() {
     expect(typeof fd === 'number').toEqual(true);
 
     updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(futimesSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
@@ -1250,7 +1252,7 @@ describe('updateMetadata', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var mode = applyUmask('777');
 
@@ -1266,7 +1268,7 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
@@ -1281,7 +1283,7 @@ describe('updateMetadata', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var mode = applyUmask('1777');
 
@@ -1297,7 +1299,7 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
@@ -1324,11 +1326,11 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(mockError);
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
 
     updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(fchmodSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
@@ -1340,8 +1342,8 @@ describe('updateMetadata', function() {
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
@@ -1365,11 +1367,11 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
 
     updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
-      var atimeSpy = futimesSpy.calls[0].arguments[1];
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.getCall(0).args[1];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
       expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
@@ -1388,10 +1390,10 @@ describe('updateMetadata', function() {
 
     var mockedErr = new Error('mocked error');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(function(fd, mode, cb) {
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(function(fd, mode, cb) {
       cb(mockedErr);
     });
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var now = Date.now();
     var then = now - 1000;
@@ -1411,10 +1413,10 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w');
 
     updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err).toEqual(mockedErr);
-      expect(fchmodSpy.calls.length).toEqual(1);
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
@@ -1573,7 +1575,7 @@ describe('createWriteStream', function() {
     var flushCalled = false;
 
     var outStream = createWriteStream(outputPath, function(fd, cb) {
-      expect(fd).toBeA('number');
+      expect(typeof fd).toEqual('number');
       flushCalled = true;
       cb();
     });
@@ -1617,7 +1619,7 @@ describe('createWriteStream', function() {
     var badOutputPath = path.join(outputBase, './non-exist/test.coffee');
 
     function assert(err) {
-      expect(err).toBeAn(Error);
+      expect(err).toBeInstanceOf(Error);
       done();
     }
 
@@ -1632,7 +1634,7 @@ describe('createWriteStream', function() {
     fs.writeFileSync(outputPath, contents);
 
     function assert(err) {
-      expect(err).toBeAn(Error);
+      expect(err).toBeInstanceOf(Error);
       done();
     }
 
