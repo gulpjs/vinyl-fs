@@ -352,12 +352,8 @@ MIT
 [symbolic-caveats]: #symbolic-links-on-windows
 [glob-stream]: https://github.com/gulpjs/glob-stream
 [node-glob]: https://github.com/isaacs/node-glob
-[gaze]: https://github.com/shama/gaze
-[glob-watcher]: https://github.com/wearefractal/glob-watcher
 [vinyl]: https://github.com/wearefractal/vinyl
 [iconv-lite]: https://github.com/ashtuchkin/iconv-lite
-[gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
 
 [downloads-image]: https://img.shields.io/npm/dm/vinyl-fs.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
