@@ -67,7 +67,7 @@ describe('.dest() on not owned files', function() {
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: new Date(earlier),
       },
@@ -95,7 +95,7 @@ describe('.dest() on not owned files', function() {
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: applyUmask('777'),
       },

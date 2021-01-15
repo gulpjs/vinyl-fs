@@ -88,7 +88,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -108,7 +108,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -128,7 +128,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -149,7 +149,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       sourceMap: makeSourceMap(),
     });
 
@@ -237,7 +237,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -264,7 +264,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function outputFn(f) {
@@ -295,7 +295,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -395,7 +395,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
@@ -422,7 +422,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -442,7 +442,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(err) {
@@ -468,7 +468,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -495,7 +495,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -522,7 +522,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -549,7 +549,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function overwrite(f) {
@@ -581,7 +581,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function overwrite(f) {
@@ -613,7 +613,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -640,7 +640,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function append(f) {
@@ -715,7 +715,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(encodedContents),
+      contents: Buffer.from(encodedContents),
     });
 
     function assert(files) {
@@ -756,7 +756,7 @@ describe('.dest()', function() {
 
   it('sends utf8 downstream despite encoding option, preserve BOM if any (buffer)', function(done) {
     var expectedString = '\ufeff' + bomContents.replace('X', '16-BE');
-    var expectedContents = new Buffer(expectedString);
+    var expectedContents = Buffer.from(expectedString);
 
     var file = new File({
       base: inputBase,
@@ -779,7 +779,7 @@ describe('.dest()', function() {
 
   it('sends utf8 downstream despite encoding option, preserve BOM if any (stream)', function(done) {
     var expectedString = '\ufeff' + bomContents.replace('X', '16-BE');
-    var expectedContents = new Buffer(expectedString);
+    var expectedContents = Buffer.from(expectedString);
 
     var file = new File({
       base: inputBase,
@@ -816,7 +816,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -868,7 +868,7 @@ describe('.dest()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer('1234567890'),
+      contents: Buffer.from('1234567890'),
     });
 
     pipe([
@@ -884,7 +884,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -907,7 +907,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -981,7 +981,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -1010,7 +1010,7 @@ describe('.dest()', function() {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: new Buffer(contents),
+        contents: Buffer.from(contents),
       });
       highwatermarkFiles.push(file);
     }
@@ -1061,7 +1061,7 @@ describe('.dest()', function() {
   });
 
   it('errors when a buffer-mode stream is piped to it', function(done) {
-    var file = new Buffer('test');
+    var file = Buffer.from('test');
 
     function assert(err) {
       expect(err).toEqual(expect.anything());

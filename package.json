@@ -31,7 +31,6 @@
     "is-valid-glob": "^1.0.0",
     "lazystream": "^1.0.0",
     "lead": "^1.0.0",
-    "object.assign": "^4.0.4",
     "pumpify": "^1.3.5",
     "readable-stream": "^2.3.3",
     "remove-bom-buffer": "^3.0.0",

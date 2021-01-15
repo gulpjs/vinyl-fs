@@ -44,7 +44,7 @@ describe('.dest() with custom times', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {},
     });
 
@@ -77,7 +77,7 @@ describe('.dest() with custom times', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: mtime,
       },
@@ -115,7 +115,7 @@ describe('.dest() with custom times', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: new Date(undefined),
       },
@@ -150,7 +150,7 @@ describe('.dest() with custom times', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         atime: invalidAtime,
         mtime: mtime,
@@ -187,7 +187,7 @@ describe('.dest() with custom times', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         atime: atime,
         mtime: mtime,

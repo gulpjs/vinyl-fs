@@ -39,7 +39,7 @@ describe('.dest() with custom owner', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         uid: 1001,
         gid: 1001,
@@ -70,7 +70,7 @@ describe('.dest() with custom owner', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         uid: -1,
         gid: -1,

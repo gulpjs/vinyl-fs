@@ -116,7 +116,7 @@ describe('.src()', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: fs.statSync(inputPath),
     });
 
@@ -136,7 +136,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf8-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -150,7 +150,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf8-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -178,7 +178,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf8-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -192,7 +192,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf8-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '8'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -220,7 +220,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16be-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -234,7 +234,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16be-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -262,7 +262,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16be-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-BE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -276,7 +276,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16be-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-BE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-BE'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -304,7 +304,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16le-encoded files by default (buffer)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -318,7 +318,7 @@ describe('.src()', function() {
   });
 
   it('removes BOM from utf16le-encoded files by default (stream)', function(done) {
-    var expectedContent = new Buffer(bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -346,7 +346,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16le-encoded files if option is false (buffer)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-LE'));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -360,7 +360,7 @@ describe('.src()', function() {
   });
 
   it('does not remove BOM from utf16le-encoded files if option is false (stream)', function(done) {
-    var expectedContent = new Buffer('\ufeff' + bomContents.replace('X', '16-LE'));
+    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-LE'));
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContent.toString());
@@ -560,7 +560,7 @@ describe('.src()', function() {
   });
 
   it('transcodes gb2312 to utf8 with encoding option (buffer)', function(done) {
-    var expectedContents = new Buffer(encodedContents);
+    var expectedContents = Buffer.from(encodedContents);
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -574,7 +574,7 @@ describe('.src()', function() {
   });
 
   it('transcodes gb2312 to utf8 with encoding option (stream)', function(done) {
-    var expectedContents = new Buffer(encodedContents);
+    var expectedContents = Buffer.from(encodedContents);
 
     function assertContent(contents) {
       expect(contents.toString()).toMatch(expectedContents.toString());

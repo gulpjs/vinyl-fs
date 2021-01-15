@@ -165,7 +165,7 @@ describe('symlink stream', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert(files) {
@@ -750,7 +750,7 @@ describe('symlink stream', function() {
   });
 
   it('errors when a buffer-mode stream is piped to it', function(done) {
-    var file = new Buffer('test');
+    var file = Buffer.from('test');
 
     function assert(err) {
       expect(err).toEqual(expect.anything());
