@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -93,7 +94,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
     }
 
     pipe([
@@ -113,7 +114,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(2);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
     }
 
     pipe([
@@ -133,7 +134,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].contents.toString()).toMatch(new RegExp(sourcemapContents));
     }
 
@@ -154,9 +155,9 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(2);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].contents.toString()).toMatch(new RegExp('//# sourceMappingURL=test.txt.map'));
-      expect(files[1].contents).toEqual(JSON.stringify(makeSourceMap()));
+      expect(files[1].contents.toString()).toEqual(JSON.stringify(makeSourceMap()));
     }
 
     pipe([
@@ -175,7 +176,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
     }
 
@@ -195,7 +196,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(process.cwd(), 'cwd should not have changed');
     }
 
@@ -217,7 +218,7 @@ describe('.dest()', function() {
       var exists = fs.existsSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(exists).toEqual(false);
@@ -243,7 +244,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
@@ -267,8 +268,8 @@ describe('.dest()', function() {
     });
 
     function outputFn(f) {
-      expect(f).toExist();
-      expect(f).toExist(file);
+      expect(f).toEqual(expect.anything());
+      expect(f).toEqual(file);
       return outputRelative;
     }
 
@@ -276,7 +277,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
@@ -301,7 +302,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(outputContents).toEqual(contents);
@@ -325,7 +326,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(outputContents).toEqual(contents);
@@ -351,7 +352,7 @@ describe('.dest()', function() {
       var stats = fs.lstatSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(stats.size).toEqual(size);
     };
 
@@ -376,7 +377,7 @@ describe('.dest()', function() {
       var stats = fs.lstatSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       // TODO: normalize this path
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
@@ -426,7 +427,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
@@ -445,7 +446,7 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       done();
     }
 
@@ -462,7 +463,7 @@ describe('.dest()', function() {
   it('reports stat errors', function(done) {
     var expectedMode = applyUmask('722');
 
-    var fstatSpy = expect.spyOn(fs, 'fstat').andCall(mockError);
+    var fstatSpy = sinon.stub(fs, 'fstat').callsFake(mockError);
 
     var file = new File({
       base: inputBase,
@@ -474,8 +475,8 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(fstatSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(fstatSpy.callCount).toEqual(1);
       done();
     }
 
@@ -677,7 +678,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents).toMatch(expectedContents);
+      expect(outputContents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -699,7 +700,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents).toMatch(expectedContents);
+      expect(outputContents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -721,7 +722,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents).toMatch(expectedContents);
+      expect(outputContents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -743,7 +744,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents).toMatch(expectedContents);
+      expect(outputContents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -766,7 +767,7 @@ describe('.dest()', function() {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files[0].isBuffer()).toEqual(true);
-      expect(files[0].contents).toMatch(expectedContents);
+      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
     }
 
     pipe([
@@ -787,7 +788,7 @@ describe('.dest()', function() {
     });
 
     function assertContent(contents) {
-      expect(contents).toMatch(expectedContents);
+      expect(contents.toString()).toMatch(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -823,7 +824,7 @@ describe('.dest()', function() {
     }
 
     function finish(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Unsupported encoding: fubar42');
       done();
     }
@@ -847,7 +848,7 @@ describe('.dest()', function() {
     }
 
     function finish(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Unsupported encoding: fubar42');
       done();
     }
@@ -1048,7 +1049,7 @@ describe('.dest()', function() {
     var file = {};
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Received a non-Vinyl object in `dest()`');
       done();
     }
@@ -1063,7 +1064,7 @@ describe('.dest()', function() {
     var file = new Buffer('test');
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Received a non-Vinyl object in `dest()`');
       done();
     }
@@ -1075,7 +1076,7 @@ describe('.dest()', function() {
   });
 
   it('errors if we cannot mkdirp', function(done) {
-    var mkdirSpy = expect.spyOn(fs, 'mkdir').andCall(mockError);
+    var mkdirSpy = sinon.stub(fs, 'mkdir').callsFake(mockError);
 
     var file = new File({
       base: inputBase,
@@ -1084,8 +1085,8 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(mkdirSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(mkdirSpy.callCount).toEqual(1);
       done();
     }
 
@@ -1098,8 +1099,8 @@ describe('.dest()', function() {
   it('errors if vinyl object is a directory and we cannot mkdirp', function(done) {
     var ogMkdir = fs.mkdir;
 
-    var mkdirSpy = expect.spyOn(fs, 'mkdir').andCall(function() {
-      if (mkdirSpy.calls.length > 1) {
+    var mkdirSpy = sinon.stub(fs, 'mkdir').callsFake(function() {
+      if (mkdirSpy.callCount > 1) {
         mockError.apply(this, arguments);
       } else {
         ogMkdir.apply(this, arguments);
@@ -1116,8 +1117,8 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(mkdirSpy.calls.length).toEqual(2);
+      expect(err).toEqual(expect.anything());
+      expect(mkdirSpy.callCount).toEqual(2);
       done();
     }
 
@@ -1152,7 +1153,7 @@ describe('.dest()', function() {
   });
 
   it('errors if vinyl object is a directory and open errors', function(done) {
-    var openSpy = expect.spyOn(fs, 'open').andCall(mockError);
+    var openSpy = sinon.stub(fs, 'open').callsFake(mockError);
 
     var file = new File({
       base: inputBase,
@@ -1164,8 +1165,8 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(openSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(openSpy.callCount).toEqual(1);
       done();
     }
 
@@ -1187,7 +1188,7 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       done();
     }
 
@@ -1205,11 +1206,11 @@ describe('.dest()', function() {
     });
 
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
-    var read = expect.createSpy().andReturn(false);
+    var read = sinon.fake.returns(false);
 
     function assert() {
       // Called never because it's not a valid option
-      expect(read.calls.length).toEqual(0);
+      expect(read.callCount).toEqual(0);
     }
 
     pipe([
@@ -1227,10 +1228,7 @@ describe('.dest()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      // Avoid comparing stats because they get reflected
-      delete files[0].stat;
-      expect(files[0]).toMatch(file);
-      expect(files[0]).toBe(file);
+      expect(files[0]).toEqual(file);
     }
 
     pipe([
@@ -1251,9 +1249,9 @@ describe('.dest()', function() {
     function assert(files) {
       expect(files.length).toEqual(1);
       // Avoid comparing stats because they get reflected
-      delete files[0].stat;
-      expect(files[0]).toMatch(file);
-      expect(files[0]).toNotBe(file);
+      files[0].stat = file.stat;
+      expect(files[0]).toMatchObject(file);
+      expect(files[0]).not.toBe(file);
     }
 
     pipe([

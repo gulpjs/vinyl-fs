@@ -3,6 +3,7 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -33,7 +34,7 @@ describe('.dest() with custom owner', function() {
       return;
     }
 
-    var fchownSpy = expect.spyOn(fs, 'fchown').andCallThrough();
+    var fchownSpy = sinon.spy(fs, 'fchown');
 
     var file = new File({
       base: inputBase,
@@ -46,9 +47,9 @@ describe('.dest() with custom owner', function() {
     });
 
     function assert() {
-      expect(fchownSpy.calls.length).toEqual(1);
-      expect(fchownSpy.calls[0].arguments[1]).toEqual(1001);
-      expect(fchownSpy.calls[0].arguments[2]).toEqual(1001);
+      expect(fchownSpy.callCount).toEqual(1);
+      expect(fchownSpy.getCall(0).args[1]).toEqual(1001);
+      expect(fchownSpy.getCall(0).args[2]).toEqual(1001);
     }
 
     pipe([
@@ -64,7 +65,7 @@ describe('.dest() with custom owner', function() {
       return;
     }
 
-    var fchownSpy = expect.spyOn(fs, 'fchown').andCallThrough();
+    var fchownSpy = sinon.spy(fs, 'fchown');
 
     var file = new File({
       base: inputBase,
@@ -77,7 +78,7 @@ describe('.dest() with custom owner', function() {
     });
 
     function assert() {
-      expect(fchownSpy.calls.length).toEqual(0);
+      expect(fchownSpy.callCount).toEqual(0);
     }
 
     pipe([

@@ -2,6 +2,7 @@
 
 var fs = require('graceful-fs');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -130,8 +131,8 @@ describe('.src() with symlinks', function() {
   it('receives a file with symbolic link stats when resolveSymlinks is a function', function(done) {
 
     function resolveSymlinks(file) {
-      expect(file).toExist();
-      expect(file.stat).toExist();
+      expect(file).toEqual(expect.anything());
+      expect(file.stat).toEqual(expect.anything());
       expect(file.stat.isSymbolicLink()).toEqual(true);
 
       return true;
@@ -152,10 +153,10 @@ describe('.src() with symlinks', function() {
 
   it('only calls resolveSymlinks once-per-file if it is a function', function(done) {
 
-    var spy = expect.createSpy().andReturn(true);
+    var spy = sinon.fake.returns(true);
 
     function assert() {
-      expect(spy.calls.length).toEqual(1);
+      expect(spy.callCount).toEqual(1);
     }
 
     pipe([

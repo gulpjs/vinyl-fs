@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -68,7 +69,7 @@ describe('symlink stream', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
     }
 
@@ -88,7 +89,7 @@ describe('symlink stream', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].cwd).toEqual(process.cwd(), 'cwd should not have changed');
     }
 
@@ -112,7 +113,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -137,7 +138,6 @@ describe('symlink stream', function() {
     });
 
     function outputFn(f) {
-      expect(f).toExist();
       expect(f).toEqual(file);
       return outputRelative;
     }
@@ -146,7 +146,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -172,7 +172,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -198,7 +198,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -224,7 +224,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -279,7 +279,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -316,7 +316,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       // When creating a junction, it seems Windows appends a separator
@@ -354,7 +354,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -397,7 +397,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -434,7 +434,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -471,7 +471,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       // When creating a junction, it seems Windows appends a separator
@@ -504,7 +504,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputPath, 'path should have changed');
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
@@ -539,7 +539,7 @@ describe('symlink stream', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
@@ -739,7 +739,7 @@ describe('symlink stream', function() {
     var file = {};
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Received a non-Vinyl object in `symlink()`');
       done();
     }
@@ -754,7 +754,7 @@ describe('symlink stream', function() {
     var file = new Buffer('test');
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Received a non-Vinyl object in `symlink()`');
       done();
     }
@@ -928,11 +928,11 @@ describe('symlink stream', function() {
     });
 
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
-    var read = expect.createSpy().andReturn(false);
+    var read = sinon.fake.returns(false);
 
     function assert() {
       // Called never because it's not a valid option
-      expect(read.calls.length).toEqual(0);
+      expect(read.called).toEqual(false);
     }
 
     pipe([
@@ -951,8 +951,6 @@ describe('symlink stream', function() {
     function assert(files) {
       expect(files.length).toEqual(1);
       // Avoid comparing stats because they get reflected
-      delete files[0].stat;
-      expect(files[0]).toMatch(file);
       expect(files[0]).toBe(file);
     }
 
@@ -976,9 +974,9 @@ describe('symlink stream', function() {
     function assert(files) {
       expect(files.length).toEqual(1);
       // Avoid comparing stats because they get reflected
-      delete files[0].stat;
-      expect(files[0]).toMatch(file);
-      expect(files[0]).toNotBe(file);
+      files[0].stat = file.stat;
+      expect(files[0]).toMatchObject(file);
+      expect(files[0]).not.toBe(file);
     }
 
     pipe([

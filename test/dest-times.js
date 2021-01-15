@@ -3,6 +3,7 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var vfs = require('../');
@@ -38,7 +39,7 @@ describe('.dest() with custom times', function() {
 
     var earlier = Date.now() - 1001;
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var file = new File({
       base: inputBase,
@@ -50,7 +51,7 @@ describe('.dest() with custom times', function() {
     function assert() {
       var stats = fs.lstatSync(outputPath);
 
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
       expect(stats.atime.getTime()).toBeGreaterThan(earlier);
       expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
     }
@@ -71,7 +72,7 @@ describe('.dest() with custom times', function() {
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var file = new File({
       base: inputBase,
@@ -83,10 +84,10 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
       // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(mtimeSpy.getTime())
         .toEqual(mtime.getTime());
@@ -109,7 +110,7 @@ describe('.dest() with custom times', function() {
 
     var earlier = Date.now() - 1001;
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var file = new File({
       base: inputBase,
@@ -123,7 +124,7 @@ describe('.dest() with custom times', function() {
     function assert() {
       var stats = fs.lstatSync(outputPath);
 
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
       expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
     }
 
@@ -144,7 +145,7 @@ describe('.dest() with custom times', function() {
     var mtime = new Date(Date.now() - 2048);
     var invalidAtime = new Date(undefined);
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var file = new File({
       base: inputBase,
@@ -157,9 +158,9 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
     }
@@ -181,7 +182,7 @@ describe('.dest() with custom times', function() {
     var atime = new Date(Date.now() - 2048);
     var mtime = new Date(Date.now() - 1024);
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var file = new File({
       base: inputBase,
@@ -194,10 +195,10 @@ describe('.dest() with custom times', function() {
     });
 
     function assert() {
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
-      var atimeSpy = futimesSpy.calls[0].arguments[1];
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.getCall(0).args[1];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(atimeSpy.getTime()).toEqual(atime.getTime());
       expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
