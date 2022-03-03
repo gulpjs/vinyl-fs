@@ -1,3 +1,12 @@
 {
-  "extends": "gulp/test"
+  "extends": "gulp",
+  "rules": {
+    "no-redeclare": "off",
+    "max-statements": "off",
+    "no-prototype-builtins": "off"
+  },
+  "env": {
+    "node": true,
+    "mocha": true
+  }
 }
