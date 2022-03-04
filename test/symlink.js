@@ -18,6 +18,7 @@ var breakPrototype = require('./utils/break-prototype');
 
 var from = miss.from;
 var pipe = miss.pipe;
+var finished = miss.finished;
 var concat = miss.concat;
 
 var count = testStreams.count;
@@ -826,15 +827,12 @@ describe('symlink stream', function() {
       }
     });
 
-    function assert(err) {
-      expect(readables).toEqual(1);
-      done(err);
-    }
-
     pipe([
       from.obj([file]),
-      symlinkStream,
-    ], assert);
+      symlinkStream
+    ], done);
+
+    finished(symlinkStream, function() {expect(readables).toEqual(1)});
   });
 
   it('respects data listeners on symlink stream', function(done) {
@@ -851,15 +849,12 @@ describe('symlink stream', function() {
       datas++;
     });
 
-    function assert(err) {
-      expect(datas).toEqual(1);
-      done(err);
-    }
-
     pipe([
       from.obj([file]),
       symlinkStream,
-    ], assert);
+    ], done);
+
+    finished(symlinkStream, function() {expect(datas).toEqual(1)});
   });
 
   it('sinks the stream if all the readable event handlers are removed', function(done) {

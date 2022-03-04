@@ -21,6 +21,7 @@ var breakPrototype = require('./utils/break-prototype');
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+var finished = miss.finished;
 var through = miss.through;
 
 var count = testStreams.count;
@@ -937,15 +938,12 @@ describe('.dest()', function() {
       }
     });
 
-    function assert(err) {
-      expect(readables).toEqual(1);
-      done(err);
-    }
-
     pipe([
       from.obj([file]),
       destStream,
-    ], assert);
+    ], done);
+
+    finished(destStream, function() {expect(readables).toEqual(1)});
   });
 
   it('respects data listeners on destination stream', function(done) {
