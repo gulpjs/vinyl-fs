@@ -23,9 +23,6 @@ var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
 var inputBase = path.join(base, './in/');
-var inputDirpath = testConstants.inputDirpath;
-var outputDirpath = testConstants.outputDirpath;
-var symlinkDirpath = testConstants.symlinkDirpath;
 var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
 var outputSymlink = path.join(symlinkDirpath, './foo');
@@ -55,10 +52,15 @@ describe('integrations', function() {
     }
 
     pipe([
-      vfs.src(inputGlob, { buffer: false }),
+      vfs.src(inputGlob, { highWaterMark: expectedCount }),
       count(expectedCount),
       vfs.dest(outputBase),
-    ], done);
+    ], function() {
+      fs.readdir(outputBase, function(err, files) {
+        expect(files.length).toEqual(expectedCount);
+        done();
+      });
+    });
   });
 
   it('(*nix) sources a directory, creates a symlink and copies it', function(done) {
