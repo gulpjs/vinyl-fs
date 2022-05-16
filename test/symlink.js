@@ -834,6 +834,7 @@ describe('symlink stream', function() {
     pipe([
       from.obj([file]),
       symlinkStream,
+      slowCount(1), // Verify and avoid race condition w/ assert check
     ], assert);
   });
 
@@ -859,6 +860,7 @@ describe('symlink stream', function() {
     pipe([
       from.obj([file]),
       symlinkStream,
+      slowCount(1), // Verify and avoid race condition w/ assert check
     ], assert);
   });
 
