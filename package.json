@@ -32,7 +32,7 @@
     "iconv-lite": "^0.4.24",
     "is-valid-glob": "^1.0.0",
     "lazystream": "^1.0.0",
-    "lead": "^1.0.0",
+    "lead": "^3.0.0",
     "object.assign": "^4.0.4",
     "pumpify": "^1.3.5",
     "readable-stream": "^3.6.0",
@@ -41,7 +41,7 @@
     "resolve-options": "^1.1.0",
     "through2": "^2.0.0",
     "to-through": "^2.0.0",
-    "value-or-function": "^3.0.0",
+    "value-or-function": "^4.0.0",
     "vinyl": "^2.0.0",
     "vinyl-sourcemap": "^1.1.0"
   },
