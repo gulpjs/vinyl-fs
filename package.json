@@ -39,7 +39,7 @@
     "remove-bom-buffer": "^3.0.0",
     "remove-bom-stream": "^1.2.0",
     "resolve-options": "^1.1.0",
-    "through2": "^2.0.0",
+    "through2": "^4.0.2",
     "to-through": "^2.0.0",
     "value-or-function": "^4.0.0",
     "vinyl": "^2.0.0",

@@ -945,6 +945,7 @@ describe('.dest()', function() {
     pipe([
       from.obj([file]),
       destStream,
+      slowCount(1), // Verify and avoid race condition w/ assert check
     ], assert);
   });
 
