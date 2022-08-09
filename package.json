@@ -1,6 +1,6 @@
 {
   "name": "vinyl-fs",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Vinyl adapter for the file system.",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
   "contributors": [
@@ -36,7 +36,7 @@
     "readable-stream": "^3.6.0",
     "remove-bom-buffer": "^3.0.0",
     "remove-bom-stream": "^1.2.0",
-    "resolve-options": "^1.1.0",
+    "resolve-options": "^2.0.0",
     "through2": "^4.0.2",
     "to-through": "^2.0.0",
     "value-or-function": "^4.0.0",
