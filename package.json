@@ -10,7 +10,7 @@
   "repository": "BonnierNews/vinyl-fs",
   "license": "MIT",
   "engines": {
-    "node": ">=16.5.0"
+    "node": ">=18.0.0"
   },
   "main": "index.js",
   "files": [
@@ -40,15 +40,15 @@
     "through2": "^4.0.2",
     "to-through": "^2.0.0",
     "value-or-function": "^4.0.0",
-    "vinyl": "^2.2.1",
+    "vinyl": "3.0.0",
     "vinyl-sourcemap": "^1.1.0"
   },
   "devDependencies": {
-    "eslint": "^8.24.0",
+    "eslint": "8.27.0",
     "eslint-config-gulp": "^5.0.1",
     "expect": "^1.20.0",
     "mississippi": "^4.0.0",
-    "mocha": "^10.0.0",
+    "mocha": "10.1.0",
     "rimraf": "^3.0.2"
   },
   "keywords": [
