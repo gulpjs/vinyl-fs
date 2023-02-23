@@ -84,16 +84,19 @@ describe('isOwner', function() {
   });
 
   afterEach(function(done) {
-    sinon.restore();
+    process.geteuid = geteuidSpy;
+    process.getuid = getuidSpy;
 
-    if (process.geteuid === noop) {
-      delete process.geteuid;
+    if (typeof process.geteuid !== 'function') {
+      process.geteuid = noop;
     }
 
     // Windows :(
-    if (process.getuid === noop) {
-      delete process.getuid;
+    if (typeof process.getuid !== 'function') {
+      process.getuid = noop;
     }
+
+    sinon.restore();
 
     done();
   });
