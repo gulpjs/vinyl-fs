@@ -84,7 +84,7 @@ describe('codecs', function() {
     expect(result).toEqual(expect.anything());
     expect(typeof result).toEqual('object');
     expect(Buffer.isBuffer(result)).toBe(true);
-    expect(result.toString()).toMatch(expected.slice(4).toString()); // Ignore leading garbage
+    expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     done();
   });
 
@@ -96,7 +96,7 @@ describe('codecs', function() {
       expect(result).toEqual(expect.anything());
       expect(typeof result).toEqual('object');
       expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString()).toMatch(expected.slice(4).toString()); // Ignore leading garbage
+      expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     }
 
     pipe([
@@ -149,7 +149,7 @@ describe('codecs', function() {
     expect(result).toEqual(expect.anything());
     expect(typeof result).toEqual('object');
     expect(Buffer.isBuffer(result)).toBe(true);
-    expect(result.toString()).toMatch(expected.slice(4).toString()); // Ignore leading garbage
+    expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     done();
   });
 
@@ -161,7 +161,7 @@ describe('codecs', function() {
       expect(result).toEqual(expect.anything());
       expect(typeof result).toEqual('object');
       expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString()).toMatch(expected.slice(4).toString()); // Ignore leading garbage
+      expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     }
 
     pipe([
@@ -182,7 +182,7 @@ describe('codecs', function() {
     var expected = encodedContents;
 
     var result = codec.decode(fs.readFileSync(encodedInputPath));
-    expect(result.toString()).toMatch(expected.toString());
+    expect(result.toString()).toEqual(expected.toString());
     done();
   });
 
@@ -191,7 +191,7 @@ describe('codecs', function() {
     var expected = encodedContents;
 
     function assert(result) {
-      expect(result.toString()).toMatch(expected.toString());
+      expect(result.toString()).toEqual(expected.toString());
     }
 
     pipe([
@@ -206,7 +206,7 @@ describe('codecs', function() {
     var expected = fs.readFileSync(encodedInputPath);
 
     var result = codec.encode(encodedContents);
-    expect(result.toString()).toMatch(expected.toString());
+    expect(result.toString()).toEqual(expected.toString());
     done();
   });
 
@@ -215,7 +215,7 @@ describe('codecs', function() {
     var expected = fs.readFileSync(encodedInputPath);
 
     function assert(result) {
-      expect(result.toString()).toMatch(expected.toString());
+      expect(result.toString()).toEqual(expected.toString());
     }
 
     pipe([

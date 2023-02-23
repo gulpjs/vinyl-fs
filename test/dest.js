@@ -678,7 +678,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents.toString()).toMatch(expectedContents.toString());
+      expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -700,7 +700,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents.toString()).toMatch(expectedContents.toString());
+      expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -722,7 +722,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents.toString()).toMatch(expectedContents.toString());
+      expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -744,7 +744,7 @@ describe('.dest()', function() {
       var outputContents = fs.readFileSync(outputPath);
 
       expect(files.length).toEqual(1);
-      expect(outputContents.toString()).toMatch(expectedContents.toString());
+      expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -767,7 +767,7 @@ describe('.dest()', function() {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files[0].isBuffer()).toEqual(true);
-      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -788,7 +788,7 @@ describe('.dest()', function() {
     });
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContents.toString());
+      expect(contents.toString()).toEqual(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {

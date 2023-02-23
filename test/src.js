@@ -140,7 +140,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -182,7 +182,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -195,7 +195,7 @@ describe('.src()', function() {
     var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -224,7 +224,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -266,7 +266,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -279,7 +279,7 @@ describe('.src()', function() {
     var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-BE'));
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -308,7 +308,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -350,7 +350,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -363,7 +363,7 @@ describe('.src()', function() {
     var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '16-LE'));
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -394,7 +394,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     };
 
     pipe([
@@ -407,7 +407,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -438,7 +438,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContent.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
     pipe([
@@ -451,7 +451,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -480,7 +480,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -493,7 +493,7 @@ describe('.src()', function() {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContents.toString());
+      expect(contents.toString()).toEqual(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -522,7 +522,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -535,7 +535,7 @@ describe('.src()', function() {
     var expectedContents = fs.readFileSync(bomInputPath);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContents.toString());
+      expect(contents.toString()).toEqual(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -564,7 +564,7 @@ describe('.src()', function() {
 
     function assert(files) {
       expect(files.length).toEqual(1);
-      expect(files[0].contents.toString()).toMatch(expectedContents.toString());
+      expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
     pipe([
@@ -577,7 +577,7 @@ describe('.src()', function() {
     var expectedContents = Buffer.from(encodedContents);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContents.toString());
+      expect(contents.toString()).toEqual(expectedContents.toString());
     }
 
     function compareContents(file, enc, cb) {
@@ -750,7 +750,7 @@ describe('.src()', function() {
     var expectedContent = fs.readFileSync(inputPath);
 
     function assertContent(contents) {
-      expect(contents.toString()).toMatch(expectedContent.toString());
+      expect(contents.toString()).toEqual(expectedContent.toString());
     }
 
     function compareContents(file, enc, cb) {
