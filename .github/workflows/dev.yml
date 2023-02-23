@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - main
 env:
   CI: true
 
@@ -20,7 +21,7 @@ jobs:
       - name: Prettier
         uses: gulpjs/prettier_action@v3.0
         with:
-          commit_message: 'Build: Run prettier'
+          commit_message: 'chore: Run prettier'
           prettier_options: '--write .'
 
   test:
@@ -30,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [10, 12, 14]
+        node: [10, 12, 14, 16]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
@@ -38,7 +39,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Node.js version
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
 
@@ -55,7 +56,7 @@ jobs:
         run: npm test
 
       - name: Coveralls
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{matrix.os}}-node-${{ matrix.node }}
@@ -68,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v1.1.0
+        uses: coverallsapp/github-action@v1.1.2
         with:
-          github-token: ${{ secrets.github_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true

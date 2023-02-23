@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://gulpjs.com">
+  <a href="https://gulpjs.com">
     <img height="257" width="114" src="https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png">
   </a>
 </p>
@@ -17,12 +17,6 @@
 ## What is a Vinyl Adapter?
 
 While Vinyl provides a clean way to describe a file, we now need a way to access these files. Each file source needs what we call a "Vinyl adapter". A Vinyl adapter simply exposes a `src(globs)` and a `dest(folder)` method. Each return a stream. The `src` stream produces Vinyl objects, and the `dest` stream consumes Vinyl objects. Vinyl adapters can expose extra methods that might be specific to their input/output medium, such as the `symlink` method `vinyl-fs` provides.
-
-## vinyl-fs for enterprise
-
-Available as part of the Tidelift Subscription
-
-The maintainers of vinyl-fs and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-vinyl-fs?utm_source=npm-vinyl-fs&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
 ## Usage
 
@@ -349,19 +343,21 @@ scenario.
 MIT
 
 <!-- prettier-ignore-start -->
-[symbolic-caveats]: #symbolic-links-on-windows
-[glob-stream]: https://github.com/gulpjs/glob-stream
-[node-glob]: https://github.com/isaacs/node-glob
-[vinyl]: https://github.com/wearefractal/vinyl
-[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
-
 [downloads-image]: https://img.shields.io/npm/dm/vinyl-fs.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
 [npm-image]: https://img.shields.io/npm/v/vinyl-fs.svg?style=flat-square
 
 [ci-url]: https://github.com/gulpjs/vinyl-fs/actions?query=workflow:dev
-[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/vinyl-fs/dev?style=flat-square
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/vinyl-fs/dev.yml??branch=master&style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/vinyl-fs/master.svg
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/vinyl-fs.svg?style=flat-square
+<!-- prettier-ignore-end -->
+
+<!-- prettier-ignore-start -->
+[symbolic-caveats]: #symbolic-links-on-windows
+[glob-stream]: https://github.com/gulpjs/glob-stream
+[node-glob]: https://github.com/isaacs/node-glob
+[vinyl]: https://github.com/wearefractal/vinyl
+[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
 <!-- prettier-ignore-end -->
