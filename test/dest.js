@@ -6,7 +6,13 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
+var through = require('through2');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
@@ -19,10 +25,7 @@ var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 var breakPrototype = require('./utils/break-prototype');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
-var through = miss.through;
+var pipeline = stream.pipeline;
 
 var count = testStreams.count;
 var rename = testStreams.rename;
@@ -97,8 +100,8 @@ describe('.dest()', function() {
       expect(files).toContain(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { sourcemaps: true }),
       concat(assert),
     ], done);
@@ -117,8 +120,8 @@ describe('.dest()', function() {
       expect(files).toContain(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { sourcemaps: '.' }),
       concat(assert),
     ], done);
@@ -138,8 +141,8 @@ describe('.dest()', function() {
       expect(files[0].contents.toString()).toMatch(new RegExp(sourcemapContents));
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { sourcemaps: true }),
       concat(assert),
     ], done);
@@ -160,8 +163,8 @@ describe('.dest()', function() {
       expect(files[1].contents.toString()).toEqual(JSON.stringify(makeSourceMap()));
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { sourcemaps: '.' }),
       concat(assert),
     ], done);
@@ -180,8 +183,8 @@ describe('.dest()', function() {
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputRelative, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -200,8 +203,8 @@ describe('.dest()', function() {
       expect(files[0].cwd).toEqual(process.cwd(), 'cwd should not have changed');
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -224,8 +227,8 @@ describe('.dest()', function() {
       expect(exists).toEqual(false);
     };
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -251,8 +254,8 @@ describe('.dest()', function() {
       expect(outputContents).toEqual(contents);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputRelative, { cwd: cwd }),
       concat(assert),
     ], done);
@@ -284,8 +287,8 @@ describe('.dest()', function() {
       expect(outputContents).toEqual(contents);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputFn, { cwd: cwd }),
       concat(assert),
     ], done);
@@ -308,8 +311,8 @@ describe('.dest()', function() {
       expect(outputContents).toEqual(contents);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -332,8 +335,8 @@ describe('.dest()', function() {
       expect(outputContents).toEqual(contents);
     };
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -356,8 +359,8 @@ describe('.dest()', function() {
       expect(stats.size).toEqual(size);
     };
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -384,8 +387,8 @@ describe('.dest()', function() {
       expect(stats.isDirectory()).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -405,8 +408,8 @@ describe('.dest()', function() {
       expect(outputContents2).toEqual(contents);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       includes({ path: inputPath }),
       vfs.dest(outputBase),
       rename(outputRenamePath),
@@ -431,8 +434,8 @@ describe('.dest()', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -454,8 +457,8 @@ describe('.dest()', function() {
     fs.closeSync(fs.openSync(outputPath, 'w'));
     fs.chmodSync(outputPath, 0);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -483,8 +486,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, 'w'));
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -509,8 +512,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: false }),
       concat(assert),
     ], done);
@@ -536,8 +539,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: true }),
       concat(assert),
     ], done);
@@ -568,8 +571,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);
@@ -600,8 +603,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);
@@ -627,8 +630,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { append: true }),
       concat(assert),
     ], done);
@@ -659,8 +662,8 @@ describe('.dest()', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { append: append }),
       concat(assert),
     ], done);
@@ -681,8 +684,8 @@ describe('.dest()', function() {
       expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: false }),
       concat(assert),
     ], done);
@@ -703,8 +706,8 @@ describe('.dest()', function() {
       expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: false }),
       concat(assert),
     ], done);
@@ -725,8 +728,8 @@ describe('.dest()', function() {
       expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'gb2312' }),
       concat(assert),
     ], done);
@@ -747,8 +750,8 @@ describe('.dest()', function() {
       expect(outputContents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'gb2312' }),
       concat(assert),
     ], done);
@@ -770,8 +773,8 @@ describe('.dest()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'utf16be' }),
       concat(assert),
     ], done);
@@ -792,7 +795,7 @@ describe('.dest()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -804,8 +807,8 @@ describe('.dest()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'utf16be' }),
       through.obj(compareContents),
       concat(assert),
@@ -829,8 +832,8 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'fubar42' }),
       concat(assert),
     ], finish);
@@ -853,8 +856,8 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { encoding: 'fubar42' }),
       concat(assert),
     ], finish);
@@ -863,7 +866,15 @@ describe('.dest()', function() {
   it('emits a finish event', function(done) {
     var destStream = vfs.dest(outputBase);
 
-    destStream.once('finish', done);
+    var finished = false;
+    destStream.once('finish', function() {
+      finished = true;
+    });
+
+    function finish() {
+      expect(finished).toBeTruthy();
+      done();
+    }
 
     var file = new File({
       base: inputBase,
@@ -871,10 +882,10 @@ describe('.dest()', function() {
       contents: Buffer.from('1234567890'),
     });
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       destStream,
-    ]);
+    ], finish);
   });
 
   it('does not get clogged by highWaterMark', function(done) {
@@ -889,8 +900,8 @@ describe('.dest()', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -912,8 +923,8 @@ describe('.dest()', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       vfs.dest(outputBase),
       slowCount(expectedCount),
@@ -943,8 +954,8 @@ describe('.dest()', function() {
       done(err);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       destStream,
     ], assert);
   });
@@ -968,8 +979,8 @@ describe('.dest()', function() {
       done(err);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       destStream,
     ], assert);
   });
@@ -990,8 +1001,8 @@ describe('.dest()', function() {
 
     destStream.on('readable', noop);
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -1019,8 +1030,8 @@ describe('.dest()', function() {
 
     destStream.on('data', noop);
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -1039,8 +1050,8 @@ describe('.dest()', function() {
       contents: from([contents]),
     });
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], done);
   });
@@ -1054,8 +1065,8 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -1069,7 +1080,7 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       from([file]),
       vfs.dest(outputBase),
     ], assert);
@@ -1090,8 +1101,8 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -1122,8 +1133,8 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -1145,8 +1156,8 @@ describe('.dest()', function() {
       expect(exists).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -1170,16 +1181,20 @@ describe('.dest()', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
 
   it('errors if content stream errors', function(done) {
-    var contentStream = from(function(size, cb) {
-      cb(new Error('mocked error'));
-    });
+    var error = new Error('mocked error');
+
+    var contentStream = new stream.Readable({
+      read: function() {
+        this.destroy(error);
+      },
+    })
 
     var file = new File({
       base: inputBase,
@@ -1188,12 +1203,12 @@ describe('.dest()', function() {
     });
 
     function assert(err) {
-      expect(err).toEqual(expect.anything());
+      expect(err).toBe(error);
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -1213,8 +1228,8 @@ describe('.dest()', function() {
       expect(read.callCount).toEqual(0);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { read: read }),
       concat(assert),
     ], done);
@@ -1231,8 +1246,8 @@ describe('.dest()', function() {
       expect(files[0]).toEqual(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -1254,8 +1269,8 @@ describe('.dest()', function() {
       expect(files[0]).not.toBe(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);

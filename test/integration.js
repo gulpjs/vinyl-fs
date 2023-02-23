@@ -3,7 +3,8 @@
 var path = require('path');
 
 var fs = require('graceful-fs');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
 var expect = require('expect');
 
 var vfs = require('../');
@@ -13,8 +14,7 @@ var isWindows = require('./utils/is-windows');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var count = testStreams.count;
 
@@ -51,7 +51,7 @@ describe('integrations', function() {
       fs.writeFileSync(filepath, content);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputGlob, { buffer: false }),
       count(expectedCount),
       vfs.dest(outputBase),
@@ -74,7 +74,7 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputDirpath),
       vfs.symlink(symlinkDirpath),
       vfs.dest(outputDirpath),
@@ -100,7 +100,7 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputDirpath),
       vfs.symlink(symlinkDirpath),
       vfs.dest(outputDirpath),
@@ -126,7 +126,7 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(outputSymlink, { resolveSymlinks: false }),
       vfs.dest(outputDirpath),
       concat(assert),
@@ -153,7 +153,7 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(outputSymlink, { resolveSymlinks: false }),
       vfs.dest(outputDirpath),
       concat(assert),
@@ -180,7 +180,7 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(outputSymlink, { resolveSymlinks: false }),
       vfs.dest(outputDirpath),
       concat(assert),

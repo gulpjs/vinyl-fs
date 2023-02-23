@@ -2,11 +2,14 @@
 
 var fs = require('graceful-fs');
 var expect = require('expect');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
+
+var pipeline = stream.pipeline;
 
 var getCodec = require('../lib/codecs');
 var DEFAULT_ENCODING = require('../lib/constants').DEFAULT_ENCODING;
@@ -69,7 +72,7 @@ describe('codecs', function() {
       expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
     }
 
-    pipe([
+    pipeline([
       fs.createReadStream(beNotBomInputPath),
       codec.decodeStream(),
       concat(assert),
@@ -99,8 +102,8 @@ describe('codecs', function() {
       expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     }
 
-    pipe([
-      from.obj([notBomContents.replace('X', 'BE')]),
+    pipeline([
+      from([notBomContents.replace('X', 'BE')]),
       codec.encodeStream(),
       concat(assert),
     ], done);
@@ -134,7 +137,7 @@ describe('codecs', function() {
       expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
     }
 
-    pipe([
+    pipeline([
       fs.createReadStream(leNotBomInputPath),
       codec.decodeStream(),
       concat(assert),
@@ -164,8 +167,8 @@ describe('codecs', function() {
       expect(result.toString()).toEqual(expected.slice(4).toString()); // Ignore leading garbage
     }
 
-    pipe([
-      from.obj([notBomContents.replace('X', 'LE')]),
+    pipeline([
+      from([notBomContents.replace('X', 'LE')]),
       codec.encodeStream(),
       concat(assert),
     ], done);
@@ -194,7 +197,7 @@ describe('codecs', function() {
       expect(result.toString()).toEqual(expected.toString());
     }
 
-    pipe([
+    pipeline([
       fs.createReadStream(encodedInputPath),
       codec.decodeStream(),
       concat(assert),
@@ -218,8 +221,8 @@ describe('codecs', function() {
       expect(result.toString()).toEqual(expected.toString());
     }
 
-    pipe([
-      from.obj([encodedContents]),
+    pipeline([
+      from([encodedContents]),
       codec.encodeStream(),
       concat(assert),
     ], done);

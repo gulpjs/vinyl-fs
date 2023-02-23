@@ -5,7 +5,12 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
@@ -14,9 +19,7 @@ var isWindows = require('./utils/is-windows');
 var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -61,8 +64,8 @@ describe('.dest() with symlinks', function() {
       expect(files[0].path).toEqual(outputPath);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -88,8 +91,8 @@ describe('.dest() with symlinks', function() {
       expect(symlinkExists).toBe(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -111,8 +114,8 @@ describe('.dest() with symlinks', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
     ], assert);
   });
@@ -135,8 +138,8 @@ describe('.dest() with symlinks', function() {
       expect(files[0].isSymbolic()).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -163,8 +166,8 @@ describe('.dest() with symlinks', function() {
       expect(files[0].isSymbolic()).toBe(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -199,8 +202,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -236,8 +239,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase),
       concat(assert),
     ], done);
@@ -272,8 +275,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { useJunctions: false }),
       concat(assert),
     ], done);
@@ -314,8 +317,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { useJunctions: useJunctions }),
       concat(assert),
     ], done);
@@ -350,8 +353,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -386,9 +389,9 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isSymbolicLink()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       // This could also be from a different Vinyl adapter
-      from.obj([file]),
+      from([file]),
       vfs.dest(neOutputBase),
       concat(assert),
     ], done);
@@ -426,9 +429,9 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isSymbolicLink()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       // This could also be from a different Vinyl adapter
-      from.obj([file]),
+      from([file]),
       vfs.dest(neOutputBase),
       concat(assert),
     ], done);
@@ -464,8 +467,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -496,8 +499,8 @@ describe('.dest() with symlinks', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       // The useJunctions option is ignored when file is not a directory
       vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
@@ -536,8 +539,8 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -569,8 +572,8 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: false }),
       concat(assert),
     ], done);
@@ -603,8 +606,8 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: true }),
       concat(assert),
     ], done);
@@ -641,8 +644,8 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);
@@ -679,8 +682,8 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);

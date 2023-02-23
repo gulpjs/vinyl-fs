@@ -6,7 +6,12 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var concat = require('concat-stream');
+var stream = require('stream');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
@@ -17,9 +22,7 @@ var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 var breakPrototype = require('./utils/break-prototype');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var count = testStreams.count;
 var slowCount = testStreams.slowCount;
@@ -73,8 +76,8 @@ describe('symlink stream', function() {
       expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputRelative, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -93,8 +96,8 @@ describe('symlink stream', function() {
       expect(files[0].cwd).toEqual(process.cwd(), 'cwd should not have changed');
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -121,8 +124,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputRelative, { cwd: cwd }),
       concat(assert),
     ], done);
@@ -154,8 +157,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputFn, { cwd: cwd }),
       concat(assert),
     ], done);
@@ -180,8 +183,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -206,8 +209,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -232,8 +235,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(inputPath);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -251,8 +254,8 @@ describe('symlink stream', function() {
       expect(files[0].isSymbolic()).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -288,8 +291,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -326,8 +329,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -363,8 +366,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { useJunctions: false }),
       concat(assert),
     ], done);
@@ -405,8 +408,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { useJunctions: useJunctions }),
       concat(assert),
     ], done);
@@ -442,8 +445,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -480,8 +483,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -509,8 +512,8 @@ describe('symlink stream', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       // The useJunctions option is ignored when file is not a directory
       vfs.symlink(outputBase, { useJunctions: true, relativeSymlinks: true }),
       concat(assert),
@@ -547,8 +550,8 @@ describe('symlink stream', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { useJunctions: false, relativeSymlinks: true }),
       concat(assert),
     ], done);
@@ -576,8 +579,8 @@ describe('symlink stream', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputDirpath),
     ], assert);
   });
@@ -602,8 +605,8 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { overwrite: false }),
       concat(assert),
     ], done);
@@ -629,8 +632,8 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { overwrite: true }),
       concat(assert),
     ], done);
@@ -661,8 +664,8 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);
@@ -693,8 +696,8 @@ describe('symlink stream', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { overwrite: overwrite }),
       concat(assert),
     ], done);
@@ -703,7 +706,15 @@ describe('symlink stream', function() {
   it('emits an end event', function(done) {
     var symlinkStream = vfs.symlink(outputBase);
 
-    symlinkStream.on('end', done);
+    var ended = false;
+    function end() {
+      ended = true;
+    }
+
+    symlinkStream.on('end', function() {
+      expect(ended).toBeTruthy();
+      done();
+    });
 
     var file = new File({
       base: inputBase,
@@ -711,16 +722,24 @@ describe('symlink stream', function() {
       contents: null,
     });
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       symlinkStream,
-    ]);
+    ], end);
   });
 
   it('emits a finish event', function(done) {
     var symlinkStream = vfs.symlink(outputBase);
 
-    symlinkStream.on('finish', done);
+    var finished = true;
+    symlinkStream.on('finish', function() {
+      finished = true;
+    });
+
+    function finish() {
+      expect(finished).toBeTruthy();
+      done();
+    }
 
     var file = new File({
       base: inputBase,
@@ -728,10 +747,10 @@ describe('symlink stream', function() {
       contents: null,
     });
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       symlinkStream,
-    ]);
+    ], finish);
   });
 
   it('errors when a non-Vinyl object is emitted', function(done) {
@@ -743,8 +762,8 @@ describe('symlink stream', function() {
       done();
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
     ], assert);
   });
@@ -758,7 +777,7 @@ describe('symlink stream', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       from([file]),
       vfs.symlink(outputBase),
     ], assert);
@@ -776,8 +795,8 @@ describe('symlink stream', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -799,8 +818,8 @@ describe('symlink stream', function() {
       highwatermarkFiles.push(file);
     }
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       vfs.symlink(outputBase),
       slowCount(expectedCount),
@@ -830,8 +849,8 @@ describe('symlink stream', function() {
       done(err);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       symlinkStream,
     ], assert);
   });
@@ -855,8 +874,8 @@ describe('symlink stream', function() {
       done(err);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       symlinkStream,
     ], assert);
   });
@@ -877,8 +896,8 @@ describe('symlink stream', function() {
 
     symlinkStream.on('readable', noop);
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -906,8 +925,8 @@ describe('symlink stream', function() {
 
     symlinkStream.on('data', noop);
 
-    pipe([
-      from.obj(highwatermarkFiles),
+    pipeline([
+      from(highwatermarkFiles),
       count(expectedCount),
       // Must be in the Writable position to test this
       // So concat-stream cannot be used
@@ -934,8 +953,8 @@ describe('symlink stream', function() {
       expect(read.called).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase, { read: read }),
       concat(assert),
     ], done);
@@ -953,8 +972,8 @@ describe('symlink stream', function() {
       expect(files[0]).toBe(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);
@@ -978,8 +997,8 @@ describe('symlink stream', function() {
       expect(files[0]).not.toBe(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.symlink(outputBase),
       concat(assert),
     ], done);

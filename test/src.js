@@ -6,16 +6,19 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
+var through = require('through2');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
 var testConstants = require('./utils/test-constants');
 
-var pipe = miss.pipe;
-var from = miss.from;
-var concat = miss.concat;
-var through = miss.through;
+var pipeline = stream.pipeline;
 
 var inputBase = testConstants.inputBase;
 var inputPath = testConstants.inputPath;
@@ -106,7 +109,7 @@ describe('.src()', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       vfs.src('./fixtures/noexist.coffee'),
       concat(),
     ], assert);
@@ -129,7 +132,7 @@ describe('.src()', function() {
 
     srcStream.write(file);
 
-    pipe([
+    pipeline([
       srcStream,
       concat(assert),
     ], done);
@@ -143,7 +146,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath),
       concat(assert),
     ], done);
@@ -157,7 +160,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -170,7 +173,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath, { buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -185,7 +188,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath, { removeBOM: false }),
       concat(assert),
     ], done);
@@ -199,7 +202,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -212,7 +215,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath, { removeBOM: false, buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -227,7 +230,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be' }),
       concat(assert),
     ], done);
@@ -241,7 +244,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -254,7 +257,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be', buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -269,7 +272,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be', removeBOM: false }),
       concat(assert),
     ], done);
@@ -283,7 +286,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -296,7 +299,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be', removeBOM: false, buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -311,7 +314,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le' }),
       concat(assert),
     ], done);
@@ -325,7 +328,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -338,7 +341,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le', buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -353,7 +356,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le', removeBOM: false }),
       concat(assert),
     ], done);
@@ -367,7 +370,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -380,7 +383,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le', removeBOM: false, buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -397,7 +400,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     };
 
-    pipe([
+    pipeline([
       vfs.src(beNotBomInputPath),
       concat(assert),
     ], done);
@@ -411,7 +414,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -424,7 +427,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(beNotBomInputPath, { buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -441,7 +444,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContent.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(leNotBomInputPath),
       concat(assert),
     ], done);
@@ -455,7 +458,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -468,7 +471,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(leNotBomInputPath, { buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -483,7 +486,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(ranBomInputPath, { encoding: false }),
       concat(assert),
     ], done);
@@ -497,7 +500,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -510,7 +513,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(ranBomInputPath, { encoding: false, buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -525,7 +528,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath, { encoding: false }),
       concat(assert),
     ], done);
@@ -539,7 +542,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -552,7 +555,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(bomInputPath, { encoding: false, buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -567,7 +570,7 @@ describe('.src()', function() {
       expect(files[0].contents.toString()).toEqual(expectedContents.toString());
     }
 
-    pipe([
+    pipeline([
       vfs.src(encodedInputPath, { encoding: 'gb2312' }),
       concat(assert),
     ], done);
@@ -581,7 +584,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -594,7 +597,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(encodedInputPath, { encoding: 'gb2312', buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -612,7 +615,7 @@ describe('.src()', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { encoding: 'fubar42' }),
       concat(assert),
     ], finish);
@@ -629,7 +632,7 @@ describe('.src()', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { encoding: 'fubar42', buffer: false }),
       concat(assert),
     ], finish);
@@ -641,7 +644,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(7);
     }
 
-    pipe([
+    pipeline([
       vfs.src('./fixtures/*.txt', { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -654,7 +657,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(7);
     }
 
-    pipe([
+    pipeline([
       vfs.src('./fixtures/*.txt', { cwd: cwd }),
       concat(assert),
     ], done);
@@ -670,7 +673,7 @@ describe('.src()', function() {
       expect(files[0].isDirectory()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputDirGlob),
       concat(assert),
     ], done);
@@ -685,7 +688,7 @@ describe('.src()', function() {
       expect(files[0].isDirectory()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src('./fixtures/f*/', { cwd: cwd }),
       concat(assert),
     ], done);
@@ -699,7 +702,7 @@ describe('.src()', function() {
       expect(files[0].isDirectory()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputDirpath),
       concat(assert),
     ], done);
@@ -713,7 +716,7 @@ describe('.src()', function() {
       expect(files[0]).toHaveProperty('contents', null);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { read: false }),
       concat(assert),
     ], done);
@@ -727,7 +730,7 @@ describe('.src()', function() {
       expect(files[0].path).toEqual(inputPath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { since: lastUpdateDate }),
       concat(assert),
     ], done);
@@ -740,7 +743,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(0);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { since: lastUpdateDate }),
       concat(assert),
     ], done);
@@ -754,7 +757,7 @@ describe('.src()', function() {
     }
 
     function compareContents(file, enc, cb) {
-      pipe([
+      pipeline([
         file.contents,
         concat(assertContent),
       ], function(err) {
@@ -768,7 +771,7 @@ describe('.src()', function() {
       expect(files[0].isStream()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { buffer: false }),
       through.obj(compareContents),
       concat(assert),
@@ -788,8 +791,8 @@ describe('.src()', function() {
       expect(files[0]).toEqual(file);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.src(inputPath),
       concat(assert),
     ], done);
@@ -800,7 +803,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(2);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath),
       vfs.src(inputPath),
       concat(assert),
@@ -816,7 +819,7 @@ describe('.src()', function() {
       expect(read.callCount).toEqual(1);
     }
 
-    pipe([
+    pipeline([
       vfs.src(inputPath, { read: read }),
       concat(assert),
     ], done);

@@ -4,7 +4,12 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
@@ -16,9 +21,7 @@ var applyUmask = require('./utils/apply-umask');
 var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -60,8 +63,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -88,8 +91,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -116,8 +119,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -145,8 +148,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -174,8 +177,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -199,8 +202,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
       concat(assert),
     ], done);
@@ -232,8 +235,8 @@ describe('.dest() with custom modes', function() {
     fs.closeSync(fs.openSync(outputPath, 'w'));
     fs.chmodSync(outputPath, startMode);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -269,8 +272,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file1, file2]),
+    pipeline([
+      from([file1, file2]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -296,8 +299,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputNestedPath)).toEqual(expectedFileMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, {
         cwd: __dirname,
         mode: expectedFileMode,
@@ -331,8 +334,8 @@ describe('.dest() with custom modes', function() {
       expect(statMode(outputPath)).toEqual(expectedMode);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -366,8 +369,8 @@ describe('.dest() with custom modes', function() {
     fs.closeSync(fs.openSync(outputPath, 'w'));
     fs.chmodSync(outputPath, startMode);
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -401,8 +404,8 @@ describe('.dest() with custom modes', function() {
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, 'w'));
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
     ], assert);
   });

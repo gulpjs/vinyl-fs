@@ -3,15 +3,15 @@
 var fs = require('graceful-fs');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var testConstants = require('./utils/test-constants');
 
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -56,7 +56,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isFile()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkNestedFirst),
       concat(assert),
     ], done);
@@ -74,7 +74,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isDirectory()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkDirpath),
       concat(assert),
     ], done);
@@ -92,7 +92,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isDirectory()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkMultiDirpathSecond),
       concat(assert),
     ], done);
@@ -107,7 +107,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkPath, { resolveSymlinks: false }),
       concat(assert),
     ], done);
@@ -122,7 +122,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkDirpath, { resolveSymlinks: false }),
       concat(assert),
     ], done);
@@ -145,7 +145,7 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isFile()).toEqual(true);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkNestedFirst, { resolveSymlinks: resolveSymlinks }),
       concat(assert),
     ], done);
@@ -159,7 +159,7 @@ describe('.src() with symlinks', function() {
       expect(spy.callCount).toEqual(1);
     }
 
-    pipe([
+    pipeline([
       vfs.src(symlinkNestedFirst, { resolveSymlinks: spy }),
       concat(assert),
     ], done);

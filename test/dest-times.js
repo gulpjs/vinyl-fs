@@ -4,7 +4,12 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
+var concat = require('concat-stream');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
@@ -12,9 +17,7 @@ var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var testConstants = require('./utils/test-constants');
 
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var pipeline = stream.pipeline;
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -56,8 +59,8 @@ describe('.dest() with custom times', function() {
       expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -95,8 +98,8 @@ describe('.dest() with custom times', function() {
       expect(file.stat.mtime).toEqual(mtime);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -128,8 +131,8 @@ describe('.dest() with custom times', function() {
       expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -165,8 +168,8 @@ describe('.dest() with custom times', function() {
       expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
     }
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);
@@ -206,8 +209,8 @@ describe('.dest() with custom times', function() {
       expect(file.stat.atime).toEqual(atime);
     };
 
-    pipe([
-      from.obj([file]),
+    pipeline([
+      from([file]),
       vfs.dest(outputBase, { cwd: __dirname }),
       concat(assert),
     ], done);

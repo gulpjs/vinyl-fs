@@ -7,8 +7,12 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var miss = require('mississippi');
+var stream = require('stream');
 var mkdirp = require('fs-mkdirp-stream/mkdirp');
+
+// TODO: This `from` should be replaced to `node:stream.Readable.from`
+// if this package supports only >= v10.17.0
+var from = require('streamx').Readable.from;
 
 var fo = require('../lib/file-operations');
 var constants = require('../lib/constants');
@@ -38,8 +42,7 @@ var reflectLinkStat = fo.reflectLinkStat;
 var updateMetadata = fo.updateMetadata;
 var createWriteStream = fo.createWriteStream;
 
-var pipe = miss.pipe;
-var from = miss.from;
+var pipeline = stream.pipeline;
 
 var string = testStreams.string;
 
@@ -1447,7 +1450,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       createWriteStream(outputPath),
     ], assert);
@@ -1463,7 +1466,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       string(size),
       createWriteStream(outputPath),
     ], assert);
@@ -1479,7 +1482,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       // Replaces from the beginning of the file
       createWriteStream(outputPath, { flags: 'r+' }),
@@ -1495,7 +1498,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       // Appends to the end of the file
       createWriteStream(outputPath, { flags: 'a' }),
@@ -1516,7 +1519,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       createWriteStream(outputPath, { mode: mode }),
     ], assert);
@@ -1530,7 +1533,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       createWriteStream(outputPath),
     ], assert);
@@ -1549,7 +1552,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       outStream,
     ], assert);
@@ -1568,7 +1571,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       outStream,
     ], assert);
@@ -1588,7 +1591,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       outStream,
     ], assert);
@@ -1612,7 +1615,7 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       outStream,
     ], assert);
@@ -1626,7 +1629,7 @@ describe('createWriteStream', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       createWriteStream(badOutputPath),
     ], assert);
@@ -1641,7 +1644,7 @@ describe('createWriteStream', function() {
       done();
     }
 
-    pipe([
+    pipeline([
       from([contents]),
       createWriteStream(outputPath, { flags: 'r' }),
     ], assert);

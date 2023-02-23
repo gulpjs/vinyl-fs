@@ -1,29 +1,27 @@
 'use strict';
 
-var miss = require('mississippi');
+var stream = require('stream');
+var through = require('through2');
 var expect = require('expect');
 
-var to = miss.to;
-var from = miss.from;
-var through = miss.through;
-
 function string(length) {
-  return from(function(size, next) {
-    if (length <= 0) {
-      next(null, null);
-      return;
-    }
+  return new stream.Readable({
+    read: function(size) {
+      if (length <= 0) {
+        return this.push(null);
+      }
 
-    var chunkSize = size <= length ? size : length;
+      var chunkSize = size <= length ? size : length;
 
-    length -= size;
+      length -= size;
 
-    var chunk = '';
-    for (var x = 0; x < chunkSize; x++) {
-      chunk += 'a';
-    }
+      var chunk = '';
+      for (var x = 0; x < chunkSize; x++) {
+        chunk += 'a';
+      }
 
-    next(null, chunk);
+      if (this.push(chunk)) this._read(size);
+    },
   });
 }
 
@@ -54,15 +52,19 @@ function count(value) {
 
 function slowCount(value) {
   var count = 0;
-  return to.obj(function(file, enc, cb) {
-    count++;
+  return new stream.Writable({
+    objectMode: true,
+    write: function(file, enc, cb) {
+      count++;
 
-    setTimeout(function() {
-      cb(null, file);
-    }, 250);
-  }, function(cb) {
-    expect(count).toEqual(value);
-    cb();
+      setTimeout(function() {
+        cb(null, file);
+      }, 250);
+    },
+    end: function(data, enc, cb) {
+      expect(count).toEqual(value);
+      cb();
+    },
   });
 }
 
