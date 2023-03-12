@@ -8,7 +8,6 @@ var expect = require('expect');
 var sinon = require('sinon');
 var stream = require('stream');
 var concat = require('concat-stream');
-var through = require('through2');
 
 // TODO: This `from` should be replaced to `node:stream.Readable.from`
 // if this package supports only >= v10.17.0
@@ -175,7 +174,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(bomInputPath, { buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -217,7 +219,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(bomInputPath, { removeBOM: false, buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -259,7 +264,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be', buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -301,7 +309,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(beBomInputPath, { encoding: 'utf16be', removeBOM: false, buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -343,7 +354,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le', buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -385,7 +399,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(leBomInputPath, { encoding: 'utf16le', removeBOM: false, buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -429,7 +446,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(beNotBomInputPath, { buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -473,7 +493,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(leNotBomInputPath, { buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -515,7 +538,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(ranBomInputPath, { encoding: false, buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -557,7 +583,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(bomInputPath, { encoding: false, buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -599,7 +628,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(encodedInputPath, { encoding: 'gb2312', buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -773,7 +805,10 @@ describe('.src()', function() {
 
     pipeline([
       vfs.src(inputPath, { buffer: false }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -810,7 +845,7 @@ describe('.src()', function() {
     ], done);
   });
 
-  it('does not pass options on to through2', function(done) {
+  it('does not pass options on to stream.Transform', function(done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = sinon.fake.returns(false);
 

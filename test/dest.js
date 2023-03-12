@@ -8,7 +8,6 @@ var expect = require('expect');
 var sinon = require('sinon');
 var stream = require('stream');
 var concat = require('concat-stream');
-var through = require('through2');
 
 // TODO: This `from` should be replaced to `node:stream.Readable.from`
 // if this package supports only >= v10.17.0
@@ -810,7 +809,10 @@ describe('.dest()', function() {
     pipeline([
       from([file]),
       vfs.dest(outputBase, { encoding: 'utf16be' }),
-      through.obj(compareContents),
+      new stream.Transform({
+        objectMode: true,
+        transform: compareContents,
+      }),
       concat(assert),
     ], done);
   });
@@ -871,16 +873,16 @@ describe('.dest()', function() {
       finished = true;
     });
 
-    function finish() {
-      expect(finished).toBeTruthy();
-      done();
-    }
-
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: Buffer.from('1234567890'),
     });
+
+    function finish() {
+      expect(finished).toBeTruthy();
+      done();
+    }
 
     pipeline([
       from([file]),
@@ -938,6 +940,9 @@ describe('.dest()', function() {
       contents: null,
     });
 
+    var finished = false;
+    var ended = false;
+
     var destStream = vfs.dest(outputBase);
 
     var readables = 0;
@@ -947,17 +952,25 @@ describe('.dest()', function() {
       if (data != null) {
         readables++;
       }
-    });
+    }).on('finish', function() {
+      finished = true;
+      expect(readables).toEqual(0);  // `readable` event was not emitted
+    }).on('end', function() {
+      ended = true;
+      expect(readables).toEqual(1);  // `readable` event was emitted
+      done();
+    });;
 
-    function assert(err) {
-      expect(readables).toEqual(1);
-      done(err);
+    function next() {
+      expect(finished).toBeTruthy(); // `finish` event was emitted
+      expect(readables).toEqual(0);  // `readable` event was not emitted
+      expect(ended).toBeFalsy();     // `end` event was not emitted
     }
 
     pipeline([
       from([file]),
       destStream,
-    ], assert);
+    ], next);
   });
 
   it('respects data listeners on destination stream', function(done) {
@@ -967,22 +980,33 @@ describe('.dest()', function() {
       contents: null,
     });
 
+    var finished = false;
+    var ended = false;
+
     var destStream = vfs.dest(outputBase);
 
     var datas = 0;
     destStream.on('data', function() {
       datas++;
+    }).on('finish', function() {
+      finished = true;
+      expect(datas).toEqual(0);  // `data` event was not emitted
+    }).on('end', function() {
+      ended = true;
+      expect(datas).toEqual(1);  // `data` event was emitted
+      done();
     });
 
-    function assert(err) {
-      expect(datas).toEqual(1);
-      done(err);
+    function next() {
+      expect(finished).toBeTruthy(); // `finish` event was emitted
+      expect(datas).toEqual(0);      // `data` event was not emitted
+      expect(ended).toBeFalsy();     // `end` event was not emitted
     }
 
     pipeline([
       from([file]),
       destStream,
-    ], assert);
+    ], next);
   });
 
   it('sinks the stream if all the readable event handlers are removed', function(done) {
@@ -1213,7 +1237,7 @@ describe('.dest()', function() {
     ], assert);
   });
 
-  it('does not pass options on to through2', function(done) {
+  it('does not pass options on to stream.Tranform', function(done) {
     var file = new File({
       base: inputBase,
       path: inputPath,

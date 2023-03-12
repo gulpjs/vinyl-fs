@@ -731,7 +731,7 @@ describe('symlink stream', function() {
   it('emits a finish event', function(done) {
     var symlinkStream = vfs.symlink(outputBase);
 
-    var finished = true;
+    var finished = false;
     symlinkStream.on('finish', function() {
       finished = true;
     });
@@ -833,6 +833,9 @@ describe('symlink stream', function() {
       contents: null,
     });
 
+    var finished = false;
+    var ended = false;
+
     var symlinkStream = vfs.symlink(outputBase);
 
     var readables = 0;
@@ -842,17 +845,25 @@ describe('symlink stream', function() {
       if (data != null) {
         readables++;
       }
+    }).on('finish', function() {
+      finished = true;
+      expect(readables).toEqual(0);  // `readable` was not emitted
+    }).on('end', function() {
+      ended = true;
+      expect(readables).toEqual(1);  // `readable` was emitted
+      done();
     });
 
-    function assert(err) {
-      expect(readables).toEqual(1);
-      done(err);
+    function next() {
+      expect(finished).toBeTruthy(); // `finish` was emitted
+      expect(readables).toEqual(0);  // `readable` was not emitted
+      expect(ended).toBeFalsy();     // `end` was not emitted
     }
 
     pipeline([
       from([file]),
       symlinkStream,
-    ], assert);
+    ], next);
   });
 
   it('respects data listeners on symlink stream', function(done) {
@@ -862,22 +873,33 @@ describe('symlink stream', function() {
       contents: null,
     });
 
+    var finished = false;
+    var ended = false;
+
     var symlinkStream = vfs.symlink(outputBase);
 
     var datas = 0;
     symlinkStream.on('data', function() {
       datas++;
+    }).on('finish', function() {
+      finished = true;
+      expect(datas).toEqual(0);  // `data` was not emitted
+    }).on('end', function() {
+      ended = true;
+      expect(datas).toEqual(1);  // `data` was emitted
+      done();
     });
 
-    function assert(err) {
-      expect(datas).toEqual(1);
-      done(err);
+    function next() {
+      expect(finished).toBeTruthy(); // `finish` was emitted
+      expect(datas).toEqual(0);      // `data` was not emitted
+      expect(ended).toBeFalsy();     // `end` was not emitted
     }
 
     pipeline([
       from([file]),
       symlinkStream,
-    ], assert);
+    ], next);
   });
 
   it('sinks the stream if all the readable event handlers are removed', function(done) {

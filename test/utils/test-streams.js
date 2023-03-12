@@ -1,7 +1,6 @@
 'use strict';
 
 var stream = require('stream');
-var through = require('through2');
 var expect = require('expect');
 
 function string(length) {
@@ -26,27 +25,37 @@ function string(length) {
 }
 
 function rename(filepath) {
-  return through.obj(function(file, enc, cb) {
-    file.path = filepath;
-    cb(null, file);
+  return new stream.Transform({
+    objectMode: true,
+    transform: function(file, enc, cb) {
+      file.path = filepath;
+      cb(null, file);
+    },
   });
 }
 
 function includes(obj) {
-  return through.obj(function(file, enc, cb) {
-    expect(file.path).toEqual(obj.path);
-    cb(null, file);
+  return new stream.Transform({
+    objectMode: true,
+    transform: function(file, enc, cb) {
+      expect(file.path).toEqual(obj.path);
+      cb(null, file);
+    },
   });
 }
 
 function count(value) {
   var count = 0;
-  return through.obj(function(file, enc, cb) {
-    count++;
-    cb(null, file);
-  }, function(cb) {
-    expect(count).toEqual(value);
-    cb();
+  return new stream.Transform({
+    objectMode: true,
+    transform: function(file, enc, cb) {
+      count++;
+      cb(null, file);
+    },
+    flush: function(cb) {
+      expect(count).toEqual(value);
+      cb();
+    },
   });
 }
 
