@@ -6,6 +6,9 @@ var sinon = require('sinon');
 var stream = require('stream');
 var concat = require('concat-stream');
 
+var os = require('os');
+var nodeVersion = require('parse-node-version')(process.version);
+
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
@@ -63,6 +66,12 @@ describe('.src() with symlinks', function() {
   });
 
   it('resolves directory symlinks correctly', function(done) {
+    // Error: EPERM: operation not permitted
+    if (os.platform() === 'win32' && nodeVersion.major === 10) {
+      this.skip();
+      return;
+    }
+
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -81,6 +90,12 @@ describe('.src() with symlinks', function() {
   });
 
   it('resolves nested symlinks to directories correctly', function(done) {
+    // Error: EPERM: operation not permitted
+    if (os.platform() === 'win32' && nodeVersion.major === 10) {
+      this.skip();
+      return;
+    }
+
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
