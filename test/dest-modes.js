@@ -32,390 +32,386 @@ function suite(moduleName) {
 
   var from = stream.Readable.from;
 
-  describe(
-    '.dest() with custom modes (with ' + moduleName + ')',
-    function () {
-      beforeEach(clean);
-      afterEach(clean);
+  describe('.dest() with custom modes (using ' + moduleName + ')', function () {
+    beforeEach(clean);
+    afterEach(clean);
 
-      it('sets the mode of a written buffer file if set on the vinyl object', function (done) {
-        // Changing the mode of a file is not supported by node.js in Windows.
-        // Windows is treated as though it does not have permission to make this operation.
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+    it('sets the mode of a written buffer file if set on the vinyl object', function (done) {
+      // Changing the mode of a file is not supported by node.js in Windows.
+      // Windows is treated as though it does not have permission to make this operation.
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        var expectedMode = applyUmask('677');
+      var expectedMode = applyUmask('677');
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-          stat: {
-            mode: expectedMode,
-          },
-        });
-
-        function assert() {
-          console.log('assert called');
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
-
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('sets the sticky bit on the mode of a written stream file if set on the vinyl object', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedMode = applyUmask('1677');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: from([contents]),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+    it('sets the sticky bit on the mode of a written stream file if set on the vinyl object', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('1677');
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: from([contents]),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('sets the mode of a written stream file if set on the vinyl object', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedMode = applyUmask('677');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: from([contents]),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+    it('sets the mode of a written stream file if set on the vinyl object', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('677');
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: from([contents]),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('sets the mode of a written directory if set on the vinyl object', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedMode = applyUmask('677');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputDirpath,
-          contents: null,
-          stat: {
-            isDirectory: always(true),
-            mode: expectedMode,
-          },
-        });
+    it('sets the mode of a written directory if set on the vinyl object', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputDirpath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('677');
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputDirpath,
+        contents: null,
+        stat: {
+          isDirectory: always(true),
+          mode: expectedMode,
+        },
       });
 
-      it('sets sticky bit on the mode of a written directory if set on the vinyl object', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputDirpath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedMode = applyUmask('1677');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputDirpath,
-          contents: null,
-          stat: {
-            isDirectory: always(true),
-            mode: expectedMode,
-          },
-        });
+    it('sets sticky bit on the mode of a written directory if set on the vinyl object', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputDirpath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('1677');
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputDirpath,
+        contents: null,
+        stat: {
+          isDirectory: always(true),
+          mode: expectedMode,
+        },
       });
 
-      it('writes new files with the mode specified in options', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputDirpath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedMode = applyUmask('777');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-        });
+    it('writes new files with the mode specified in options', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('777');
 
-        stream.pipeline(
-          [
-            from([file]),
-            vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
-          ],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
       });
 
-      it('updates the file mode to match the vinyl mode', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var startMode = applyUmask('655');
-        var expectedMode = applyUmask('722');
+      stream.pipeline(
+        [
+          from([file]),
+          vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
+        ],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+    it('updates the file mode to match the vinyl mode', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
+      var startMode = applyUmask('655');
+      var expectedMode = applyUmask('722');
 
-        fs.mkdirSync(outputBase);
-        fs.closeSync(fs.openSync(outputPath, 'w'));
-        fs.chmodSync(outputPath, startMode);
-
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('updates the directory mode to match the vinyl mode', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var startMode = applyUmask('2777');
-        var expectedMode = applyUmask('727');
+      fs.mkdirSync(outputBase);
+      fs.closeSync(fs.openSync(outputPath, 'w'));
+      fs.chmodSync(outputPath, startMode);
 
-        var file1 = new File({
-          base: inputBase,
-          path: outputDirpath,
-          stat: {
-            isDirectory: always(true),
-            mode: startMode,
-          },
-        });
-        var file2 = new File({
-          base: inputBase,
-          path: outputDirpath,
-          stat: {
-            isDirectory: always(true),
-            mode: expectedMode,
-          },
-        });
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        function assert() {
-          expect(statMode(outputDirpath)).toEqual(expectedMode);
-          done();
-        }
+    it('updates the directory mode to match the vinyl mode', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        stream.pipeline(
-          [from([file1, file2]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var startMode = applyUmask('2777');
+      var expectedMode = applyUmask('727');
+
+      var file1 = new File({
+        base: inputBase,
+        path: outputDirpath,
+        stat: {
+          isDirectory: always(true),
+          mode: startMode,
+        },
+      });
+      var file2 = new File({
+        base: inputBase,
+        path: outputDirpath,
+        stat: {
+          isDirectory: always(true),
+          mode: expectedMode,
+        },
       });
 
-      it('uses different modes for files and directories', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputDirpath)).toEqual(expectedMode);
+        done();
+      }
 
-        var expectedDirMode = applyUmask('2777');
-        var expectedFileMode = applyUmask('755');
+      stream.pipeline(
+        [from([file1, file2]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputNestedPath,
-          contents: Buffer.from(contents),
-        });
+    it('uses different modes for files and directories', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert() {
-          expect(statMode(outputDirpath)).toEqual(expectedDirMode);
-          expect(statMode(outputNestedPath)).toEqual(expectedFileMode);
-          done();
-        }
+      var expectedDirMode = applyUmask('2777');
+      var expectedFileMode = applyUmask('755');
 
-        stream.pipeline(
-          [
-            from([file]),
-            vfs.dest(outputBase, {
-              cwd: __dirname,
-              mode: expectedFileMode,
-              dirMode: expectedDirMode,
-            }),
-          ],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputNestedPath,
+        contents: Buffer.from(contents),
       });
 
-      it('does not fchmod a matching file', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(statMode(outputDirpath)).toEqual(expectedDirMode);
+        expect(statMode(outputNestedPath)).toEqual(expectedFileMode);
+        done();
+      }
 
-        var fchmodSpy = sinon.spy(fs, 'fchmod');
+      stream.pipeline(
+        [
+          from([file]),
+          vfs.dest(outputBase, {
+            cwd: __dirname,
+            mode: expectedFileMode,
+            dirMode: expectedDirMode,
+          }),
+        ],
+        assert
+      );
+    });
 
-        var expectedMode = applyUmask('777');
+    it('does not fchmod a matching file', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+      var fchmodSpy = sinon.spy(fs, 'fchmod');
 
-        function assert() {
-          expect(fchmodSpy.callCount).toEqual(0);
-          expect(statMode(outputPath)).toEqual(expectedMode);
-          done();
-        }
+      var expectedMode = applyUmask('777');
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('sees a file with special chmod (setuid/setgid/sticky) as distinct', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(fchmodSpy.callCount).toEqual(0);
+        expect(statMode(outputPath)).toEqual(expectedMode);
+        done();
+      }
 
-        var fchmodSpy = sinon.spy(fs, 'fchmod');
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var startMode = applyUmask('3722');
-        var expectedMode = applyUmask('722');
+    it('sees a file with special chmod (setuid/setgid/sticky) as distinct', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+      var fchmodSpy = sinon.spy(fs, 'fchmod');
 
-        function assert() {
-          expect(fchmodSpy.callCount).toEqual(1);
-          done();
-        }
+      var startMode = applyUmask('3722');
+      var expectedMode = applyUmask('722');
 
-        fs.mkdirSync(outputBase);
-        fs.closeSync(fs.openSync(outputPath, 'w'));
-        fs.chmodSync(outputPath, startMode);
-
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: expectedMode,
+        },
       });
 
-      it('reports fchmod errors', function (done) {
-        if (isWindows) {
-          this.skip();
-          return;
-        }
+      function assert() {
+        expect(fchmodSpy.callCount).toEqual(1);
+        done();
+      }
 
-        var expectedMode = applyUmask('722');
+      fs.mkdirSync(outputBase);
+      fs.closeSync(fs.openSync(outputPath, 'w'));
+      fs.chmodSync(outputPath, startMode);
 
-        var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
 
-        var file = new File({
-          base: inputBase,
-          path: inputPath,
-          contents: Buffer.from(contents),
-          stat: {
-            mode: expectedMode,
-          },
-        });
+    it('reports fchmod errors', function (done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
 
-        function assert(err) {
-          expect(err).toEqual(expect.anything());
-          expect(fchmodSpy.callCount).toEqual(1);
-          done();
-        }
+      var expectedMode = applyUmask('722');
 
-        fs.mkdirSync(outputBase);
-        fs.closeSync(fs.openSync(outputPath, 'w'));
+      var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
 
-        stream.pipeline(
-          [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-          assert
-        );
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: expectedMode,
+        },
       });
-    }
-  );
+
+      function assert(err) {
+        expect(err).toEqual(expect.anything());
+        expect(fchmodSpy.callCount).toEqual(1);
+        done();
+      }
+
+      fs.mkdirSync(outputBase);
+      fs.closeSync(fs.openSync(outputPath, 'w'));
+
+      stream.pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assert
+      );
+    });
+  });
 }
 
 suite('stream');

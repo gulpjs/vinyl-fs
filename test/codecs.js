@@ -66,7 +66,7 @@ function suite(moduleName) {
     });
   }
 
-  describe('codecs (with ' + moduleName + ')', function () {
+  describe('codecs (using ' + moduleName + ')', function () {
     it('exports a function', function (done) {
       expect(typeof getCodec).toEqual('function');
       done();

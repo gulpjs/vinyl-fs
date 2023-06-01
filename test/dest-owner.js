@@ -23,7 +23,7 @@ function suite(moduleName) {
 
   var from = stream.Readable.from;
 
-  describe('.dest() with custom owner (with ' + moduleName + ')', function () {
+  describe('.dest() with custom owner (using ' + moduleName + ')', function () {
     beforeEach(clean);
     afterEach(clean);
 
