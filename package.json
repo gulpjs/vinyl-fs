@@ -32,7 +32,6 @@
     "is-valid-glob": "^1.0.0",
     "lazystream": "^1.0.1",
     "lead": "^4.0.0",
-    "pumpify": "^2.0.1",
     "remove-bom-stream": "^2.0.0",
     "resolve-options": "^2.0.0",
     "stream-composer": "^1.0.2",
