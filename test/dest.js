@@ -732,7 +732,7 @@ function suite(moduleName) {
         var outputContents = fs.readFileSync(outputPath);
 
         expect(files.length).toEqual(1);
-        expect(outputContents.toString()).toEqual(expectedContents.toString());
+        expect(outputContents).toEqual(expectedContents);
       }
 
       stream.pipeline(
@@ -757,7 +757,7 @@ function suite(moduleName) {
         var outputContents = fs.readFileSync(outputPath);
 
         expect(files.length).toEqual(1);
-        expect(outputContents.toString()).toEqual(expectedContents.toString());
+        expect(outputContents).toEqual(expectedContents);
       }
 
       stream.pipeline(
@@ -782,7 +782,7 @@ function suite(moduleName) {
         var outputContents = fs.readFileSync(outputPath);
 
         expect(files.length).toEqual(1);
-        expect(outputContents.toString()).toEqual(expectedContents.toString());
+        expect(outputContents).toEqual(expectedContents);
       }
 
       stream.pipeline(
@@ -807,7 +807,7 @@ function suite(moduleName) {
         var outputContents = fs.readFileSync(outputPath);
 
         expect(files.length).toEqual(1);
-        expect(outputContents.toString()).toEqual(expectedContents.toString());
+        expect(outputContents).toEqual(expectedContents);
       }
 
       stream.pipeline(
@@ -833,9 +833,7 @@ function suite(moduleName) {
       function assert(files) {
         expect(files.length).toEqual(1);
         expect(files[0].isBuffer()).toEqual(true);
-        expect(files[0].contents.toString()).toEqual(
-          expectedContents.toString()
-        );
+        expect(files[0].contents).toEqual(expectedContents);
       }
 
       stream.pipeline(
@@ -859,7 +857,7 @@ function suite(moduleName) {
       });
 
       function assertContent(contents) {
-        expect(contents.toString()).toEqual(expectedContents.toString());
+        expect(contents).toEqual(expectedContents);
       }
 
       function compareContents(file, enc, cb) {
