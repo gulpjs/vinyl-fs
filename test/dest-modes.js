@@ -28,7 +28,7 @@ var contents = testConstants.contents;
 var clean = cleanup(outputBase);
 
 function suite(moduleName) {
-  var stream = require('stream');
+  var stream = require(moduleName);
 
   var from = stream.Readable.from;
 
@@ -38,7 +38,7 @@ function suite(moduleName) {
       beforeEach(clean);
       afterEach(clean);
 
-      it.only('sets the mode of a written buffer file if set on the vinyl object', function (done) {
+      it('sets the mode of a written buffer file if set on the vinyl object', function (done) {
         // Changing the mode of a file is not supported by node.js in Windows.
         // Windows is treated as though it does not have permission to make this operation.
         if (isWindows) {
@@ -419,5 +419,5 @@ function suite(moduleName) {
 }
 
 suite('stream');
-// suite('streamx');
-// suite('readable-stream');
+suite('streamx');
+suite('readable-stream');
