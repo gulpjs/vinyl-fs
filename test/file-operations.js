@@ -87,19 +87,26 @@ describe('isOwner', function() {
   });
 
   afterEach(function(done) {
-    process.geteuid = geteuidSpy;
-    process.getuid = getuidSpy;
-
-    if (typeof process.geteuid !== 'function') {
-      process.geteuid = noop;
+    // Because there are cases that delete process.geteuid or process.getuid,
+    // though an error occurs in sinon.restore if a spied function is
+    // undefined.
+    if (process.geteuid === undefined) {
+      process.geteuid = geteuidSpy;
     }
-
-    // Windows :(
-    if (typeof process.getuid !== 'function') {
-      process.getuid = noop;
+    if (process.getuid === undefined) {
+      process.getuid = getuidSpy;
     }
 
     sinon.restore();
+
+    if (process.geteuid === noop) {
+      delete process.geteuid;
+    }
+
+    // Windows :(
+    if (process.getuid === noop) {
+      delete process.getuid;
+    }
 
     done();
   });
