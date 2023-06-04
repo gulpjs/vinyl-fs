@@ -745,7 +745,7 @@ describe('.src()', function() {
       expect(files.length).toEqual(1);
       expect(files[0].path).toEqual(inputPath);
       expect(files[0].isNull()).toEqual(true);
-      expect(files[0]).toHaveProperty('contents', null);
+      expect(files[0].contents).toEqual(null);
     }
 
     pipeline([
