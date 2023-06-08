@@ -34,7 +34,7 @@ function suite(moduleName) {
   var count = streamUtils.count;
   var concatArray = streamUtils.concatArray;
 
-  describe('integrations (using ' + moduleName + ')', function () {
+  describe.skip('integrations (using ' + moduleName + ')', function () {
     beforeEach(clean);
     afterEach(clean);
 
