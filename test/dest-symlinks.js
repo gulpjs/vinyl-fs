@@ -11,6 +11,7 @@ var vfs = require('../');
 var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var always = require('./utils/always');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
 var inputBase = testConstants.inputBase;
@@ -33,28 +34,8 @@ function suite(moduleName) {
 
   var from = stream.Readable.from;
 
-  function concat(fn, timeout) {
-    var collect = [];
-    return new stream.Writable({
-      objectMode: true,
-      write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
-          cb = enc;
-        }
-        setTimeout(function () {
-          collect.push(chunk);
-          cb();
-        }, timeout || 1);
-      },
-      final: function (cb) {
-        if (typeof fn === 'function') {
-          fn(collect);
-        }
-
-        cb();
-      },
-    });
-  }
+  var streamUtils = testStreams(stream);
+  var concatArray = streamUtils.concatArray;
 
   describe('.dest() with symlinks (using ' + moduleName + ')', function () {
     beforeEach(clean);
@@ -84,7 +65,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -110,7 +91,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -155,7 +136,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -185,7 +166,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -221,7 +202,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -257,7 +238,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -295,7 +276,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { useJunctions: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -340,7 +321,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { useJunctions: useJunctions }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -379,7 +360,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -419,7 +400,7 @@ function suite(moduleName) {
           // This could also be from a different Vinyl adapter
           from([file]),
           vfs.dest(neOutputBase),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -462,7 +443,7 @@ function suite(moduleName) {
           // This could also be from a different Vinyl adapter
           from([file]),
           vfs.dest(neOutputBase),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -502,7 +483,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -538,7 +519,7 @@ function suite(moduleName) {
           from([file]),
           // The useJunctions option is ignored when file is not a directory
           vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -583,7 +564,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -619,7 +600,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -655,7 +636,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -696,7 +677,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -737,7 +718,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );

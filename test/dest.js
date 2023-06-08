@@ -18,12 +18,6 @@ var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
 var breakPrototype = require('./utils/break-prototype');
 
-var count = testStreams.count;
-var rename = testStreams.rename;
-var includes = testStreams.includes;
-var slowCount = testStreams.slowCount;
-var string = testStreams.string;
-
 function noop() {}
 
 var inputRelative = testConstants.inputRelative;
@@ -60,28 +54,15 @@ function suite(moduleName) {
 
   var from = stream.Readable.from;
 
-  function concat(fn, timeout) {
-    var collect = [];
-    return new stream.Writable({
-      objectMode: true,
-      write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
-          cb = enc;
-        }
-        setTimeout(function () {
-          collect.push(chunk);
-          cb();
-        }, timeout || 1);
-      },
-      final: function (cb) {
-        if (typeof fn === 'function') {
-          fn(collect);
-        }
+  var streamUtils = testStreams(stream);
 
-        cb();
-      },
-    });
-  }
+  var count = streamUtils.count;
+  var rename = streamUtils.rename;
+  var includes = streamUtils.includes;
+  var slowCount = streamUtils.slowCount;
+  var chunks = streamUtils.chunks;
+  var concatArray = streamUtils.concatArray;
+  var compareContents = streamUtils.compareContents;
 
   describe('.dest() (using ' + moduleName + ')', function () {
     beforeEach(clean);
@@ -126,7 +107,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { sourcemaps: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -149,7 +130,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { sourcemaps: '.' }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -175,7 +156,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { sourcemaps: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -204,7 +185,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { sourcemaps: '.' }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -227,7 +208,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputRelative, { cwd: __dirname }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -250,7 +231,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -273,7 +254,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -299,7 +280,11 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputRelative, { cwd: cwd }), concat(assert)],
+        [
+          from([file]),
+          vfs.dest(outputRelative, { cwd: cwd }),
+          concatArray(assert),
+        ],
         done
       );
     });
@@ -331,7 +316,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputFn, { cwd: cwd }), concat(assert)],
+        [from([file]), vfs.dest(outputFn, { cwd: cwd }), concatArray(assert)],
         done
       );
     });
@@ -354,7 +339,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -377,7 +362,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -388,7 +373,7 @@ function suite(moduleName) {
       var file = new File({
         base: inputBase,
         path: inputPath,
-        contents: string(size),
+        contents: chunks(size),
       });
 
       function assert(files) {
@@ -400,7 +385,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -430,7 +415,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -457,7 +442,7 @@ function suite(moduleName) {
           rename(outputRenamePath),
           includes({ path: outputRenamePath }),
           vfs.dest(outputBase),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -479,7 +464,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -553,7 +538,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -583,7 +568,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -618,7 +603,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -653,7 +638,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -680,7 +665,11 @@ function suite(moduleName) {
       fs.writeFileSync(outputPath, existingContents);
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase, { append: true }), concat(assert)],
+        [
+          from([file]),
+          vfs.dest(outputBase, { append: true }),
+          concatArray(assert),
+        ],
         done
       );
     });
@@ -714,7 +703,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { append: append }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -739,7 +728,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -764,7 +753,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -789,7 +778,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'gb2312' }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -814,7 +803,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'gb2312' }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -840,7 +829,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'utf16be' }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -860,11 +849,6 @@ function suite(moduleName) {
         expect(contents).toEqual(expectedContents);
       }
 
-      function compareContents(file, enc, cb) {
-        stream.pipeline([file.contents, concat(assertContent)], function (err) {
-          cb(err, file);
-        });
-      }
       function assert(files) {
         expect(files.length).toEqual(1);
         expect(files[0].isStream()).toEqual(true);
@@ -874,11 +858,8 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'utf16be' }),
-          new stream.Transform({
-            objectMode: true,
-            transform: compareContents,
-          }),
-          concat(assert),
+          compareContents(assertContent),
+          concatArray(assert),
         ],
         done
       );
@@ -905,7 +886,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'fubar42' }),
-          concat(assert),
+          concatArray(assert),
         ],
         finish
       );
@@ -932,7 +913,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.dest(outputBase, { encoding: 'fubar42' }),
-          concat(assert),
+          concatArray(assert),
         ],
         finish
       );
@@ -1248,7 +1229,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -1313,7 +1294,11 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase, { read: read }), concat(assert)],
+        [
+          from([file]),
+          vfs.dest(outputBase, { read: read }),
+          concatArray(assert),
+        ],
         done
       );
     });
@@ -1330,7 +1315,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });
@@ -1352,7 +1337,7 @@ function suite(moduleName) {
       }
 
       stream.pipeline(
-        [from([file]), vfs.dest(outputBase), concat(assert)],
+        [from([file]), vfs.dest(outputBase), concatArray(assert)],
         done
       );
     });

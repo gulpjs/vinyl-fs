@@ -7,6 +7,7 @@ var getCodec = require('../lib/codecs');
 var DEFAULT_ENCODING = require('../lib/constants').DEFAULT_ENCODING;
 
 var testCodec = require('./utils/codecs');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 
 var beNotBomInputPath = testConstants.beNotBomInputPath;
@@ -20,51 +21,9 @@ function suite(moduleName) {
 
   var from = stream.Readable.from;
 
-  function concatString(fn, timeout) {
-    var collect = '';
-    return new stream.Writable({
-      objectMode: true,
-      write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
-          cb = enc;
-        }
-        setTimeout(function () {
-          collect = collect + chunk;
-          cb();
-        }, timeout || 1);
-      },
-      final: function (cb) {
-        if (typeof fn === 'function') {
-          fn(collect);
-        }
-
-        cb();
-      },
-    });
-  }
-
-  function concatBuffer(fn, timeout) {
-    var collect = Buffer.alloc(0);
-    return new stream.Writable({
-      objectMode: true,
-      write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
-          cb = enc;
-        }
-        setTimeout(function () {
-          collect = Buffer.concat([collect, chunk]);
-          cb();
-        }, timeout || 1);
-      },
-      final: function (cb) {
-        if (typeof fn === 'function') {
-          fn(collect);
-        }
-
-        cb();
-      },
-    });
-  }
+  var streamUtils = testStreams(stream);
+  var concatString = streamUtils.concatString;
+  var concatBuffer = streamUtils.concatBuffer;
 
   describe('codecs (using ' + moduleName + ')', function () {
     it('exports a function', function (done) {
