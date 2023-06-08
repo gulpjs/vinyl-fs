@@ -3,7 +3,6 @@
 var path = require('path');
 
 var fs = require('graceful-fs');
-var concat = require('concat-stream');
 var expect = require('expect');
 
 var vfs = require('../');
@@ -33,6 +32,7 @@ function suite(moduleName) {
 
   var streamUtils = testStreams(stream);
   var count = streamUtils.count;
+  var concatArray = streamUtils.concatArray;
 
   describe('integrations (using ' + moduleName + ')', function () {
     beforeEach(clean);
@@ -84,7 +84,7 @@ function suite(moduleName) {
           vfs.src(inputDirpath),
           vfs.symlink(symlinkDirpath),
           vfs.dest(outputDirpath),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -113,7 +113,7 @@ function suite(moduleName) {
           vfs.src(inputDirpath),
           vfs.symlink(symlinkDirpath),
           vfs.dest(outputDirpath),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -141,7 +141,7 @@ function suite(moduleName) {
         [
           vfs.src(outputSymlink, { resolveSymlinks: false }),
           vfs.dest(outputDirpath),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -171,7 +171,7 @@ function suite(moduleName) {
         [
           vfs.src(outputSymlink, { resolveSymlinks: false }),
           vfs.dest(outputDirpath),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -201,7 +201,7 @@ function suite(moduleName) {
         [
           vfs.src(outputSymlink, { resolveSymlinks: false }),
           vfs.dest(outputDirpath),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
