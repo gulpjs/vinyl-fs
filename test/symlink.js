@@ -6,7 +6,6 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var concat = require('concat-stream');
 
 var vfs = require('../');
 
@@ -39,6 +38,7 @@ function suite(moduleName) {
   var streamUtils = testStreams(stream);
   var count = streamUtils.count;
   var slowCount = streamUtils.slowCount;
+  var concatArray = streamUtils.concatArray;
 
   describe('symlink stream (using ' + moduleName + ')', function () {
     beforeEach(clean);
@@ -83,7 +83,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputRelative, { cwd: __dirname }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -105,7 +105,10 @@ function suite(moduleName) {
         );
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('creates a link to the right folder with relative cwd', function (done) {
@@ -133,7 +136,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputRelative, { cwd: cwd }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -166,7 +169,11 @@ function suite(moduleName) {
       }
 
       pipeline(
-        [from([file]), vfs.symlink(outputFn, { cwd: cwd }), concat(assert)],
+        [
+          from([file]),
+          vfs.symlink(outputFn, { cwd: cwd }),
+          concatArray(assert),
+        ],
         done
       );
     });
@@ -190,7 +197,10 @@ function suite(moduleName) {
         expect(outputLink).toEqual(inputPath);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('can create relative links', function (done) {
@@ -216,7 +226,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -241,7 +251,10 @@ function suite(moduleName) {
         expect(outputLink).toEqual(inputPath);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('emits Vinyl objects that are symbolic', function (done) {
@@ -256,7 +269,10 @@ function suite(moduleName) {
         expect(files[0].isSymbolic()).toEqual(true);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('(*nix) creates a link for a directory', function (done) {
@@ -292,7 +308,10 @@ function suite(moduleName) {
         expect(lstats.isDirectory()).toEqual(false);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('(windows) creates a junction for a directory', function (done) {
@@ -332,7 +351,10 @@ function suite(moduleName) {
         expect(lstats.isDirectory()).toEqual(false);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('(windows) options can disable junctions for a directory', function (done) {
@@ -372,7 +394,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { useJunctions: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -420,7 +442,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { useJunctions: useJunctions }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -463,7 +485,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { relativeSymlinks: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -513,7 +535,7 @@ function suite(moduleName) {
             useJunctions: true,
             relativeSymlinks: true,
           }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -549,7 +571,7 @@ function suite(moduleName) {
             useJunctions: true,
             relativeSymlinks: true,
           }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -595,7 +617,7 @@ function suite(moduleName) {
             useJunctions: false,
             relativeSymlinks: true,
           }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -650,7 +672,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { overwrite: false }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -680,7 +702,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { overwrite: true }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -715,7 +737,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -750,7 +772,7 @@ function suite(moduleName) {
         [
           from([file]),
           vfs.symlink(outputBase, { overwrite: overwrite }),
-          concat(assert),
+          concatArray(assert),
         ],
         done
       );
@@ -845,7 +867,7 @@ function suite(moduleName) {
           from(highwatermarkFiles),
           count(expectedCount),
           // Must be in the Writable position to test this
-          // So concat-stream cannot be used
+          // So concatArray stream cannot be used
           vfs.symlink(outputBase),
         ],
         done
@@ -974,7 +996,7 @@ function suite(moduleName) {
           from(highwatermarkFiles),
           count(expectedCount),
           // Must be in the Writable position to test this
-          // So concat-stream cannot be used
+          // So concatArray stream cannot be used
           symlinkStream,
         ],
         done
@@ -1006,7 +1028,7 @@ function suite(moduleName) {
           from(highwatermarkFiles),
           count(expectedCount),
           // Must be in the Writable position to test this
-          // So concat-stream cannot be used
+          // So concatArray stream cannot be used
           symlinkStream,
         ],
         done
@@ -1033,7 +1055,11 @@ function suite(moduleName) {
       }
 
       pipeline(
-        [from([file]), vfs.symlink(outputBase, { read: read }), concat(assert)],
+        [
+          from([file]),
+          vfs.symlink(outputBase, { read: read }),
+          concatArray(assert),
+        ],
         done
       );
     });
@@ -1050,7 +1076,10 @@ function suite(moduleName) {
         expect(files[0]).toBe(file);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
 
     it('marshalls a Vinyl object without isSymbolic to a newer Vinyl', function (done) {
@@ -1071,7 +1100,10 @@ function suite(moduleName) {
         expect(files[0]).not.toBe(file);
       }
 
-      pipeline([from([file]), vfs.symlink(outputBase), concat(assert)], done);
+      pipeline(
+        [from([file]), vfs.symlink(outputBase), concatArray(assert)],
+        done
+      );
     });
   });
 }
