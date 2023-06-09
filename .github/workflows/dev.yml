@@ -52,6 +52,13 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Prepare files
+        if: ${{ !startsWith(matrix.os, 'windows') }}
+        run: |
+          find test -type d -exec chmod g+s {} \;
+          sudo chown root test/fixtures/not-owned/not-owned.txt
+          sudo chmod 666 test/fixtures/not-owned/not-owned.txt
+
       - name: Run tests
         run: npm test
 
