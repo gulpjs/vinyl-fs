@@ -21,6 +21,7 @@ var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
+var describeStreams = require('./utils/suite');
 
 var closeFd = fo.closeFd;
 var isOwner = fo.isOwner;
@@ -1419,218 +1420,210 @@ describe('updateMetadata', function () {
   // TODO: forward fchown error tests
 });
 
-function suite(moduleName) {
-  var stream = require(moduleName);
-
+describeStreams('createWriteStream', function (stream) {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
   var streamUtils = testStreams(stream);
   var chunks = streamUtils.chunks;
 
-  describe('createWriteStream (using ' + moduleName + ')', function () {
-    beforeEach(clean);
-    afterEach(clean);
+  beforeEach(clean);
+  afterEach(clean);
 
-    beforeEach(function (done) {
-      // For some reason, the outputDir sometimes exists on Windows
-      // So we use our mkdirp to create it
-      mkdirp(outputBase, done);
-    });
-
-    it('accepts just a file path and writes to it', function (done) {
-      function assert(err) {
-        var outputContents = fs.readFileSync(outputPath, 'utf8');
-        expect(outputContents).toEqual(contents);
-        done(err);
-      }
-
-      pipeline([from([contents]), createWriteStream(outputPath)], assert);
-    });
-
-    it('accepts just a file path and writes a large file to it', function (done) {
-      var size = 40000;
-
-      function assert(err) {
-        var stats = fs.lstatSync(outputPath);
-
-        expect(stats.size).toEqual(size);
-        done(err);
-      }
-
-      pipeline([chunks(size), createWriteStream(outputPath)], assert);
-    });
-
-    it('accepts flags option', function (done) {
-      // Write 13 stars then 12345 because the length of expected is 13
-      fs.writeFileSync(outputPath, '*************12345');
-
-      function assert(err) {
-        var outputContents = fs.readFileSync(outputPath, 'utf8');
-        expect(outputContents).toEqual(contents + '12345');
-        done(err);
-      }
-
-      pipeline(
-        [
-          from([contents]),
-          // Replaces from the beginning of the file
-          createWriteStream(outputPath, { flags: 'r+' }),
-        ],
-        assert
-      );
-    });
-
-    it('accepts append flag as option & places cursor at the end', function (done) {
-      fs.writeFileSync(outputPath, '12345');
-
-      function assert(err) {
-        var outputContents = fs.readFileSync(outputPath, 'utf8');
-        expect(outputContents).toEqual('12345' + contents);
-        done(err);
-      }
-
-      pipeline(
-        [
-          from([contents]),
-          // Appends to the end of the file
-          createWriteStream(outputPath, { flags: 'a' }),
-        ],
-        assert
-      );
-    });
-
-    it('accepts mode option', function (done) {
-      if (isWindows) {
-        console.log(
-          'Changing the mode of a file is not supported by node.js in Windows.'
-        );
-        this.skip();
-        return;
-      }
-
-      var mode = applyUmask('777');
-
-      function assert(err) {
-        expect(statMode(outputPath)).toEqual(mode);
-        done(err);
-      }
-
-      pipeline(
-        [from([contents]), createWriteStream(outputPath, { mode: mode })],
-        assert
-      );
-    });
-
-    it('uses default file mode if no mode options', function (done) {
-      var defaultMode = applyUmask(DEFAULT_FILE_MODE);
-
-      function assert(err) {
-        expect(statMode(outputPath)).toEqual(defaultMode);
-        done(err);
-      }
-
-      pipeline([from([contents]), createWriteStream(outputPath)], assert);
-    });
-
-    it('accepts a flush function that is called before close emitted', function (done) {
-      var flushCalled = false;
-
-      var outStream = createWriteStream(outputPath, {}, function (fd, cb) {
-        flushCalled = true;
-        cb();
-      });
-
-      function assert(err) {
-        expect(flushCalled).toEqual(true);
-        done(err);
-      }
-
-      pipeline([from([contents]), outStream], assert);
-    });
-
-    it('can specify flush without options argument', function (done) {
-      var flushCalled = false;
-
-      var outStream = createWriteStream(outputPath, function (fd, cb) {
-        flushCalled = true;
-        cb();
-      });
-
-      function assert(err) {
-        expect(flushCalled).toEqual(true);
-        done(err);
-      }
-
-      pipeline([from([contents]), outStream], assert);
-    });
-
-    it('passes the file descriptor to flush', function (done) {
-      var flushCalled = false;
-
-      var outStream = createWriteStream(outputPath, function (fd, cb) {
-        expect(typeof fd).toEqual('number');
-        flushCalled = true;
-        cb();
-      });
-
-      function assert(err) {
-        expect(flushCalled).toEqual(true);
-        done(err);
-      }
-
-      pipeline([from([contents]), outStream], assert);
-    });
-
-    it('passes a callback to flush to call when work is done', function (done) {
-      var flushCalled = false;
-      var timeoutCalled = false;
-
-      var outStream = createWriteStream(outputPath, function (fd, cb) {
-        flushCalled = true;
-        setTimeout(function () {
-          timeoutCalled = true;
-          cb();
-        }, 250);
-      });
-
-      function assert(err) {
-        expect(flushCalled).toEqual(true);
-        expect(timeoutCalled).toEqual(true);
-        done(err);
-      }
-
-      pipeline([from([contents]), outStream], assert);
-    });
-
-    it('emits an error if open fails', function (done) {
-      var badOutputPath = path.join(outputBase, './non-exist/test.coffee');
-
-      function assert(err) {
-        expect(err).toBeInstanceOf(Error);
-        done();
-      }
-
-      pipeline([from([contents]), createWriteStream(badOutputPath)], assert);
-    });
-
-    it('emits an error if write fails', function (done) {
-      // Create the file so it can be opened with `r`
-      fs.writeFileSync(outputPath, contents);
-
-      function assert(err) {
-        expect(err).toBeInstanceOf(Error);
-        done();
-      }
-
-      pipeline(
-        [from([contents]), createWriteStream(outputPath, { flags: 'r' })],
-        assert
-      );
-    });
+  beforeEach(function (done) {
+    // For some reason, the outputDir sometimes exists on Windows
+    // So we use our mkdirp to create it
+    mkdirp(outputBase, done);
   });
-}
 
-suite('stream');
-suite('streamx');
-suite('readable-stream');
+  it('accepts just a file path and writes to it', function (done) {
+    function assert(err) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+      expect(outputContents).toEqual(contents);
+      done(err);
+    }
+
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
+  });
+
+  it('accepts just a file path and writes a large file to it', function (done) {
+    var size = 40000;
+
+    function assert(err) {
+      var stats = fs.lstatSync(outputPath);
+
+      expect(stats.size).toEqual(size);
+      done(err);
+    }
+
+    pipeline([chunks(size), createWriteStream(outputPath)], assert);
+  });
+
+  it('accepts flags option', function (done) {
+    // Write 13 stars then 12345 because the length of expected is 13
+    fs.writeFileSync(outputPath, '*************12345');
+
+    function assert(err) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+      expect(outputContents).toEqual(contents + '12345');
+      done(err);
+    }
+
+    pipeline(
+      [
+        from([contents]),
+        // Replaces from the beginning of the file
+        createWriteStream(outputPath, { flags: 'r+' }),
+      ],
+      assert
+    );
+  });
+
+  it('accepts append flag as option & places cursor at the end', function (done) {
+    fs.writeFileSync(outputPath, '12345');
+
+    function assert(err) {
+      var outputContents = fs.readFileSync(outputPath, 'utf8');
+      expect(outputContents).toEqual('12345' + contents);
+      done(err);
+    }
+
+    pipeline(
+      [
+        from([contents]),
+        // Appends to the end of the file
+        createWriteStream(outputPath, { flags: 'a' }),
+      ],
+      assert
+    );
+  });
+
+  it('accepts mode option', function (done) {
+    if (isWindows) {
+      console.log(
+        'Changing the mode of a file is not supported by node.js in Windows.'
+      );
+      this.skip();
+      return;
+    }
+
+    var mode = applyUmask('777');
+
+    function assert(err) {
+      expect(statMode(outputPath)).toEqual(mode);
+      done(err);
+    }
+
+    pipeline(
+      [from([contents]), createWriteStream(outputPath, { mode: mode })],
+      assert
+    );
+  });
+
+  it('uses default file mode if no mode options', function (done) {
+    var defaultMode = applyUmask(DEFAULT_FILE_MODE);
+
+    function assert(err) {
+      expect(statMode(outputPath)).toEqual(defaultMode);
+      done(err);
+    }
+
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
+  });
+
+  it('accepts a flush function that is called before close emitted', function (done) {
+    var flushCalled = false;
+
+    var outStream = createWriteStream(outputPath, {}, function (fd, cb) {
+      flushCalled = true;
+      cb();
+    });
+
+    function assert(err) {
+      expect(flushCalled).toEqual(true);
+      done(err);
+    }
+
+    pipeline([from([contents]), outStream], assert);
+  });
+
+  it('can specify flush without options argument', function (done) {
+    var flushCalled = false;
+
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
+      flushCalled = true;
+      cb();
+    });
+
+    function assert(err) {
+      expect(flushCalled).toEqual(true);
+      done(err);
+    }
+
+    pipeline([from([contents]), outStream], assert);
+  });
+
+  it('passes the file descriptor to flush', function (done) {
+    var flushCalled = false;
+
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
+      expect(typeof fd).toEqual('number');
+      flushCalled = true;
+      cb();
+    });
+
+    function assert(err) {
+      expect(flushCalled).toEqual(true);
+      done(err);
+    }
+
+    pipeline([from([contents]), outStream], assert);
+  });
+
+  it('passes a callback to flush to call when work is done', function (done) {
+    var flushCalled = false;
+    var timeoutCalled = false;
+
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
+      flushCalled = true;
+      setTimeout(function () {
+        timeoutCalled = true;
+        cb();
+      }, 250);
+    });
+
+    function assert(err) {
+      expect(flushCalled).toEqual(true);
+      expect(timeoutCalled).toEqual(true);
+      done(err);
+    }
+
+    pipeline([from([contents]), outStream], assert);
+  });
+
+  it('emits an error if open fails', function (done) {
+    var badOutputPath = path.join(outputBase, './non-exist/test.coffee');
+
+    function assert(err) {
+      expect(err).toBeInstanceOf(Error);
+      done();
+    }
+
+    pipeline([from([contents]), createWriteStream(badOutputPath)], assert);
+  });
+
+  it('emits an error if write fails', function (done) {
+    // Create the file so it can be opened with `r`
+    fs.writeFileSync(outputPath, contents);
+
+    function assert(err) {
+      expect(err).toBeInstanceOf(Error);
+      done();
+    }
+
+    pipeline(
+      [from([contents]), createWriteStream(outputPath, { flags: 'r' })],
+      assert
+    );
+  });
+});

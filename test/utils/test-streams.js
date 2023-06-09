@@ -164,6 +164,18 @@ module.exports = function makeUtils(stream) {
     });
   }
 
+  function fromError(error) {
+    return new stream.Readable({
+      read: function (cb) {
+        if (typeof cb === 'function') {
+          cb(error);
+        } else {
+          this.destroy(error);
+        }
+      },
+    });
+  }
+
   return {
     chunks: chunks,
     rename: rename,
@@ -174,5 +186,6 @@ module.exports = function makeUtils(stream) {
     concatBuffer: concatBuffer,
     concatArray: concatArray,
     compareContents: compareContents,
+    fromError: fromError,
   };
 };

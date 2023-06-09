@@ -9,6 +9,7 @@ var DEFAULT_ENCODING = require('../lib/constants').DEFAULT_ENCODING;
 var testCodec = require('./utils/codecs');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
+var describeStreams = require('./utils/suite');
 
 var beNotBomInputPath = testConstants.beNotBomInputPath;
 var leNotBomInputPath = testConstants.leNotBomInputPath;
@@ -16,46 +17,48 @@ var notBomContents = testConstants.notBomContents;
 var encodedInputPath = testConstants.encodedInputPath;
 var encodedContents = testConstants.encodedContents;
 
-function suite(moduleName) {
-  var stream = require(moduleName);
+describe('codecs', function () {
+  it('exports a function', function (done) {
+    expect(typeof getCodec).toEqual('function');
+    done();
+  });
 
-  var from = stream.Readable.from;
+  it('returns undefined for unsupported encoding', function (done) {
+    var codec = getCodec('fubar42');
+    expect(codec).toBe(undefined);
+    done();
+  });
 
-  var streamUtils = testStreams(stream);
-  var concatString = streamUtils.concatString;
-  var concatBuffer = streamUtils.concatBuffer;
-
-  describe('codecs (using ' + moduleName + ')', function () {
-    it('exports a function', function (done) {
-      expect(typeof getCodec).toEqual('function');
-      done();
-    });
-
-    it('returns undefined for unsupported encoding', function (done) {
-      var codec = getCodec('fubar42');
-      expect(codec).toBe(undefined);
-      done();
-    });
-
-    it(
-      'returns a proper codec for default encoding ' + DEFAULT_ENCODING,
-      function (done) {
-        var codec = getCodec(DEFAULT_ENCODING);
-        testCodec(codec);
-        expect(codec.enc).toEqual(DEFAULT_ENCODING);
-        expect(codec.bomAware).toBe(true);
-        done();
-      }
-    );
-
-    it('returns a proper codec for utf16be', function (done) {
-      var codec = getCodec('utf16be');
+  it(
+    'returns a proper codec for default encoding ' + DEFAULT_ENCODING,
+    function (done) {
+      var codec = getCodec(DEFAULT_ENCODING);
       testCodec(codec);
-      expect(codec.bomAware).toBe(true);
+      expect(codec.enc).toEqual(DEFAULT_ENCODING);
       done();
-    });
+    }
+  );
 
-    it('can decode bytes from utf16be encoding to a string (buffer)', function (done) {
+  it('returns a proper codec for utf16be', function (done) {
+    var codec = getCodec('utf16be');
+    testCodec(codec);
+    done();
+  });
+
+  it('returns a proper codec for utf16le', function (done) {
+    var codec = getCodec('utf16le');
+    testCodec(codec);
+    done();
+  });
+
+  it('returns a proper codec for gb2312', function (done) {
+    var codec = getCodec('gb2312');
+    testCodec(codec);
+    done();
+  });
+
+  describe('buffer', function () {
+    it('can decode bytes from utf16be encoding to a string', function (done) {
       var codec = getCodec('utf16be');
       var expected = notBomContents.replace('X', 'BE');
 
@@ -66,27 +69,7 @@ function suite(moduleName) {
       done();
     });
 
-    it('can decode bytes from utf16be encoding to a string (stream)', function (done) {
-      var codec = getCodec('utf16be');
-      var expected = notBomContents.replace('X', 'BE');
-
-      function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(typeof result).toEqual('string');
-        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
-      }
-
-      stream.pipeline(
-        [
-          fs.createReadStream(beNotBomInputPath),
-          codec.decodeStream(),
-          concatString(assert),
-        ],
-        done
-      );
-    });
-
-    it('can encode a string to bytes in utf16be encoding (buffer)', function (done) {
+    it('can encode a string to bytes in utf16be encoding', function (done) {
       var codec = getCodec('utf16be');
       var expected = fs.readFileSync(beNotBomInputPath);
 
@@ -98,34 +81,7 @@ function suite(moduleName) {
       done();
     });
 
-    it('can encode a string to bytes in utf16be encoding (stream)', function (done) {
-      var codec = getCodec('utf16be');
-      var expected = fs.readFileSync(beNotBomInputPath);
-
-      function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(Buffer.isBuffer(result)).toBe(true);
-        expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
-      }
-
-      stream.pipeline(
-        [
-          from([notBomContents.replace('X', 'BE')]),
-          codec.encodeStream(),
-          concatBuffer(assert),
-        ],
-        done
-      );
-    });
-
-    it('returns a proper codec for utf16le', function (done) {
-      var codec = getCodec('utf16le');
-      testCodec(codec);
-      expect(codec.bomAware).toBe(true);
-      done();
-    });
-
-    it('can decode bytes from utf16le encoding to a string (buffer)', function (done) {
+    it('can decode bytes from utf16le encoding to a string', function (done) {
       var codec = getCodec('utf16le');
       var expected = notBomContents.replace('X', 'LE');
 
@@ -136,27 +92,7 @@ function suite(moduleName) {
       done();
     });
 
-    it('can decode bytes from utf16le encoding to a string (stream)', function (done) {
-      var codec = getCodec('utf16le');
-      var expected = notBomContents.replace('X', 'LE');
-
-      function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(typeof result).toEqual('string');
-        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
-      }
-
-      stream.pipeline(
-        [
-          fs.createReadStream(leNotBomInputPath),
-          codec.decodeStream(),
-          concatString(assert),
-        ],
-        done
-      );
-    });
-
-    it('can encode a string to bytes in utf16le encoding (buffer)', function (done) {
+    it('can encode a string to bytes in utf16le encoding', function (done) {
       var codec = getCodec('utf16le');
       var expected = fs.readFileSync(leNotBomInputPath);
 
@@ -168,7 +104,94 @@ function suite(moduleName) {
       done();
     });
 
-    it('can encode a string to bytes in utf16le encoding (stream)', function (done) {
+    it('can decode bytes from gb2312 encoding to a string', function (done) {
+      var codec = getCodec('gb2312');
+      var expected = encodedContents;
+
+      var result = codec.decode(fs.readFileSync(encodedInputPath));
+      expect(result).toEqual(expected);
+      done();
+    });
+
+    it('can encode a string to bytes in gb2312 encoding', function (done) {
+      var codec = getCodec('gb2312');
+      var expected = fs.readFileSync(encodedInputPath);
+
+      var result = codec.encode(encodedContents);
+      expect(result).toEqual(expected);
+      done();
+    });
+  });
+
+  describeStreams('stream', function (stream) {
+    var from = stream.Readable.from;
+    var pipeline = stream.pipeline;
+
+    var streamUtils = testStreams(stream);
+    var concatString = streamUtils.concatString;
+    var concatBuffer = streamUtils.concatBuffer;
+
+    it('can decode bytes from utf16be encoding to a string', function (done) {
+      var codec = getCodec('utf16be');
+      var expected = notBomContents.replace('X', 'BE');
+
+      function assert(result) {
+        expect(result).toEqual(expect.anything());
+        expect(typeof result).toEqual('string');
+        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
+      }
+
+      pipeline(
+        [
+          fs.createReadStream(beNotBomInputPath),
+          codec.decodeStream(),
+          concatString(assert),
+        ],
+        done
+      );
+    });
+
+    it('can encode a string to bytes in utf16be encoding', function (done) {
+      var codec = getCodec('utf16be');
+      var expected = fs.readFileSync(beNotBomInputPath);
+
+      function assert(result) {
+        expect(result).toEqual(expect.anything());
+        expect(Buffer.isBuffer(result)).toBe(true);
+        expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
+      }
+
+      pipeline(
+        [
+          from([notBomContents.replace('X', 'BE')]),
+          codec.encodeStream(),
+          concatBuffer(assert),
+        ],
+        done
+      );
+    });
+
+    it('can decode bytes from utf16le encoding to a string', function (done) {
+      var codec = getCodec('utf16le');
+      var expected = notBomContents.replace('X', 'LE');
+
+      function assert(result) {
+        expect(result).toEqual(expect.anything());
+        expect(typeof result).toEqual('string');
+        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
+      }
+
+      pipeline(
+        [
+          fs.createReadStream(leNotBomInputPath),
+          codec.decodeStream(),
+          concatString(assert),
+        ],
+        done
+      );
+    });
+
+    it('can encode a string to bytes in utf16le encoding', function (done) {
       var codec = getCodec('utf16le');
       var expected = fs.readFileSync(leNotBomInputPath);
 
@@ -178,7 +201,7 @@ function suite(moduleName) {
         expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
       }
 
-      stream.pipeline(
+      pipeline(
         [
           from([notBomContents.replace('X', 'LE')]),
           codec.encodeStream(),
@@ -188,22 +211,7 @@ function suite(moduleName) {
       );
     });
 
-    it('returns a proper codec for gb2312', function (done) {
-      var codec = getCodec('gb2312');
-      testCodec(codec);
-      done();
-    });
-
-    it('can decode bytes from gb2312 encoding to a string (buffer)', function (done) {
-      var codec = getCodec('gb2312');
-      var expected = encodedContents;
-
-      var result = codec.decode(fs.readFileSync(encodedInputPath));
-      expect(result).toEqual(expected);
-      done();
-    });
-
-    it('can decode bytes from gb2312 encoding to a string (stream)', function (done) {
+    it('can decode bytes from gb2312 encoding to a string', function (done) {
       var codec = getCodec('gb2312');
       var expected = encodedContents;
 
@@ -211,7 +219,7 @@ function suite(moduleName) {
         expect(result).toEqual(expected);
       }
 
-      stream.pipeline(
+      pipeline(
         [
           fs.createReadStream(encodedInputPath),
           codec.decodeStream(),
@@ -221,16 +229,7 @@ function suite(moduleName) {
       );
     });
 
-    it('can encode a string to bytes in gb2312 encoding (buffer)', function (done) {
-      var codec = getCodec('gb2312');
-      var expected = fs.readFileSync(encodedInputPath);
-
-      var result = codec.encode(encodedContents);
-      expect(result).toEqual(expected);
-      done();
-    });
-
-    it('can encode a string to bytes in gb2312 encoding (stream)', function (done) {
+    it('can encode a string to bytes in gb2312 encoding', function (done) {
       var codec = getCodec('gb2312');
       var expected = fs.readFileSync(encodedInputPath);
 
@@ -238,14 +237,10 @@ function suite(moduleName) {
         expect(result).toEqual(expected);
       }
 
-      stream.pipeline(
+      pipeline(
         [from([encodedContents]), codec.encodeStream(), concatBuffer(assert)],
         done
       );
     });
   });
-}
-
-suite('stream');
-suite('streamx');
-suite('readable-stream');
+});

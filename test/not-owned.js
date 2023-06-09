@@ -4,20 +4,14 @@ var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
 var sinon = require('sinon');
-var stream = require('stream');
-var concat = require('concat-stream');
-
-// TODO: This `from` should be replaced to `node:stream.Readable.from`
-// if this package supports only >= v10.17.0
-var from = require('streamx').Readable.from;
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var applyUmask = require('./utils/apply-umask');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
-
-var pipeline = stream.pipeline;
+var describeStreams = require('./utils/suite');
 
 var notOwnedBase = testConstants.notOwnedBase;
 var notOwnedPath = testConstants.notOwnedPath;
@@ -25,7 +19,12 @@ var contents = testConstants.contents;
 
 var clean = cleanup();
 
-describe('.dest() on not owned files', function() {
+describeStreams('.dest() on not owned files', function (stream) {
+  var from = stream.Readable.from;
+  var pipeline = stream.pipeline;
+
+  var streamUtils = testStreams(stream);
+  var concatArray = streamUtils.concatArray;
 
   var fileStats = fs.statSync(notOwnedPath);
 
@@ -57,7 +56,7 @@ describe('.dest() on not owned files', function() {
     return false;
   }
 
-  it('does not error if mtime is different', function(done) {
+  it('does not error if mtime is different', function (done) {
     if (needsAction()) {
       this.skip();
       return;
@@ -80,14 +79,10 @@ describe('.dest() on not owned files', function() {
       expect(futimesSpy.callCount).toEqual(0);
     }
 
-    pipeline([
-      from([file]),
-      vfs.dest(notOwnedBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
   });
 
-  it('does not error if mode is different', function(done) {
+  it('does not error if mode is different', function (done) {
     if (needsAction()) {
       this.skip();
       return;
@@ -108,10 +103,6 @@ describe('.dest() on not owned files', function() {
       expect(fchmodSpy.callCount).toEqual(0);
     }
 
-    pipeline([
-      from([file]),
-      vfs.dest(notOwnedBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
   });
 });
