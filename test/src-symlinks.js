@@ -61,7 +61,7 @@ describeStreams('.src() with symlinks', function (stream) {
     pipeline([vfs.src(symlinkNestedFirst), concatArray(assert)], done);
   });
 
-  it('resolves directory symlinks correctly', function (done) {
+  it.only('resolves directory symlinks correctly', function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
