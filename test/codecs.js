@@ -35,6 +35,7 @@ describe('codecs', function () {
       var codec = getCodec(DEFAULT_ENCODING);
       testCodec(codec);
       expect(codec.enc).toEqual(DEFAULT_ENCODING);
+      expect(codec.bomAware).toEqual(true);
       done();
     }
   );
@@ -42,12 +43,14 @@ describe('codecs', function () {
   it('returns a proper codec for utf16be', function (done) {
     var codec = getCodec('utf16be');
     testCodec(codec);
+    expect(codec.bomAware).toEqual(true);
     done();
   });
 
   it('returns a proper codec for utf16le', function (done) {
     var codec = getCodec('utf16le');
     testCodec(codec);
+    expect(codec.bomAware).toEqual(true);
     done();
   });
 

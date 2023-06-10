@@ -74,7 +74,7 @@ describeStreams('symlink stream', function (stream) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
+      expect(files[0].cwd).toEqual(__dirname);
     }
 
     pipeline(
@@ -97,10 +97,7 @@ describeStreams('symlink stream', function (stream) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(
-        process.cwd(),
-        'cwd should not have changed'
-      );
+      expect(files[0].cwd).toEqual(process.cwd());
     }
 
     pipeline(
@@ -123,10 +120,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
-      expect(files[0].isSymbolic()).toBe(true, 'file should be symbolic');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -159,10 +156,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
-      expect(files[0].isSymbolic()).toBe(true, 'file should be symbolic');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -184,10 +181,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
-      expect(files[0].isSymbolic()).toBe(true, 'file should be symbolic');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -209,10 +206,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
-      expect(files[0].isSymbolic()).toBe(true, 'file should be symbolic');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
@@ -238,10 +235,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
-      expect(files[0].isSymbolic()).toBe(true, 'file should be symbolic');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
       expect(outputLink).toEqual(inputPath);
     }
 
@@ -291,9 +288,9 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].symlink).toEqual(outputLink);
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -327,13 +324,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
       // When creating a junction, it seems Windows appends a separator
-      expect(files[0].symlink + path.sep).toEqual(
-        outputLink,
-        'symlink should be set'
-      );
+      expect(files[0].symlink + path.sep).toEqual(outputLink);
       expect(outputLink).toEqual(inputDirpath + path.sep);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -367,9 +361,9 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].symlink).toEqual(outputLink);
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -412,9 +406,9 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].symlink).toEqual(outputLink);
       expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -452,9 +446,9 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].symlink).toEqual(outputLink);
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -492,13 +486,10 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
       // When creating a junction, it seems Windows appends a separator
-      expect(files[0].symlink + path.sep).toEqual(
-        outputLink,
-        'symlink should be set'
-      );
+      expect(files[0].symlink + path.sep).toEqual(outputLink);
       expect(outputLink).toEqual(inputDirpath + path.sep);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
@@ -534,8 +525,8 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
@@ -575,9 +566,9 @@ describeStreams('symlink stream', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
-      expect(files[0].symlink).toEqual(outputLink, 'symlink should be set');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputDirpath);
+      expect(files[0].symlink).toEqual(outputLink);
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);

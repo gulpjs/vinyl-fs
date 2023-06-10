@@ -201,7 +201,7 @@ describeStreams('.dest()', function (stream) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
+      expect(files[0].cwd).toEqual(__dirname);
     }
 
     pipeline(
@@ -224,10 +224,7 @@ describeStreams('.dest()', function (stream) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(
-        process.cwd(),
-        'cwd should not have changed'
-      );
+      expect(files[0].cwd).toEqual(process.cwd());
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
@@ -245,8 +242,8 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(exists).toEqual(false);
     }
 
@@ -267,9 +264,9 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].cwd).toEqual(__dirname);
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(outputContents).toEqual(contents);
     }
 
@@ -303,9 +300,9 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].cwd).toEqual(__dirname, 'cwd should have changed');
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].cwd).toEqual(__dirname);
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(outputContents).toEqual(contents);
     }
 
@@ -327,8 +324,8 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(outputContents).toEqual(contents);
     }
 
@@ -347,8 +344,8 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
-      expect(files[0].path).toEqual(outputPath, 'path should have changed');
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(outputPath);
       expect(outputContents).toEqual(contents);
     }
 
@@ -392,9 +389,9 @@ describeStreams('.dest()', function (stream) {
 
       expect(files.length).toEqual(1);
       expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, 'base should have changed');
+      expect(files[0].base).toEqual(outputBase);
       // TODO: normalize this path
-      expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
+      expect(files[0].path).toEqual(outputDirpath);
       expect(stats.isDirectory()).toEqual(true);
     }
 
