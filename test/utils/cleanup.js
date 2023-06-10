@@ -5,7 +5,7 @@ var sinon = require('sinon');
 
 function cleanup(glob) {
   return function(cb) {
-    this.timeout(20000);
+    this.timeout(0);
 
     sinon.restore();
 

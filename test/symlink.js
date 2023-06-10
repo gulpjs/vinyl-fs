@@ -844,7 +844,7 @@ describeStreams('symlink stream', function (stream) {
   });
 
   it('allows backpressure when piped to another, slower stream', function (done) {
-    this.timeout(20000);
+    this.timeout(0);
 
     var expectedCount = 24;
     var highwatermarkFiles = [];

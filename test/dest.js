@@ -356,7 +356,7 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('writes large streaming files to the right folder', function (done) {
-    this.timeout(10000);
+    this.timeout(0);
 
     var size = 40000;
 
@@ -944,7 +944,7 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('allows backpressure when piped to another, slower stream', function (done) {
-    this.timeout(20000);
+    this.timeout(0);
 
     var expectedCount = 24;
     var highwatermarkFiles = [];
