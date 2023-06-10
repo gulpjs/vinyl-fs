@@ -356,6 +356,9 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('writes large streaming files to the right folder', function (done) {
+    // A 2-second timeout is right on the edge for ubuntu so we double and then some
+    this.timeout(5000);
+
     var size = 40000;
 
     var file = new File({
