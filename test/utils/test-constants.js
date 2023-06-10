@@ -20,8 +20,8 @@ var outputNestedPath = path.posix.join(outputDirpath, './test.txt');
 // Used for rename tests
 var outputRenamePath = path.posix.join(outputBase, './foo2.txt');
 // Used for not-owned tests
-var notOwnedBase = path.posix.join(inputBase, './not-owned/');
-var notOwnedPath = path.posix.join(notOwnedBase, 'not-owned.txt');
+var notOwnedBase = path.join(inputBase, './not-owned/');
+var notOwnedPath = path.join(notOwnedBase, 'not-owned.txt');
 // Used for BOM tests
 var bomInputPath = path.posix.join(inputBase, './bom-utf8.txt');
 var beBomInputPath = path.posix.join(inputBase, './bom-utf16be.txt');

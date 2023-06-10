@@ -26,14 +26,14 @@ describeStreams('.dest() on not owned files', function (stream) {
   var streamUtils = testStreams(stream);
   var concatArray = streamUtils.concatArray;
 
-  var fileStats = fs.statSync(notOwnedPath);
-
   beforeEach(clean);
   afterEach(clean);
 
   var seenActions = false;
 
   function needsAction() {
+    var fileStats = fs.statSync(notOwnedPath);
+
     var problems = [];
     var actions = [];
     if (fileStats.uid !== 0) {
