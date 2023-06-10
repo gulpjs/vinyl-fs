@@ -612,7 +612,7 @@ describeStreams('.src()', function (stream) {
 
   // TODO: need to normalize the path of a directory vinyl object
   it('globs a directory with default settings', function (done) {
-    var inputDirGlob = path.posix.join(inputBase, './f*/');
+    var inputDirGlob = path.join(inputBase, './f*/');
 
     function assert(files) {
       expect(files.length).toEqual(1);

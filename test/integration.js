@@ -17,11 +17,11 @@ var base = testConstants.outputBase;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
-var inputBase = path.posix.join(base, './in/');
-var inputGlob = path.posix.join(inputBase, './*.txt');
-var outputBase = path.posix.join(base, './out/');
-var outputSymlink = path.posix.join(symlinkDirpath, './foo');
-var outputDirpathSymlink = path.posix.join(outputDirpath, './foo');
+var inputBase = path.join(base, './in/');
+var inputGlob = path.join(inputBase, './*.txt');
+var outputBase = path.join(base, './out/');
+var outputSymlink = path.join(symlinkDirpath, './foo');
+var outputDirpathSymlink = path.join(outputDirpath, './foo');
 var content = testConstants.contents;
 
 var clean = cleanup(base);
