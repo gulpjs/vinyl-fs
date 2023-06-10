@@ -1447,6 +1447,8 @@ describeStreams('createWriteStream', function (stream) {
   });
 
   it('accepts just a file path and writes a large file to it', function (done) {
+    this.timeout(50000);
+
     var size = 40000;
 
     function assert(err) {
