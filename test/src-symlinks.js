@@ -4,9 +4,6 @@ var fs = require('graceful-fs');
 var expect = require('expect');
 var sinon = require('sinon');
 
-var os = require('os');
-var nodeVersion = require('parse-node-version')(process.version);
-
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
@@ -65,12 +62,6 @@ describeStreams('.src() with symlinks', function (stream) {
   });
 
   it('resolves directory symlinks correctly', function (done) {
-    // Error: EPERM: operation not permitted
-    if (os.platform() === 'win32' && nodeVersion.major === 10) {
-      this.skip();
-      return;
-    }
-
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -86,12 +77,6 @@ describeStreams('.src() with symlinks', function (stream) {
   });
 
   it('resolves nested symlinks to directories correctly', function (done) {
-    // Error: EPERM: operation not permitted
-    if (os.platform() === 'win32' && nodeVersion.major === 10) {
-      this.skip();
-      return;
-    }
-
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
