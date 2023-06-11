@@ -1218,7 +1218,7 @@ describeStreams('.dest()', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it('does not pass options on to stream.Tranform', function (done) {
+  it('does not pass options on to stream', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,

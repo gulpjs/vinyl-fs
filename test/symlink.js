@@ -1016,7 +1016,7 @@ describeStreams('symlink stream', function (stream) {
     });
   });
 
-  it('does not pass options on to through2', function (done) {
+  it('does not pass options on to stream', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
