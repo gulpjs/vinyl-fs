@@ -9,12 +9,15 @@ var sinon = require('sinon');
 
 var vfs = require('../');
 
+var cleanup = require('./utils/cleanup');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
 var describeStreams = require('./utils/suite');
 
 var inputBase = testConstants.inputBase;
 var inputPath = testConstants.inputPath;
+var outputBase = testConstants.outputBase;
+var outputPath = testConstants.outputPath;
 var inputDirpath = testConstants.inputDirpath;
 var bomInputPath = testConstants.bomInputPath;
 var beBomInputPath = testConstants.beBomInputPath;
@@ -27,6 +30,8 @@ var encodedContents = testConstants.encodedContents;
 var bomContents = testConstants.bomContents;
 var contents = testConstants.contents;
 
+var clean = cleanup(outputBase);
+
 describeStreams('.src()', function (stream) {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
@@ -34,6 +39,9 @@ describeStreams('.src()', function (stream) {
   var streamUtils = testStreams(stream);
   var concatArray = streamUtils.concatArray;
   var compareContents = streamUtils.compareContents;
+
+  beforeEach(clean);
+  afterEach(clean);
 
   it('throws on invalid glob (empty)', function (done) {
     var stream;
@@ -685,6 +693,28 @@ describeStreams('.src()', function (stream) {
       [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assert)],
       done
     );
+  });
+
+  it('streams a file with ctime greater than mtime', function (done) {
+    fs.mkdirSync(outputBase);
+    fs.copyFileSync(inputPath, outputPath);
+
+    setTimeout(function () {
+      // chmod changes ctime but not mtime
+      fs.chmodSync(outputPath, parseInt('666', 8));
+
+      var lastMtime = new Date(+fs.statSync(outputPath).mtime);
+
+      function assert(files) {
+        expect(files.length).toEqual(1);
+        expect(files[0].path).toEqual(outputPath);
+      }
+
+      pipeline(
+        [vfs.src(outputPath, { since: lastMtime }), concatArray(assert)],
+        done
+      );
+    }, 250);
   });
 
   it('streams a file with streaming contents', function (done) {
