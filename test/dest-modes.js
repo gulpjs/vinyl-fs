@@ -3,7 +3,7 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var miss = require('mississippi');
+var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -14,10 +14,7 @@ var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
 var always = require('./utils/always');
 var testConstants = require('./utils/test-constants');
-
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var describeStreams = require('./utils/suite');
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -31,12 +28,14 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describe('.dest() with custom modes', function() {
+describeStreams('.dest() with custom modes', function (stream) {
+  var from = stream.Readable.from;
+  var pipeline = stream.pipeline;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it('sets the mode of a written buffer file if set on the vinyl object', function(done) {
+  it('sets the mode of a written buffer file if set on the vinyl object', function (done) {
     // Changing the mode of a file is not supported by node.js in Windows.
     // Windows is treated as though it does not have permission to make this operation.
     if (isWindows) {
@@ -49,7 +48,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -57,16 +56,13 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('sets the sticky bit on the mode of a written stream file if set on the vinyl object', function(done) {
+  it('sets the sticky bit on the mode of a written stream file if set on the vinyl object', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -85,16 +81,13 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('sets the mode of a written stream file if set on the vinyl object', function(done) {
+  it('sets the mode of a written stream file if set on the vinyl object', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -113,16 +106,13 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('sets the mode of a written directory if set on the vinyl object', function(done) {
+  it('sets the mode of a written directory if set on the vinyl object', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -142,16 +132,13 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('sets sticky bit on the mode of a written directory if set on the vinyl object', function(done) {
+  it('sets sticky bit on the mode of a written directory if set on the vinyl object', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -171,16 +158,13 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('writes new files with the mode specified in options', function(done) {
+  it('writes new files with the mode specified in options', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -191,21 +175,24 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { cwd: __dirname, mode: expectedMode }),
+      ],
+      assert
+    );
   });
 
-  it('updates the file mode to match the vinyl mode', function(done) {
+  it('updates the file mode to match the vinyl mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -217,7 +204,7 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
@@ -225,20 +212,17 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, 'w'));
     fs.chmodSync(outputPath, startMode);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('updates the directory mode to match the vinyl mode', function(done) {
+  it('updates the directory mode to match the vinyl mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -266,16 +250,16 @@ describe('.dest() with custom modes', function() {
 
     function assert() {
       expect(statMode(outputDirpath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file1, file2]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [from([file1, file2]), vfs.dest(outputBase, { cwd: __dirname })],
+      assert
+    );
   });
 
-  it('uses different modes for files and directories', function(done) {
+  it('uses different modes for files and directories', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -287,63 +271,63 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputNestedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
     });
 
     function assert() {
       expect(statMode(outputDirpath)).toEqual(expectedDirMode);
       expect(statMode(outputNestedPath)).toEqual(expectedFileMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, {
-        cwd: __dirname,
-        mode: expectedFileMode,
-        dirMode: expectedDirMode,
-      }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, {
+          cwd: __dirname,
+          mode: expectedFileMode,
+          dirMode: expectedDirMode,
+        }),
+      ],
+      assert
+    );
   });
 
-  it('does not fchmod a matching file', function(done) {
+  it('does not fchmod a matching file', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var expectedMode = applyUmask('777');
 
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
       expect(statMode(outputPath)).toEqual(expectedMode);
+      done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('sees a file with special chmod (setuid/setgid/sticky) as distinct', function(done) {
+  it('sees a file with special chmod (setuid/setgid/sticky) as distinct', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var startMode = applyUmask('3722');
     var expectedMode = applyUmask('722');
@@ -351,28 +335,25 @@ describe('.dest() with custom modes', function() {
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
+      done();
     }
 
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, 'w'));
     fs.chmodSync(outputPath, startMode);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('reports fchmod errors', function(done) {
+  it('reports fchmod errors', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -380,29 +361,26 @@ describe('.dest() with custom modes', function() {
 
     var expectedMode = applyUmask('722');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(mockError);
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
 
     var file = new File({
       base: inputBase,
       path: inputPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: expectedMode,
       },
     });
 
     function assert(err) {
-      expect(err).toExist();
-      expect(fchmodSpy.calls.length).toEqual(1);
+      expect(err).toEqual(expect.anything());
+      expect(fchmodSpy.callCount).toEqual(1);
       done();
     }
 
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, 'w'));
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { cwd: __dirname }),
-    ], assert);
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 });

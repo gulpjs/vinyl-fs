@@ -1,13 +1,13 @@
 'use strict';
 
 var rimraf = require('rimraf');
-var expect = require('expect');
+var sinon = require('sinon');
 
 function cleanup(glob) {
   return function(cb) {
-    this.timeout(20000);
+    this.timeout(0);
 
-    expect.restoreSpies();
+    sinon.restore();
 
     if (!glob) {
       return cb();

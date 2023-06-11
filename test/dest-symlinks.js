@@ -5,18 +5,15 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var miss = require('mississippi');
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var always = require('./utils/always');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
-
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var describeStreams = require('./utils/suite');
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -33,12 +30,17 @@ var neOutputDirpath = testConstants.neOutputDirpath;
 
 var clean = cleanup(outputBase);
 
-describe('.dest() with symlinks', function() {
+describeStreams('.dest() with symlinks', function (stream) {
+  var from = stream.Readable.from;
+  var pipeline = stream.pipeline;
+
+  var streamUtils = testStreams(stream);
+  var concatArray = streamUtils.concatArray;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it('creates symlinks when `file.isSymbolic()` is true', function(done) {
+  it('creates symlinks when `file.isSymbolic()` is true', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -61,14 +63,10 @@ describe('.dest() with symlinks', function() {
       expect(files[0].path).toEqual(outputPath);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it('does not create symlinks when `file.isSymbolic()` is false', function(done) {
+  it('does not create symlinks when `file.isSymbolic()` is false', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -88,14 +86,10 @@ describe('.dest() with symlinks', function() {
       expect(symlinkExists).toBe(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it('errors if missing a `.symlink` property', function(done) {
+  it('errors if missing a `.symlink` property', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -106,18 +100,15 @@ describe('.dest() with symlinks', function() {
     });
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       expect(err.message).toEqual('Missing symlink property on symbolic vinyl');
       done();
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-    ], assert);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it('emits Vinyl files that are (still) symbolic', function(done) {
+  it('emits Vinyl files that are (still) symbolic', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -135,14 +126,10 @@ describe('.dest() with symlinks', function() {
       expect(files[0].isSymbolic()).toEqual(true);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it('can create relative links', function(done) {
+  it('can create relative links', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -163,14 +150,17 @@ describe('.dest() with symlinks', function() {
       expect(files[0].isSymbolic()).toBe(true);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { relativeSymlinks: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { relativeSymlinks: true }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(*nix) creates a link for a directory', function(done) {
+  it('(*nix) creates a link for a directory', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -199,14 +189,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it('(windows) creates a junction for a directory', function(done) {
+  it('(windows) creates a junction for a directory', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -236,14 +222,10 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it('(windows) options can disable junctions for a directory', function(done) {
+  it('(windows) options can disable junctions for a directory', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -272,14 +254,17 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: false }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { useJunctions: false }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) options can disable junctions for a directory (as a function)', function(done) {
+  it('(windows) options can disable junctions for a directory (as a function)', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -298,7 +283,7 @@ describe('.dest() with symlinks', function() {
     file.symlink = inputDirpath;
 
     function useJunctions(f) {
-      expect(f).toExist();
+      expect(f).toEqual(expect.anything());
       expect(f).toBe(file);
       return false;
     }
@@ -314,14 +299,17 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: useJunctions }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { useJunctions: useJunctions }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(*nix) can create relative links for directories', function(done) {
+  it('(*nix) can create relative links for directories', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -350,14 +338,17 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { relativeSymlinks: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { relativeSymlinks: true }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(*nix) receives a virtual symbolic directory and creates a symlink', function(done) {
+  it('(*nix) receives a virtual symbolic directory and creates a symlink', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -386,18 +377,21 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isSymbolicLink()).toEqual(true);
     }
 
-    pipe([
-      // This could also be from a different Vinyl adapter
-      from.obj([file]),
-      vfs.dest(neOutputBase),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        // This could also be from a different Vinyl adapter
+        from([file]),
+        vfs.dest(neOutputBase),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
   // There's no way to determine the proper type of link to create with a dangling link
   // So we just create a 'file' type symlink
   // There's also no real way to test the type that was created
-  it('(windows) receives a virtual symbolic directory and creates a symlink', function(done) {
+  it('(windows) receives a virtual symbolic directory and creates a symlink', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -426,15 +420,18 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isSymbolicLink()).toEqual(true);
     }
 
-    pipe([
-      // This could also be from a different Vinyl adapter
-      from.obj([file]),
-      vfs.dest(neOutputBase),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        // This could also be from a different Vinyl adapter
+        from([file]),
+        vfs.dest(neOutputBase),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) relativeSymlinks option is ignored when junctions are used', function(done) {
+  it('(windows) relativeSymlinks option is ignored when junctions are used', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -464,14 +461,20 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, {
+          useJunctions: true,
+          relativeSymlinks: true,
+        }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) supports relativeSymlinks option when link is not for a directory', function(done) {
+  it('(windows) supports relativeSymlinks option when link is not for a directory', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -496,15 +499,21 @@ describe('.dest() with symlinks', function() {
       expect(outputLink).toEqual(path.normalize('../fixtures/test.txt'));
     }
 
-    pipe([
-      from.obj([file]),
-      // The useJunctions option is ignored when file is not a directory
-      vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        // The useJunctions option is ignored when file is not a directory
+        vfs.dest(outputBase, {
+          useJunctions: true,
+          relativeSymlinks: true,
+        }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) can create relative links for directories when junctions are disabled', function(done) {
+  it('(windows) can create relative links for directories when junctions are disabled', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -528,7 +537,7 @@ describe('.dest() with symlinks', function() {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      expect(files).toInclude(file);
+      expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase, 'base should have changed');
       expect(files[0].path).toEqual(outputDirpath, 'path should have changed');
       expect(outputLink).toEqual(path.normalize('../fixtures/foo'));
@@ -536,14 +545,20 @@ describe('.dest() with symlinks', function() {
       expect(lstats.isDirectory()).toEqual(false);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, {
+          useJunctions: false,
+          relativeSymlinks: true,
+        }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('does not overwrite links with overwrite option set to false', function(done) {
+  it('does not overwrite links with overwrite option set to false', function (done) {
     var existingContents = 'Lorem Ipsum';
 
     var file = new File({
@@ -569,15 +584,17 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { overwrite: false }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { overwrite: false }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-
-  it('overwrites links with overwrite option set to true', function(done) {
+  it('overwrites links with overwrite option set to true', function (done) {
     var existingContents = 'Lorem Ipsum';
 
     var file = new File({
@@ -603,14 +620,17 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { overwrite: true }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { overwrite: true }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('does not overwrite links with overwrite option set to a function that returns false', function(done) {
+  it('does not overwrite links with overwrite option set to a function that returns false', function (done) {
     var existingContents = 'Lorem Ipsum';
 
     var file = new File({
@@ -641,14 +661,17 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { overwrite: overwrite }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('overwrites links with overwrite option set to a function that returns true', function(done) {
+  it('overwrites links with overwrite option set to a function that returns true', function (done) {
     var existingContents = 'Lorem Ipsum';
 
     var file = new File({
@@ -679,10 +702,13 @@ describe('.dest() with symlinks', function() {
     fs.mkdirSync(outputBase);
     fs.writeFileSync(outputPath, existingContents);
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(outputBase, { overwrite: overwrite }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, { overwrite: overwrite }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 });

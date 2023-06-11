@@ -2,15 +2,14 @@
 
 var fs = require('graceful-fs');
 var expect = require('expect');
-var miss = require('mississippi');
+var sinon = require('sinon');
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
-
-var pipe = miss.pipe;
-var concat = miss.concat;
+var describeStreams = require('./utils/suite');
 
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -26,12 +25,16 @@ var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 
 var clean = cleanup(outputBase);
 
-describe('.src() with symlinks', function() {
+describeStreams('.src() with symlinks', function (stream) {
+  var pipeline = stream.pipeline;
+
+  var streamUtils = testStreams(stream);
+  var concatArray = streamUtils.concatArray;
 
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     fs.mkdirSync(outputBase);
     fs.mkdirSync(outputDirpath);
     fs.symlinkSync(inputDirpath, symlinkDirpath);
@@ -43,7 +46,7 @@ describe('.src() with symlinks', function() {
     done();
   });
 
-  it('resolves symlinks correctly', function(done) {
+  it('resolves symlinks correctly', function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -55,13 +58,10 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isFile()).toEqual(true);
     }
 
-    pipe([
-      vfs.src(symlinkNestedFirst),
-      concat(assert),
-    ], done);
+    pipeline([vfs.src(symlinkNestedFirst), concatArray(assert)], done);
   });
 
-  it('resolves directory symlinks correctly', function(done) {
+  it('resolves directory symlinks correctly', function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -73,13 +73,10 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isDirectory()).toEqual(true);
     }
 
-    pipe([
-      vfs.src(symlinkDirpath),
-      concat(assert),
-    ], done);
+    pipeline([vfs.src(symlinkDirpath), concatArray(assert)], done);
   });
 
-  it('resolves nested symlinks to directories correctly', function(done) {
+  it('resolves nested symlinks to directories correctly', function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       // The path should be the symlink itself
@@ -91,13 +88,10 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isDirectory()).toEqual(true);
     }
 
-    pipe([
-      vfs.src(symlinkMultiDirpathSecond),
-      concat(assert),
-    ], done);
+    pipeline([vfs.src(symlinkMultiDirpathSecond), concatArray(assert)], done);
   });
 
-  it('preserves file symlinks with resolveSymlinks option set to false', function(done) {
+  it('preserves file symlinks with resolveSymlinks option set to false', function (done) {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkPath);
 
     function assert(files) {
@@ -106,13 +100,13 @@ describe('.src() with symlinks', function() {
       expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
     }
 
-    pipe([
-      vfs.src(symlinkPath, { resolveSymlinks: false }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [vfs.src(symlinkPath, { resolveSymlinks: false }), concatArray(assert)],
+      done
+    );
   });
 
-  it('preserves directory symlinks with resolveSymlinks option set to false', function(done) {
+  it('preserves directory symlinks with resolveSymlinks option set to false', function (done) {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkDirpath);
 
     function assert(files) {
@@ -121,17 +115,19 @@ describe('.src() with symlinks', function() {
       expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
     }
 
-    pipe([
-      vfs.src(symlinkDirpath, { resolveSymlinks: false }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(symlinkDirpath, { resolveSymlinks: false }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('receives a file with symbolic link stats when resolveSymlinks is a function', function(done) {
-
+  it('receives a file with symbolic link stats when resolveSymlinks is a function', function (done) {
     function resolveSymlinks(file) {
-      expect(file).toExist();
-      expect(file.stat).toExist();
+      expect(file).toEqual(expect.anything());
+      expect(file.stat).toEqual(expect.anything());
       expect(file.stat.isSymbolicLink()).toEqual(true);
 
       return true;
@@ -144,23 +140,28 @@ describe('.src() with symlinks', function() {
       expect(files[0].stat.isFile()).toEqual(true);
     }
 
-    pipe([
-      vfs.src(symlinkNestedFirst, { resolveSymlinks: resolveSymlinks }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(symlinkNestedFirst, { resolveSymlinks: resolveSymlinks }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('only calls resolveSymlinks once-per-file if it is a function', function(done) {
-
-    var spy = expect.createSpy().andReturn(true);
+  it('only calls resolveSymlinks once-per-file if it is a function', function (done) {
+    var spy = sinon.fake.returns(true);
 
     function assert() {
-      expect(spy.calls.length).toEqual(1);
+      expect(spy.callCount).toEqual(1);
     }
 
-    pipe([
-      vfs.src(symlinkNestedFirst, { resolveSymlinks: spy }),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(symlinkNestedFirst, { resolveSymlinks: spy }),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 });

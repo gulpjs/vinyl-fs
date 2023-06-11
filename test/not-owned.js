@@ -3,17 +3,15 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var miss = require('mississippi');
+var sinon = require('sinon');
 
 var vfs = require('../');
 
 var cleanup = require('./utils/cleanup');
 var applyUmask = require('./utils/apply-umask');
+var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
-
-var from = miss.from;
-var pipe = miss.pipe;
-var concat = miss.concat;
+var describeStreams = require('./utils/suite');
 
 var notOwnedBase = testConstants.notOwnedBase;
 var notOwnedPath = testConstants.notOwnedPath;
@@ -21,9 +19,12 @@ var contents = testConstants.contents;
 
 var clean = cleanup();
 
-describe('.dest() on not owned files', function() {
+describeStreams('.dest() on not owned files', function (stream) {
+  var from = stream.Readable.from;
+  var pipeline = stream.pipeline;
 
-  var fileStats = fs.statSync(notOwnedPath);
+  var streamUtils = testStreams(stream);
+  var concatArray = streamUtils.concatArray;
 
   beforeEach(clean);
   afterEach(clean);
@@ -31,6 +32,8 @@ describe('.dest() on not owned files', function() {
   var seenActions = false;
 
   function needsAction() {
+    var fileStats = fs.statSync(notOwnedPath);
+
     var problems = [];
     var actions = [];
     if (fileStats.uid !== 0) {
@@ -53,61 +56,53 @@ describe('.dest() on not owned files', function() {
     return false;
   }
 
-  it('does not error if mtime is different', function(done) {
+  it('does not error if mtime is different', function (done) {
     if (needsAction()) {
       this.skip();
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var earlier = Date.now() - 1000;
 
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mtime: new Date(earlier),
       },
     });
 
     function assert() {
-      expect(futimesSpy.calls.length).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(notOwnedBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
   });
 
-  it('does not error if mode is different', function(done) {
+  it('does not error if mode is different', function (done) {
     if (needsAction()) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var file = new File({
       base: notOwnedBase,
       path: notOwnedPath,
-      contents: new Buffer(contents),
+      contents: Buffer.from(contents),
       stat: {
         mode: applyUmask('777'),
       },
     });
 
     function assert() {
-      expect(fchmodSpy.calls.length).toEqual(0);
+      expect(fchmodSpy.callCount).toEqual(0);
     }
 
-    pipe([
-      from.obj([file]),
-      vfs.dest(notOwnedBase),
-      concat(assert),
-    ], done);
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
   });
 });

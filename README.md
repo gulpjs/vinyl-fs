@@ -1,12 +1,12 @@
 <p align="center">
-  <a href="http://gulpjs.com">
+  <a href="https://gulpjs.com">
     <img height="257" width="114" src="https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png">
   </a>
 </p>
 
 # vinyl-fs
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 [Vinyl][vinyl] adapter for the file system.
 
@@ -17,12 +17,6 @@
 ## What is a Vinyl Adapter?
 
 While Vinyl provides a clean way to describe a file, we now need a way to access these files. Each file source needs what we call a "Vinyl adapter". A Vinyl adapter simply exposes a `src(globs)` and a `dest(folder)` method. Each return a stream. The `src` stream produces Vinyl objects, and the `dest` stream consumes Vinyl objects. Vinyl adapters can expose extra methods that might be specific to their input/output medium, such as the `symlink` method `vinyl-fs` provides.
-
-## vinyl-fs for enterprise
-
-Available as part of the Tidelift Subscription
-
-The maintainers of vinyl-fs and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-vinyl-fs?utm_source=npm-vinyl-fs&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
 ## Usage
 
@@ -133,7 +127,7 @@ Default: `true`
 
 Whether or not you want globs to match on dot files (e.g. `.gitignore`).
 
-__Note: This option is not resolved from a function because it is passed verbatim to node-glob.__
+__Note: This option is not resolved from a function because it is passed verbatim to anymatch.__
 
 Type: `Boolean`
 
@@ -141,7 +135,7 @@ Default: `false`
 
 ##### other
 
-Any glob-related options are documented in [glob-stream] and [node-glob] and are forwarded verbatim.
+Any glob-related options are documented in [glob-stream] and [anymatch] and are forwarded verbatim.
 
 ### `dest(folder[, options])`
 
@@ -344,28 +338,26 @@ type of link and we default to using `'file'`, which may cause unexpected behavi
 if you are creating a "dangling" link to a directory. It is advised to avoid this
 scenario.
 
+## License
 
-[symbolic-caveats]: #symbolic-links-on-windows
-[glob-stream]: https://github.com/gulpjs/glob-stream
-[node-glob]: https://github.com/isaacs/node-glob
-[gaze]: https://github.com/shama/gaze
-[glob-watcher]: https://github.com/wearefractal/glob-watcher
-[vinyl]: https://github.com/wearefractal/vinyl
-[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
+MIT
 
-[downloads-image]: http://img.shields.io/npm/dm/vinyl-fs.svg
+<!-- prettier-ignore-start -->
+[downloads-image]: https://img.shields.io/npm/dm/vinyl-fs.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/vinyl-fs
-[npm-image]: http://img.shields.io/npm/v/vinyl-fs.svg
+[npm-image]: https://img.shields.io/npm/v/vinyl-fs.svg?style=flat-square
 
-[travis-url]: https://travis-ci.org/gulpjs/vinyl-fs
-[travis-image]: http://img.shields.io/travis/gulpjs/vinyl-fs.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/gulpjs/vinyl-fs
-[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/vinyl-fs.svg?label=appveyor
+[ci-url]: https://github.com/gulpjs/vinyl-fs/actions?query=workflow:dev
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/vinyl-fs/dev.yml??branch=master&style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/vinyl-fs/master.svg
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/vinyl-fs.svg?style=flat-square
+<!-- prettier-ignore-end -->
 
-[gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
-
+<!-- prettier-ignore-start -->
+[symbolic-caveats]: #symbolic-links-on-windows
+[glob-stream]: https://github.com/gulpjs/glob-stream
+[anymatch]: https://github.com/micromatch/anymatch
+[vinyl]: https://github.com/gulpjs/vinyl
+[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
+<!-- prettier-ignore-end -->

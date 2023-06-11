@@ -3,7 +3,6 @@
 var path = require('path');
 
 var fs = require('graceful-fs');
-var miss = require('mississippi');
 var expect = require('expect');
 
 var vfs = require('../');
@@ -12,20 +11,13 @@ var cleanup = require('./utils/cleanup');
 var isWindows = require('./utils/is-windows');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
-
-var pipe = miss.pipe;
-var concat = miss.concat;
-
-var count = testStreams.count;
+var describeStreams = require('./utils/suite');
 
 var base = testConstants.outputBase;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
 var inputBase = path.join(base, './in/');
-var inputDirpath = testConstants.inputDirpath;
-var outputDirpath = testConstants.outputDirpath;
-var symlinkDirpath = testConstants.symlinkDirpath;
 var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
 var outputSymlink = path.join(symlinkDirpath, './foo');
@@ -34,12 +26,17 @@ var content = testConstants.contents;
 
 var clean = cleanup(base);
 
-describe('integrations', function() {
+describeStreams('integrations', function (stream) {
+  var pipeline = stream.pipeline;
+
+  var streamUtils = testStreams(stream);
+  var count = streamUtils.count;
+  var concatArray = streamUtils.concatArray;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it('does not exhaust available file descriptors when streaming thousands of files', function(done) {
+  it('does not exhaust available file descriptors when streaming thousands of files', function (done) {
     // This can be a very slow test on boxes with slow disk i/o
     this.timeout(0);
 
@@ -54,14 +51,17 @@ describe('integrations', function() {
       fs.writeFileSync(filepath, content);
     }
 
-    pipe([
-      vfs.src(inputGlob, { buffer: false }),
-      count(expectedCount),
-      vfs.dest(outputBase),
-    ], done);
+    pipeline(
+      [
+        vfs.src(inputGlob, { buffer: false }),
+        count(expectedCount),
+        vfs.dest(outputBase),
+      ],
+      done
+    );
   });
 
-  it('(*nix) sources a directory, creates a symlink and copies it', function(done) {
+  it('(*nix) sources a directory, creates a symlink and copies it', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -77,15 +77,18 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
-      vfs.src(inputDirpath),
-      vfs.symlink(symlinkDirpath),
-      vfs.dest(outputDirpath),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(inputDirpath),
+        vfs.symlink(symlinkDirpath),
+        vfs.dest(outputDirpath),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) sources a directory, creates a junction and copies it', function(done) {
+  it('(windows) sources a directory, creates a junction and copies it', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -103,15 +106,18 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
-      vfs.src(inputDirpath),
-      vfs.symlink(symlinkDirpath),
-      vfs.dest(outputDirpath),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(inputDirpath),
+        vfs.symlink(symlinkDirpath),
+        vfs.dest(outputDirpath),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(*nix) sources a symlink and copies it', function(done) {
+  it('(*nix) sources a symlink and copies it', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -129,14 +135,17 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
-      vfs.src(outputSymlink, { resolveSymlinks: false }),
-      vfs.dest(outputDirpath),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(outputSymlink, { resolveSymlinks: false }),
+        vfs.dest(outputDirpath),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) sources a directory symlink and copies it', function(done) {
+  it('(windows) sources a directory symlink and copies it', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -156,14 +165,17 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
-      vfs.src(outputSymlink, { resolveSymlinks: false }),
-      vfs.dest(outputDirpath),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(outputSymlink, { resolveSymlinks: false }),
+        vfs.dest(outputDirpath),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 
-  it('(windows) sources a junction and copies it', function(done) {
+  it('(windows) sources a junction and copies it', function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -183,10 +195,13 @@ describe('integrations', function() {
       expect(files[0].symlink).toEqual(inputDirpath);
     }
 
-    pipe([
-      vfs.src(outputSymlink, { resolveSymlinks: false }),
-      vfs.dest(outputDirpath),
-      concat(assert),
-    ], done);
+    pipeline(
+      [
+        vfs.src(outputSymlink, { resolveSymlinks: false }),
+        vfs.dest(outputDirpath),
+        concatArray(assert),
+      ],
+      done
+    );
   });
 });

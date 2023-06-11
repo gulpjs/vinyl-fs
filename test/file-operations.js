@@ -6,7 +6,7 @@ var buffer = require('buffer');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var miss = require('mississippi');
+var sinon = require('sinon');
 var mkdirp = require('fs-mkdirp-stream/mkdirp');
 
 var fo = require('../lib/file-operations');
@@ -21,6 +21,7 @@ var isWindows = require('./utils/is-windows');
 var applyUmask = require('./utils/apply-umask');
 var testStreams = require('./utils/test-streams');
 var testConstants = require('./utils/test-constants');
+var describeStreams = require('./utils/suite');
 
 var closeFd = fo.closeFd;
 var isOwner = fo.isOwner;
@@ -37,11 +38,6 @@ var reflectLinkStat = fo.reflectLinkStat;
 var updateMetadata = fo.updateMetadata;
 var createWriteStream = fo.createWriteStream;
 
-var pipe = miss.pipe;
-var from = miss.from;
-
-var string = testStreams.string;
-
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var neInputDirpath = testConstants.neInputDirpath;
@@ -53,8 +49,7 @@ var clean = cleanup(outputBase);
 
 function noop() {}
 
-describe('isOwner', function() {
-
+describe('isOwner', function () {
   var ownerStat = {
     uid: 9001,
   };
@@ -66,7 +61,7 @@ describe('isOwner', function() {
   var getuidSpy;
   var geteuidSpy;
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     if (typeof process.geteuid !== 'function') {
       process.geteuid = noop;
     }
@@ -76,14 +71,24 @@ describe('isOwner', function() {
       process.getuid = noop;
     }
 
-    getuidSpy = expect.spyOn(process, 'getuid').andReturn(ownerStat.uid);
-    geteuidSpy = expect.spyOn(process, 'geteuid').andReturn(ownerStat.uid);
+    getuidSpy = sinon.stub(process, 'getuid').returns(ownerStat.uid);
+    geteuidSpy = sinon.stub(process, 'geteuid').returns(ownerStat.uid);
 
     done();
   });
 
-  afterEach(function(done) {
-    expect.restoreSpies();
+  afterEach(function (done) {
+    // Because there are cases that delete process.geteuid or process.getuid,
+    // though an error occurs in sinon.restore if a spied function is
+    // undefined.
+    if (process.geteuid === undefined) {
+      process.geteuid = geteuidSpy;
+    }
+    if (process.getuid === undefined) {
+      process.getuid = getuidSpy;
+    }
+
+    sinon.restore();
 
     if (process.geteuid === noop) {
       delete process.geteuid;
@@ -99,27 +104,26 @@ describe('isOwner', function() {
 
   // TODO: test for having neither
 
-  it('uses process.geteuid() when available', function(done) {
-
+  it('uses process.geteuid() when available', function (done) {
     isOwner(ownerStat);
 
-    expect(getuidSpy.calls.length).toEqual(0);
-    expect(geteuidSpy.calls.length).toEqual(1);
+    expect(getuidSpy.callCount).toEqual(0);
+    expect(geteuidSpy.callCount).toEqual(1);
 
     done();
   });
 
-  it('uses process.getuid() when geteuid() is not available', function(done) {
+  it('uses process.getuid() when geteuid() is not available', function (done) {
     delete process.geteuid;
 
     isOwner(ownerStat);
 
-    expect(getuidSpy.calls.length).toEqual(1);
+    expect(getuidSpy.callCount).toEqual(1);
 
     done();
   });
 
-  it('returns false when non-root and non-owner', function(done) {
+  it('returns false when non-root and non-owner', function (done) {
     var result = isOwner(nonOwnerStat);
 
     expect(result).toEqual(false);
@@ -127,7 +131,7 @@ describe('isOwner', function() {
     done();
   });
 
-  it('returns true when owner and non-root', function(done) {
+  it('returns true when owner and non-root', function (done) {
     var result = isOwner(ownerStat);
 
     expect(result).toEqual(true);
@@ -135,8 +139,9 @@ describe('isOwner', function() {
     done();
   });
 
-  it('returns true when non-owner but root', function(done) {
-    expect.spyOn(process, 'geteuid').andReturn(0); // 0 is root uid
+  it('returns true when non-owner but root', function (done) {
+    process.geteuid.restore();
+    sinon.stub(process, 'geteuid').returns(0);
 
     var result = isOwner(nonOwnerStat);
 
@@ -146,9 +151,8 @@ describe('isOwner', function() {
   });
 });
 
-describe('isValidUnixId', function() {
-
-  it('returns true if the given id is a valid unix id', function(done) {
+describe('isValidUnixId', function () {
+  it('returns true if the given id is a valid unix id', function (done) {
     var result = isValidUnixId(1000);
 
     expect(result).toEqual(true);
@@ -156,7 +160,7 @@ describe('isValidUnixId', function() {
     done();
   });
 
-  it('returns false if the given id is not a number', function(done) {
+  it('returns false if the given id is not a number', function (done) {
     var result = isValidUnixId('root');
 
     expect(result).toEqual(false);
@@ -164,7 +168,7 @@ describe('isValidUnixId', function() {
     done();
   });
 
-  it('returns false when the given id is less than 0', function(done) {
+  it('returns false when the given id is less than 0', function (done) {
     var result = isValidUnixId(-1);
 
     expect(result).toEqual(false);
@@ -173,9 +177,8 @@ describe('isValidUnixId', function() {
   });
 });
 
-describe('getFlags', function() {
-
-  it('returns wx if overwrite is false and append is false', function(done) {
+describe('getFlags', function () {
+  it('returns wx if overwrite is false and append is false', function (done) {
     var result = getFlags({
       overwrite: false,
       append: false,
@@ -186,7 +189,7 @@ describe('getFlags', function() {
     done();
   });
 
-  it('returns w if overwrite is true and append is false', function(done) {
+  it('returns w if overwrite is true and append is false', function (done) {
     var result = getFlags({
       overwrite: true,
       append: false,
@@ -197,7 +200,7 @@ describe('getFlags', function() {
     done();
   });
 
-  it('returns ax if overwrite is false and append is true', function(done) {
+  it('returns ax if overwrite is false and append is true', function (done) {
     var result = getFlags({
       overwrite: false,
       append: true,
@@ -208,7 +211,7 @@ describe('getFlags', function() {
     done();
   });
 
-  it('returns a if overwrite is true and append is true', function(done) {
+  it('returns a if overwrite is true and append is true', function (done) {
     var result = getFlags({
       overwrite: true,
       append: true,
@@ -220,9 +223,8 @@ describe('getFlags', function() {
   });
 });
 
-describe('isFatalOverwriteError', function() {
-
-  it('returns false if not given any error', function(done) {
+describe('isFatalOverwriteError', function () {
+  it('returns false if not given any error', function (done) {
     var result = isFatalOverwriteError(null);
 
     expect(result).toEqual(false);
@@ -230,7 +232,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns true if code != EEXIST', function(done) {
+  it('returns true if code != EEXIST', function (done) {
     var result = isFatalOverwriteError({ code: 'EOTHER' });
 
     expect(result).toEqual(true);
@@ -238,7 +240,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns false if code == EEXIST and flags == wx', function(done) {
+  it('returns false if code == EEXIST and flags == wx', function (done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'wx');
 
     expect(result).toEqual(false);
@@ -246,7 +248,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns false if code == EEXIST and flags == ax', function(done) {
+  it('returns false if code == EEXIST and flags == ax', function (done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'ax');
 
     expect(result).toEqual(false);
@@ -254,7 +256,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns true if error.code == EEXIST and flags == w', function(done) {
+  it('returns true if error.code == EEXIST and flags == w', function (done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'w');
 
     expect(result).toEqual(true);
@@ -262,7 +264,7 @@ describe('isFatalOverwriteError', function() {
     done();
   });
 
-  it('returns true if error.code == EEXIST and flags == a', function(done) {
+  it('returns true if error.code == EEXIST and flags == a', function (done) {
     var result = isFatalOverwriteError({ code: 'EEXIST' }, 'a');
 
     expect(result).toEqual(true);
@@ -271,9 +273,8 @@ describe('isFatalOverwriteError', function() {
   });
 });
 
-describe('isFatalUnlinkError', function() {
-
-  it('returns false if not given any error', function(done) {
+describe('isFatalUnlinkError', function () {
+  it('returns false if not given any error', function (done) {
     var result = isFatalUnlinkError(null);
 
     expect(result).toEqual(false);
@@ -281,7 +282,7 @@ describe('isFatalUnlinkError', function() {
     done();
   });
 
-  it('returns false if code == ENOENT', function(done) {
+  it('returns false if code == ENOENT', function (done) {
     var result = isFatalUnlinkError({ code: 'ENOENT' }, 'wx');
 
     expect(result).toEqual(false);
@@ -289,19 +290,17 @@ describe('isFatalUnlinkError', function() {
     done();
   });
 
-  it('returns true if code != ENOENT', function(done) {
+  it('returns true if code != ENOENT', function (done) {
     var result = isFatalUnlinkError({ code: 'EOTHER' });
 
     expect(result).toEqual(true);
 
     done();
   });
-
 });
 
-describe('getModeDiff', function() {
-
-  it('returns 0 if both modes are the same', function(done) {
+describe('getModeDiff', function () {
+  it('returns 0 if both modes are the same', function (done) {
     var fsMode = applyUmask('777');
     var vfsMode = applyUmask('777');
 
@@ -312,7 +311,7 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('returns 0 if vinyl mode is not a number', function(done) {
+  it('returns 0 if vinyl mode is not a number', function (done) {
     var fsMode = applyUmask('777');
     var vfsMode = undefined;
 
@@ -323,7 +322,7 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('returns a value greater than 0 if modes are different', function(done) {
+  it('returns a value greater than 0 if modes are different', function (done) {
     var fsMode = applyUmask('777');
     var vfsMode = applyUmask('744');
 
@@ -334,7 +333,7 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('returns the proper diff', function(done) {
+  it('returns the proper diff', function (done) {
     var fsMode = applyUmask('777');
     var vfsMode = applyUmask('744');
     var expectedDiff = applyUmask('33');
@@ -346,7 +345,7 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('does not matter the order of diffing', function(done) {
+  it('does not matter the order of diffing', function (done) {
     var fsMode = applyUmask('655');
     var vfsMode = applyUmask('777');
     var expectedDiff = applyUmask('122');
@@ -358,7 +357,7 @@ describe('getModeDiff', function() {
     done();
   });
 
-  it('includes the sticky/setuid/setgid bits', function(done) {
+  it('includes the sticky/setuid/setgid bits', function (done) {
     var fsMode = applyUmask('1777');
     var vfsMode = applyUmask('4777');
     var expectedDiff = applyUmask('5000');
@@ -371,9 +370,8 @@ describe('getModeDiff', function() {
   });
 });
 
-describe('getTimesDiff', function() {
-
-  it('returns undefined if vinyl mtime is not a valid date', function(done) {
+describe('getTimesDiff', function () {
+  it('returns undefined if vinyl mtime is not a valid date', function (done) {
     var fsStat = {
       mtime: new Date(),
     };
@@ -388,7 +386,7 @@ describe('getTimesDiff', function() {
     done();
   });
 
-  it('returns undefined if vinyl mtime & atime are both equal to counterparts', function(done) {
+  it('returns undefined if vinyl mtime & atime are both equal to counterparts', function (done) {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -407,7 +405,7 @@ describe('getTimesDiff', function() {
   });
 
   // TODO: is this proper/expected?
-  it('returns undefined if vinyl mtimes equals the counterpart and atimes are null', function(done) {
+  it('returns undefined if vinyl mtimes equals the counterpart and atimes are null', function (done) {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -425,7 +423,7 @@ describe('getTimesDiff', function() {
     done();
   });
 
-  it('returns a diff object if mtimes do not match', function(done) {
+  it('returns a diff object if mtimes do not match', function (done) {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -446,7 +444,7 @@ describe('getTimesDiff', function() {
     done();
   });
 
-  it('returns a diff object if atimes do not match', function(done) {
+  it('returns a diff object if atimes do not match', function (done) {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -469,7 +467,7 @@ describe('getTimesDiff', function() {
     done();
   });
 
-  it('returns the fs atime if the vinyl atime is invalid', function(done) {
+  it('returns the fs atime if the vinyl atime is invalid', function (done) {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -492,7 +490,7 @@ describe('getTimesDiff', function() {
   });
 
   // TODO: is this proper/expected?
-  it('makes atime diff undefined if fs and vinyl atime are invalid', function(done) {
+  it('makes atime diff undefined if fs and vinyl atime are invalid', function (done) {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -515,9 +513,8 @@ describe('getTimesDiff', function() {
   });
 });
 
-describe('getOwnerDiff', function() {
-
-  it('returns undefined if vinyl uid & gid are invalid', function(done) {
+describe('getOwnerDiff', function () {
+  it('returns undefined if vinyl uid & gid are invalid', function (done) {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -534,7 +531,7 @@ describe('getOwnerDiff', function() {
     done();
   });
 
-  it('returns undefined if vinyl uid & gid are both equal to counterparts', function(done) {
+  it('returns undefined if vinyl uid & gid are both equal to counterparts', function (done) {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -551,7 +548,7 @@ describe('getOwnerDiff', function() {
     done();
   });
 
-  it('returns a diff object if uid or gid do not match', function(done) {
+  it('returns a diff object if uid or gid do not match', function (done) {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -578,14 +575,14 @@ describe('getOwnerDiff', function() {
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
     done();
   });
 
-  it('returns the fs uid if the vinyl uid is invalid', function(done) {
+  it('returns the fs uid if the vinyl uid is invalid', function (done) {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -603,19 +600,19 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(expected);
 
-    var vfsStat = {
+    vfsStat = {
       uid: -1,
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
     done();
   });
 
-  it('returns the fs gid if the vinyl gid is invalid', function(done) {
+  it('returns the fs gid if the vinyl gid is invalid', function (done) {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -633,19 +630,19 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(expected);
 
-    var vfsStat = {
+    vfsStat = {
       uid: 1001,
       gid: -1,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(expected);
 
     done();
   });
 
-  it('returns undefined if fs and vinyl uid are invalid', function(done) {
+  it('returns undefined if fs and vinyl uid are invalid', function (done) {
     var fsStat = {
       uid: undefined,
       gid: 1000,
@@ -659,23 +656,23 @@ describe('getOwnerDiff', function() {
 
     expect(result).toEqual(undefined);
 
-    var fsStat = {
+    fsStat = {
       uid: -1,
       gid: 1000,
     };
-    var vfsStat = {
+    vfsStat = {
       uid: -1,
       gid: 1001,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(undefined);
 
     done();
   });
 
-  it('returns undefined if fs and vinyl gid are invalid', function(done) {
+  it('returns undefined if fs and vinyl gid are invalid', function (done) {
     var fsStat = {
       uid: 1000,
       gid: undefined,
@@ -698,7 +695,7 @@ describe('getOwnerDiff', function() {
       gid: -1,
     };
 
-    var result = getOwnerDiff(fsStat, vfsStat);
+    result = getOwnerDiff(fsStat, vfsStat);
 
     expect(result).toEqual(undefined);
 
@@ -706,65 +703,65 @@ describe('getOwnerDiff', function() {
   });
 });
 
-describe('closeFd', function() {
+describe('closeFd', function () {
   // This is just a very large number since node broke our tests by disallowing -1
   // We're also doing some hacky version matching because node 0.12 accepts 10000 on Windows (and fails the test)
   var invalidFd = process.version[1] === '0' ? -1 : 10000;
 
-  it('calls the callback with propagated error if fd is not a number', function(done) {
+  it('calls the callback with propagated error if fd is not a number', function (done) {
     var propagatedError = new Error();
 
-    closeFd(propagatedError, null, function(err) {
+    closeFd(propagatedError, null, function (err) {
       expect(err).toEqual(propagatedError);
 
       done();
     });
   });
 
-  it('calls the callback with close error if no error to propagate', function(done) {
-    closeFd(null, invalidFd, function(err) {
-      expect(err).toExist();
+  it('calls the callback with close error if no error to propagate', function (done) {
+    closeFd(null, invalidFd, function (err) {
+      expect(err).toEqual(expect.anything());
 
       done();
     });
   });
 
-  it('calls the callback with propagated error if close errors', function(done) {
+  it('calls the callback with propagated error if close errors', function (done) {
     var propagatedError = new Error();
 
-    closeFd(propagatedError, invalidFd, function(err) {
+    closeFd(propagatedError, invalidFd, function (err) {
       expect(err).toEqual(propagatedError);
 
       done();
     });
   });
 
-  it('calls the callback with propagated error if close succeeds', function(done) {
+  it('calls the callback with propagated error if close succeeds', function (done) {
     var propagatedError = new Error();
 
     var fd = fs.openSync(inputPath, 'r');
 
-    var closeSpy = expect.spyOn(fs, 'close').andCallThrough();
+    var closeSpy = sinon.spy(fs, 'close');
 
-    closeFd(propagatedError, fd, function(err) {
+    closeFd(propagatedError, fd, function (err) {
       closeSpy.restore();
 
-      expect(closeSpy.calls.length).toEqual(1);
+      expect(closeSpy.callCount).toEqual(1);
       expect(err).toEqual(propagatedError);
 
       done();
     });
   });
 
-  it('calls the callback with no error if close succeeds & no propagated error', function(done) {
+  it('calls the callback with no error if close succeeds & no propagated error', function (done) {
     var fd = fs.openSync(inputPath, 'r');
 
-    var spy = expect.spyOn(fs, 'close').andCallThrough();
+    var spy = sinon.spy(fs, 'close');
 
-    closeFd(null, fd, function(err) {
-      spy.restore();
+    closeFd(null, fd, function (err) {
+      sinon.restore();
 
-      expect(spy.calls.length).toEqual(1);
+      expect(spy.callCount).toEqual(1);
       expect(err).toEqual(undefined);
 
       done();
@@ -772,21 +769,20 @@ describe('closeFd', function() {
   });
 });
 
-describe('writeFile', function() {
-
+describe('writeFile', function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     mkdirp(outputBase, done);
   });
 
-  it('writes a file to the filesystem, does not close and returns the fd', function(done) {
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+  it('writes a file to the filesystem, does not close and returns the fd', function (done) {
+    writeFile(outputPath, Buffer.from(contents), function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.close(fd, function() {
+      fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, 'utf8');
 
         expect(written).toEqual(contents);
@@ -796,14 +792,14 @@ describe('writeFile', function() {
     });
   });
 
-  it('defaults to writing files with 0666 mode', function(done) {
+  it('defaults to writing files with 0666 mode', function (done) {
     var expected = applyUmask('666');
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.close(fd, function() {
+      fs.close(fd, function () {
         expect(statMode(outputPath)).toEqual(expected);
 
         done();
@@ -811,7 +807,7 @@ describe('writeFile', function() {
     });
   });
 
-  it('accepts a different mode in options', function(done) {
+  it('accepts a different mode in options', function (done) {
     // Changing the mode of a file is not supported by node.js in Windows.
     if (isWindows) {
       this.skip();
@@ -823,11 +819,11 @@ describe('writeFile', function() {
       mode: expected,
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.close(fd, function() {
+      fs.close(fd, function () {
         expect(statMode(outputPath)).toEqual(expected);
 
         done();
@@ -835,42 +831,49 @@ describe('writeFile', function() {
     });
   });
 
-  it('defaults to opening files with write flag', function(done) {
+  it('defaults to opening files with write flag', function (done) {
     var length = contents.length;
 
-    writeFile(outputPath, new Buffer(contents), function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr) {
-        expect(readErr).toExist();
+      fs.read(fd, Buffer.alloc(length), 0, length, 0, function (readErr) {
+        expect(readErr).toEqual(expect.anything());
 
         fs.close(fd, done);
       });
     });
   });
 
-  it('accepts a different flags in options', function(done) {
+  it('accepts a different flags in options', function (done) {
     var length = contents.length;
     var options = {
       flags: 'w+',
     };
 
-    writeFile(outputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.read(fd, new Buffer(length), 0, length, 0, function(readErr, _, written) {
-        expect(readErr).toNotExist();
+      fs.read(
+        fd,
+        Buffer.alloc(length),
+        0,
+        length,
+        0,
+        function (readErr, _, written) {
+          expect(readErr).not.toEqual(expect.anything());
 
-        expect(written.toString()).toEqual(contents);
+          expect(written.toString()).toEqual(contents);
 
-        fs.close(fd, done);
-      });
+          fs.close(fd, done);
+        }
+      );
     });
   });
 
-  it('appends to a file if append flag is given', function(done) {
+  it('appends to a file if append flag is given', function (done) {
     var initial = 'test';
     var toWrite = '-a-thing';
 
@@ -882,11 +885,11 @@ describe('writeFile', function() {
       flags: 'a',
     };
 
-    writeFile(outputPath, new Buffer(toWrite), options, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, Buffer.from(toWrite), options, function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.close(fd, function() {
+      fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, 'utf8');
 
         expect(written).toEqual(expected);
@@ -896,54 +899,54 @@ describe('writeFile', function() {
     });
   });
 
-  it('does not pass a file descriptor if open call errors', function(done) {
+  it('does not pass a file descriptor if open call errors', function (done) {
     var notExistDir = path.join(__dirname, './not-exist-dir/writeFile.txt');
 
-    writeFile(notExistDir, new Buffer(contents), function(err, fd) {
-      expect(err).toExist();
+    writeFile(notExistDir, Buffer.from(contents), function (err, fd) {
+      expect(err).toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(false);
 
       done();
     });
   });
 
-  it('passes a file descriptor if write call errors', function(done) {
+  it('passes a file descriptor if write call errors', function (done) {
     var options = {
       flags: 'r',
     };
 
-    writeFile(inputPath, new Buffer(contents), options, function(err, fd) {
-      expect(err).toExist();
+    writeFile(inputPath, Buffer.from(contents), options, function (err, fd) {
+      expect(err).toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, done);
     });
   });
 
-  it('passes an error if called with string as data', function(done) {
-    writeFile(outputPath, contents, function(err) {
-      expect(err).toExist();
+  it('passes an error if called with string as data', function (done) {
+    writeFile(outputPath, contents, function (err) {
+      expect(err).toEqual(expect.anything());
 
       done();
     });
   });
 
-  it('does not error on SlowBuffer', function(done) {
+  it('does not error on SlowBuffer', function (done) {
     if (!buffer.SlowBuffer) {
       this.skip();
       return;
     }
 
     var length = contents.length;
-    var buf = new Buffer(contents);
+    var buf = Buffer.from(contents);
     var content = new buffer.SlowBuffer(length);
     buf.copy(content, 0, 0, length);
 
-    writeFile(outputPath, content, function(err, fd) {
-      expect(err).toNotExist();
+    writeFile(outputPath, content, function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
-      fs.close(fd, function() {
+      fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, 'utf8');
 
         expect(written).toEqual(contents);
@@ -953,9 +956,9 @@ describe('writeFile', function() {
     });
   });
 
-  it('does not error if options is falsey', function(done) {
-    writeFile(outputPath, new Buffer(contents), null, function(err, fd) {
-      expect(err).toNotExist();
+  it('does not error if options is falsey', function (done) {
+    writeFile(outputPath, Buffer.from(contents), null, function (err, fd) {
+      expect(err).not.toEqual(expect.anything());
       expect(typeof fd === 'number').toEqual(true);
 
       fs.close(fd, done);
@@ -963,37 +966,35 @@ describe('writeFile', function() {
   });
 });
 
-describe('reflectStat', function() {
-
+describe('reflectStat', function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     mkdirp(outputBase, done);
   });
 
-  it('passes the error if stat fails', function(done) {
-
+  it('passes the error if stat fails', function (done) {
     var file = new File();
 
-    reflectStat(neInputDirpath, file, function(err) {
-      expect(err).toExist();
+    reflectStat(neInputDirpath, file, function (err) {
+      expect(err).toEqual(expect.anything());
 
       done();
     });
   });
 
-  it('updates the vinyl with filesystem stats', function(done) {
+  it('updates the vinyl with filesystem stats', function (done) {
     var file = new File();
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectStat(symlinkPath, file, function() {
+    reflectStat(symlinkPath, file, function () {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
-      fs.stat(symlinkPath, function(err, stat) {
+      fs.stat(symlinkPath, function (err, stat) {
         expect(file.stat).toEqual(stat);
 
         done();
@@ -1002,37 +1003,35 @@ describe('reflectStat', function() {
   });
 });
 
-describe('reflectLinkStat', function() {
-
+describe('reflectLinkStat', function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     mkdirp(outputBase, done);
   });
 
-  it('passes the error if lstat fails', function(done) {
-
+  it('passes the error if lstat fails', function (done) {
     var file = new File();
 
-    reflectLinkStat(neInputDirpath, file, function(err) {
-      expect(err).toExist();
+    reflectLinkStat(neInputDirpath, file, function (err) {
+      expect(err).toEqual(expect.anything());
 
       done();
     });
   });
 
-  it('updates the vinyl with filesystem symbolic stats', function(done) {
+  it('updates the vinyl with filesystem symbolic stats', function (done) {
     var file = new File();
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectLinkStat(symlinkPath, file, function() {
+    reflectLinkStat(symlinkPath, file, function () {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
-      fs.lstat(symlinkPath, function(err, stat) {
+      fs.lstat(symlinkPath, function (err, stat) {
         expect(file.stat).toEqual(stat);
 
         done();
@@ -1041,16 +1040,15 @@ describe('reflectLinkStat', function() {
   });
 });
 
-describe('updateMetadata', function() {
-
+describe('updateMetadata', function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     mkdirp(outputBase, done);
   });
 
-  afterEach(function(done) {
+  afterEach(function (done) {
     if (process.geteuid === noop) {
       delete process.geteuid;
     }
@@ -1058,7 +1056,7 @@ describe('updateMetadata', function() {
     done();
   });
 
-  it('passes the error if fstat fails', function(done) {
+  it('passes the error if fstat fails', function (done) {
     // Changing the time of a directory errors in Windows.
     // Changing the mode of a file is not supported by node.js in Windows.
     // Windows is treated as though it does not have permission to make these operations.
@@ -1076,14 +1074,14 @@ describe('updateMetadata', function() {
       stat: {},
     });
 
-    updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
+    updateMetadata(fd, file, function (err) {
+      expect(err).toEqual(expect.anything());
 
       done();
     });
   });
 
-  it('updates the vinyl object with fs stats', function(done) {
+  it('updates the vinyl object with fs stats', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -1099,9 +1097,9 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
     var stats = fs.fstatSync(fd);
 
-    updateMetadata(fd, file, function() {
+    updateMetadata(fd, file, function () {
       // Not sure why .toEqual doesn't match these
-      Object.keys(file.stat).forEach(function(key) {
+      Object.keys(file.stat).forEach(function (key) {
         expect(file.stat[key]).toEqual(stats[key]);
       });
 
@@ -1109,7 +1107,7 @@ describe('updateMetadata', function() {
     });
   });
 
-  it('does not touch the fs if nothing to update', function(done) {
+  it('does not touch the fs if nothing to update', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -1122,20 +1120,20 @@ describe('updateMetadata', function() {
       stat: {},
     });
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(0);
-      expect(futimesSpy.calls.length).toEqual(0);
+    updateMetadata(fd, file, function () {
+      expect(fchmodSpy.callCount).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
 
       fs.close(fd, done);
     });
   });
 
-  it('does not touch the fs if process is not owner of the file', function(done) {
+  it('does not touch the fs if process is not owner of the file', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -1156,27 +1154,27 @@ describe('updateMetadata', function() {
       },
     });
 
-    expect.spyOn(process, 'geteuid').andReturn(9002);
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    sinon.stub(process, 'geteuid').returns(9002);
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(0);
-      expect(futimesSpy.calls.length).toEqual(0);
+    updateMetadata(fd, file, function () {
+      expect(fchmodSpy.callCount).toEqual(0);
+      expect(futimesSpy.callCount).toEqual(0);
 
       fs.close(fd, done);
     });
   });
 
-  it('updates times on fs and vinyl object if there is a diff', function(done) {
+  it('updates times on fs and vinyl object if there is a diff', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
@@ -1196,12 +1194,12 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(futimesSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function () {
+      expect(futimesSpy.callCount).toEqual(1);
       // Var stats = fs.fstatSync(fd);
 
-      var atimeSpy = futimesSpy.calls[0].arguments[1];
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.getCall(0).args[1];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
       expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
@@ -1212,13 +1210,13 @@ describe('updateMetadata', function() {
     });
   });
 
-  it('forwards futimes error and descriptor upon error', function(done) {
+  it('forwards futimes error and descriptor upon error', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCall(mockError);
+    var futimesSpy = sinon.stub(fs, 'futimes').callsFake(mockError);
 
     var now = Date.now();
     var then = now - 1000;
@@ -1236,21 +1234,21 @@ describe('updateMetadata', function() {
     var fd = fs.openSync(outputPath, 'w+');
     expect(typeof fd === 'number').toEqual(true);
 
-    updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
-      expect(futimesSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function (err) {
+      expect(err).toEqual(expect.anything());
+      expect(futimesSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
   });
 
-  it('updates the mode on fs and vinyl object if there is a diff', function(done) {
+  it('updates the mode on fs and vinyl object if there is a diff', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var mode = applyUmask('777');
 
@@ -1265,8 +1263,8 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function () {
+      expect(fchmodSpy.callCount).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
@@ -1274,14 +1272,13 @@ describe('updateMetadata', function() {
     });
   });
 
-
-  it('updates the sticky bit on mode on fs and vinyl object if there is a diff', function(done) {
+  it('updates the sticky bit on mode on fs and vinyl object if there is a diff', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var mode = applyUmask('1777');
 
@@ -1296,8 +1293,8 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function () {
+      expect(fchmodSpy.callCount).toEqual(1);
       var stats = fs.fstatSync(fd);
       expect(file.stat.mode).toEqual(stats.mode);
 
@@ -1305,7 +1302,7 @@ describe('updateMetadata', function() {
     });
   });
 
-  it('forwards fchmod error and descriptor upon error', function(done) {
+  it('forwards fchmod error and descriptor upon error', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -1324,24 +1321,24 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(mockError);
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(mockError);
 
-    updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
-      expect(fchmodSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function (err) {
+      expect(err).toEqual(expect.anything());
+      expect(fchmodSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
   });
 
-  it('updates the mode & times on fs and vinyl object if there is a diff', function(done) {
+  it('updates the mode & times on fs and vinyl object if there is a diff', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCallThrough();
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var fchmodSpy = sinon.spy(fs, 'fchmod');
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
@@ -1364,12 +1361,12 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w+');
 
-    updateMetadata(fd, file, function() {
-      expect(fchmodSpy.calls.length).toEqual(1);
-      expect(futimesSpy.calls.length).toEqual(1);
+    updateMetadata(fd, file, function () {
+      expect(fchmodSpy.callCount).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
-      var atimeSpy = futimesSpy.calls[0].arguments[1];
-      var mtimeSpy = futimesSpy.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.getCall(0).args[1];
+      var mtimeSpy = futimesSpy.getCall(0).args[2];
 
       expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
       expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
@@ -1380,7 +1377,7 @@ describe('updateMetadata', function() {
     });
   });
 
-  it('forwards fchmod error and descriptor through futimes if there is a time diff', function(done) {
+  it('forwards fchmod error and descriptor through futimes if there is a time diff', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -1388,10 +1385,10 @@ describe('updateMetadata', function() {
 
     var mockedErr = new Error('mocked error');
 
-    var fchmodSpy = expect.spyOn(fs, 'fchmod').andCall(function(fd, mode, cb) {
+    var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(function (fd, mode, cb) {
       cb(mockedErr);
     });
-    var futimesSpy = expect.spyOn(fs, 'futimes').andCallThrough();
+    var futimesSpy = sinon.spy(fs, 'futimes');
 
     var now = Date.now();
     var then = now - 1000;
@@ -1410,11 +1407,11 @@ describe('updateMetadata', function() {
 
     var fd = fs.openSync(outputPath, 'w');
 
-    updateMetadata(fd, file, function(err) {
-      expect(err).toExist();
+    updateMetadata(fd, file, function (err) {
+      expect(err).toEqual(expect.anything());
       expect(err).toEqual(mockedErr);
-      expect(fchmodSpy.calls.length).toEqual(1);
-      expect(futimesSpy.calls.length).toEqual(1);
+      expect(fchmodSpy.callCount).toEqual(1);
+      expect(futimesSpy.callCount).toEqual(1);
 
       fs.close(fd, done);
     });
@@ -1423,32 +1420,35 @@ describe('updateMetadata', function() {
   // TODO: forward fchown error tests
 });
 
-describe('createWriteStream', function() {
+describeStreams('createWriteStream', function (stream) {
+  var from = stream.Readable.from;
+  var pipeline = stream.pipeline;
+
+  var streamUtils = testStreams(stream);
+  var chunks = streamUtils.chunks;
 
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     // For some reason, the outputDir sometimes exists on Windows
     // So we use our mkdirp to create it
     mkdirp(outputBase, done);
   });
 
-  it('accepts just a file path and writes to it', function(done) {
-
+  it('accepts just a file path and writes to it', function (done) {
     function assert(err) {
       var outputContents = fs.readFileSync(outputPath, 'utf8');
       expect(outputContents).toEqual(contents);
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      createWriteStream(outputPath),
-    ], assert);
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
   });
 
-  it('accepts just a file path and writes a large file to it', function(done) {
+  it('accepts just a file path and writes a large file to it', function (done) {
+    this.timeout(0);
+
     var size = 40000;
 
     function assert(err) {
@@ -1458,13 +1458,10 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      string(size),
-      createWriteStream(outputPath),
-    ], assert);
+    pipeline([chunks(size), createWriteStream(outputPath)], assert);
   });
 
-  it('accepts flags option', function(done) {
+  it('accepts flags option', function (done) {
     // Write 13 stars then 12345 because the length of expected is 13
     fs.writeFileSync(outputPath, '*************12345');
 
@@ -1474,14 +1471,17 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      // Replaces from the beginning of the file
-      createWriteStream(outputPath, { flags: 'r+' }),
-    ], assert);
+    pipeline(
+      [
+        from([contents]),
+        // Replaces from the beginning of the file
+        createWriteStream(outputPath, { flags: 'r+' }),
+      ],
+      assert
+    );
   });
 
-  it('accepts append flag as option & places cursor at the end', function(done) {
+  it('accepts append flag as option & places cursor at the end', function (done) {
     fs.writeFileSync(outputPath, '12345');
 
     function assert(err) {
@@ -1490,16 +1490,21 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      // Appends to the end of the file
-      createWriteStream(outputPath, { flags: 'a' }),
-    ], assert);
+    pipeline(
+      [
+        from([contents]),
+        // Appends to the end of the file
+        createWriteStream(outputPath, { flags: 'a' }),
+      ],
+      assert
+    );
   });
 
-  it('accepts mode option', function(done) {
+  it('accepts mode option', function (done) {
     if (isWindows) {
-      console.log('Changing the mode of a file is not supported by node.js in Windows.');
+      console.log(
+        'Changing the mode of a file is not supported by node.js in Windows.'
+      );
       this.skip();
       return;
     }
@@ -1511,13 +1516,13 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      createWriteStream(outputPath, { mode: mode }),
-    ], assert);
+    pipeline(
+      [from([contents]), createWriteStream(outputPath, { mode: mode })],
+      assert
+    );
   });
 
-  it('uses default file mode if no mode options', function(done) {
+  it('uses default file mode if no mode options', function (done) {
     var defaultMode = applyUmask(DEFAULT_FILE_MODE);
 
     function assert(err) {
@@ -1525,16 +1530,13 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      createWriteStream(outputPath),
-    ], assert);
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
   });
 
-  it('accepts a flush function that is called before close emitted', function(done) {
+  it('accepts a flush function that is called before close emitted', function (done) {
     var flushCalled = false;
 
-    var outStream = createWriteStream(outputPath, {}, function(fd, cb) {
+    var outStream = createWriteStream(outputPath, {}, function (fd, cb) {
       flushCalled = true;
       cb();
     });
@@ -1544,16 +1546,13 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      outStream,
-    ], assert);
+    pipeline([from([contents]), outStream], assert);
   });
 
-  it('can specify flush without options argument', function(done) {
+  it('can specify flush without options argument', function (done) {
     var flushCalled = false;
 
-    var outStream = createWriteStream(outputPath, function(fd, cb) {
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
       flushCalled = true;
       cb();
     });
@@ -1563,17 +1562,14 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      outStream,
-    ], assert);
+    pipeline([from([contents]), outStream], assert);
   });
 
-  it('passes the file descriptor to flush', function(done) {
+  it('passes the file descriptor to flush', function (done) {
     var flushCalled = false;
 
-    var outStream = createWriteStream(outputPath, function(fd, cb) {
-      expect(fd).toBeA('number');
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
+      expect(typeof fd).toEqual('number');
       flushCalled = true;
       cb();
     });
@@ -1583,19 +1579,16 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      outStream,
-    ], assert);
+    pipeline([from([contents]), outStream], assert);
   });
 
-  it('passes a callback to flush to call when work is done', function(done) {
+  it('passes a callback to flush to call when work is done', function (done) {
     var flushCalled = false;
     var timeoutCalled = false;
 
-    var outStream = createWriteStream(outputPath, function(fd, cb) {
+    var outStream = createWriteStream(outputPath, function (fd, cb) {
       flushCalled = true;
-      setTimeout(function() {
+      setTimeout(function () {
         timeoutCalled = true;
         cb();
       }, 250);
@@ -1607,38 +1600,32 @@ describe('createWriteStream', function() {
       done(err);
     }
 
-    pipe([
-      from([contents]),
-      outStream,
-    ], assert);
+    pipeline([from([contents]), outStream], assert);
   });
 
-  it('emits an error if open fails', function(done) {
+  it('emits an error if open fails', function (done) {
     var badOutputPath = path.join(outputBase, './non-exist/test.coffee');
 
     function assert(err) {
-      expect(err).toBeAn(Error);
+      expect(err).toBeInstanceOf(Error);
       done();
     }
 
-    pipe([
-      from([contents]),
-      createWriteStream(badOutputPath),
-    ], assert);
+    pipeline([from([contents]), createWriteStream(badOutputPath)], assert);
   });
 
-  it('emits an error if write fails', function(done) {
+  it('emits an error if write fails', function (done) {
     // Create the file so it can be opened with `r`
     fs.writeFileSync(outputPath, contents);
 
     function assert(err) {
-      expect(err).toBeAn(Error);
+      expect(err).toBeInstanceOf(Error);
       done();
     }
 
-    pipe([
-      from([contents]),
-      createWriteStream(outputPath, { flags: 'r' }),
-    ], assert);
+    pipeline(
+      [from([contents]), createWriteStream(outputPath, { flags: 'r' })],
+      assert
+    );
   });
 });
