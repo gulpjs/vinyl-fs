@@ -110,6 +110,16 @@ describeStreams('.src()', function (stream) {
     }
   });
 
+  it('supports arrays of globs', function (done) {
+    var cwd = path.relative(process.cwd(), __dirname);
+
+    var stream = vfs.src(['./fixtures/test.txt', './fixtures/bom-*.txt'], {
+      cwd: cwd,
+    });
+    expect(stream).toEqual(expect.anything());
+    done();
+  });
+
   it('emits an error on file not existing', function (done) {
     function assert(err) {
       expect(err).toEqual(expect.anything());
