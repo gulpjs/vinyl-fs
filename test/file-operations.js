@@ -1242,6 +1242,47 @@ describe('updateMetadata', function () {
     });
   });
 
+  it('sets stats to filesystem stats if futimes is not implemented (issue 302)', function (done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var futimesSpy = sinon.stub(fs, 'futimes').callsFake(function () {
+      var callback = arguments[arguments.length - 1];
+      var err = new Error('ENOSYS: function not implemented, futime');
+      err.errno = -109;
+      err.code = 'ENOSYS';
+      err.syscall = 'futime';
+      callback(err);
+    });
+
+    var fd = fs.openSync(outputPath, 'w+');
+    expect(typeof fd === 'number').toEqual(true);
+
+    var stat = fs.fstatSync(fd);
+
+    var file = new File({
+      base: outputBase,
+      path: outputPath,
+      contents: null,
+      stat: {
+        mtime: new Date(stat.mtime - 1000),
+        atime: new Date(stat.atime - 1000),
+      },
+    });
+
+    updateMetadata(fd, file, function (err) {
+      expect(err).not.toEqual(expect.anything());
+      expect(futimesSpy.callCount).toEqual(1);
+      // Times were updated to match the filesystem since futimes wasn't implemented
+      expect(file.stat.mtime).toEqual(stat.mtime);
+      expect(file.stat.atime).toEqual(stat.atime);
+
+      fs.close(fd, done);
+    });
+  });
+
   it('updates the mode on fs and vinyl object if there is a diff', function (done) {
     if (isWindows) {
       this.skip();
