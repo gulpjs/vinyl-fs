@@ -801,7 +801,7 @@ describeStreams('.src()', function (stream) {
     );
   });
 
-  it('does not pass options on to stream.Transform', function (done) {
+  it('does not pass options on to stream', function (done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = sinon.fake.returns(false);
 

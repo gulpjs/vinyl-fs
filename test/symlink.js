@@ -223,6 +223,51 @@ describeStreams('symlink stream', function (stream) {
     );
   });
 
+  it('will create symlinks with different names if property set in pipeline', function (done) {
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: null,
+    });
+
+    var renamed = 'renamed-symlink.txt';
+
+    function assert(files) {
+      var outputLink = fs.readlinkSync(path.join(outputBase, renamed));
+
+      expect(files.length).toEqual(1);
+      expect(files).toContain(file);
+      expect(files[0].base).toEqual(outputBase);
+      expect(files[0].path).toEqual(path.join(outputBase, renamed));
+      expect(files[0].symlink).toEqual(outputLink);
+      expect(files[0].isSymbolic()).toBe(true);
+      expect(outputLink).toEqual(inputPath);
+    }
+
+    pipeline(
+      [
+        from([file]),
+        new stream.Transform({
+          objectMode: true,
+          transform: function (file, enc, cb) {
+            if (typeof enc === 'function') {
+              cb = enc;
+            }
+
+            // User can stash the file.path on the symlink before they rename the file
+            file.symlink = file.path;
+            // Then they can rename the file
+            file.basename = renamed;
+            cb(null, file);
+          },
+        }),
+        vfs.symlink(outputBase),
+        concatArray(assert),
+      ],
+      done
+    );
+  });
+
   it('creates a link for a file with streaming contents', function (done) {
     var file = new File({
       base: inputBase,
@@ -971,7 +1016,7 @@ describeStreams('symlink stream', function (stream) {
     });
   });
 
-  it('does not pass options on to through2', function (done) {
+  it('does not pass options on to stream', function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
