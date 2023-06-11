@@ -628,6 +628,24 @@ describeStreams('.src()', function (stream) {
     );
   });
 
+  it('supports glob negation with ../ paths (issue 306)', function (done) {
+    var cwd = path.relative(process.cwd(), __dirname);
+
+    function assert(files) {
+      expect(files.length).toEqual(4);
+    }
+
+    pipeline(
+      [
+        vfs.src(['../test/fixtures/*.txt', '!../test/fixtures/bom-*.txt'], {
+          cwd: cwd,
+        }),
+        concatArray(assert),
+      ],
+      done
+    );
+  });
+
   // TODO: need to normalize the path of a directory vinyl object
   it('globs a directory with default settings', function (done) {
     var inputDirGlob = path.join(inputBase, './f*/');
