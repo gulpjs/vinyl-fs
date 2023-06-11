@@ -14,12 +14,14 @@ var testConstants = require('./utils/test-constants');
 var describeStreams = require('./utils/suite');
 
 var base = testConstants.outputBase;
+var inputPath = testConstants.inputPath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
 var inputBase = path.join(base, './in/');
 var inputGlob = path.join(inputBase, './*.txt');
 var outputBase = path.join(base, './out/');
+var outputPath = path.join(outputBase, './test.txt');
 var outputSymlink = path.join(symlinkDirpath, './foo');
 var outputDirpathSymlink = path.join(outputDirpath, './foo');
 var content = testConstants.contents;
@@ -27,6 +29,7 @@ var content = testConstants.contents;
 var clean = cleanup(base);
 
 describeStreams('integrations', function (stream) {
+  var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
   var streamUtils = testStreams(stream);
@@ -202,6 +205,34 @@ describeStreams('integrations', function (stream) {
         concatArray(assert),
       ],
       done
+    );
+  });
+
+  it('can re-assign contents to a well-behaving stream as per issue #310', function (done) {
+    var contents = ['something', ' ', 'else'];
+
+    function assert() {
+      expect(fs.readFileSync(outputPath).toString()).toEqual(contents.join(''));
+      done();
+    }
+
+    pipeline(
+      [
+        vfs.src(inputPath),
+        new stream.Transform({
+          objectMode: true,
+          transform: function (file, enc, cb) {
+            if (typeof enc === 'function') {
+              cb = enc;
+            }
+
+            file.contents = from(contents);
+            cb(null, file);
+          },
+        }),
+        vfs.dest(outputBase),
+      ],
+      assert
     );
   });
 });
