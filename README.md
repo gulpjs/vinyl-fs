@@ -127,7 +127,7 @@ Default: `true`
 
 Whether or not you want globs to match on dot files (e.g. `.gitignore`).
 
-__Note: This option is not resolved from a function because it is passed verbatim to node-glob.__
+__Note: This option is not resolved from a function because it is passed verbatim to anymatch.__
 
 Type: `Boolean`
 
@@ -135,7 +135,7 @@ Default: `false`
 
 ##### other
 
-Any glob-related options are documented in [glob-stream] and [node-glob] and are forwarded verbatim.
+Any glob-related options are documented in [glob-stream] and [anymatch] and are forwarded verbatim.
 
 ### `dest(folder[, options])`
 
@@ -357,7 +357,7 @@ MIT
 <!-- prettier-ignore-start -->
 [symbolic-caveats]: #symbolic-links-on-windows
 [glob-stream]: https://github.com/gulpjs/glob-stream
-[node-glob]: https://github.com/isaacs/node-glob
-[vinyl]: https://github.com/wearefractal/vinyl
+[anymatch]: https://github.com/micromatch/anymatch
+[vinyl]: https://github.com/gulpjs/vinyl
 [iconv-lite]: https://github.com/ashtuchkin/iconv-lite
 <!-- prettier-ignore-end -->
