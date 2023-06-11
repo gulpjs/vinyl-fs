@@ -707,12 +707,9 @@ describeStreams('.src()', function (stream) {
 
       var stat = fs.statSync(renamedPath);
 
-      var lastMtime = new Date(+stat.mtime);
-      var lastCtime = new Date(+stat.ctime);
+      expect(+stat.ctime).toBeGreaterThan(+stat.mtime);
 
-      expect(lastCtime.getMilliseconds()).toBeGreaterThan(
-        lastMtime.getMilliseconds()
-      );
+      var lastMtime = new Date(+stat.mtime);
 
       function assert(files) {
         expect(files.length).toEqual(1);
