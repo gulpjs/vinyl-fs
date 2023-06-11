@@ -705,7 +705,14 @@ describeStreams('.src()', function (stream) {
       // rename changes ctime but not mtime
       fs.renameSync(outputPath, renamedPath);
 
-      var lastMtime = new Date(+fs.statSync(renamedPath).mtime);
+      var stat = fs.statSync(renamedPath);
+
+      var lastMtime = new Date(+stat.mtime);
+      var lastCtime = new Date(+stat.ctime);
+
+      expect(lastCtime.getMilliseconds()).toBeGreaterThan(
+        lastMtime.getMilliseconds()
+      );
 
       function assert(files) {
         expect(files.length).toEqual(1);
