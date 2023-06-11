@@ -699,19 +699,21 @@ describeStreams('.src()', function (stream) {
     fs.mkdirSync(outputBase);
     fs.copyFileSync(inputPath, outputPath);
 
-    setTimeout(function () {
-      // chmod changes ctime but not mtime
-      fs.chmodSync(outputPath, parseInt('666', 8));
+    var renamedPath = path.join(outputBase, 'foo.txt');
 
-      var lastMtime = new Date(+fs.statSync(outputPath).mtime);
+    setTimeout(function () {
+      // rename changes ctime but not mtime
+      fs.renameSync(outputPath, renamedPath);
+
+      var lastMtime = new Date(+fs.statSync(renamedPath).mtime);
 
       function assert(files) {
         expect(files.length).toEqual(1);
-        expect(files[0].path).toEqual(outputPath);
+        expect(files[0].path).toEqual(renamedPath);
       }
 
       pipeline(
-        [vfs.src(outputPath, { since: lastMtime }), concatArray(assert)],
+        [vfs.src(renamedPath, { since: lastMtime }), concatArray(assert)],
         done
       );
     }, 250);
