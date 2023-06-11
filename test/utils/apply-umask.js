@@ -5,7 +5,7 @@ function applyUmask(mode) {
     mode = parseInt(mode, 8);
   }
 
-  return (mode & ~process.umask());
+  return mode & ~process.umask();
 }
 
 module.exports = applyUmask;

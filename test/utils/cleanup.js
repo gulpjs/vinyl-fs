@@ -4,7 +4,7 @@ var rimraf = require('rimraf');
 var sinon = require('sinon');
 
 function cleanup(glob) {
-  return function(cb) {
+  return function (cb) {
     this.timeout(0);
 
     sinon.restore();

@@ -1,7 +1,7 @@
 'use strict';
 
 function always(value) {
-  return function() {
+  return function () {
     return value;
   };
 }

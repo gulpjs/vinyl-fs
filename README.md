@@ -24,12 +24,13 @@ While Vinyl provides a clean way to describe a file, we now need a way to access
 var map = require('map-stream');
 var vfs = require('vinyl-fs');
 
-var log = function(file, cb) {
+var log = function (file, cb) {
   console.log(file.path);
   cb(null, file);
 };
 
-vfs.src(['./js/**/*.js', '!./js/vendor/*.js'])
+vfs
+  .src(['./js/**/*.js', '!./js/vendor/*.js'])
   .pipe(map(log))
   .pipe(vfs.dest('./output'));
 ```
@@ -41,7 +42,7 @@ vfs.src(['./js/**/*.js', '!./js/vendor/*.js'])
 Takes a glob string or an array of glob strings as the first argument and an options object as the second.
 Returns a stream of [vinyl] `File` objects.
 
-__Note: UTF-8 BOM will be removed from all UTF-8 files read with `.src` unless disabled in the options.__
+**Note: UTF-8 BOM will be removed from all UTF-8 files read with `.src` unless disabled in the options.**
 
 #### Globs
 
@@ -50,13 +51,13 @@ Globs are executed in order, so negations should follow positive globs.
 For example:
 
 ```js
-fs.src(['!b*', '*'])
+fs.src(['!b*', '*']);
 ```
 
 would not exclude any files, but the following would exclude all files starting with "b":
 
 ```js
-fs.src(['*', '!b*'])
+fs.src(['*', '!b*']);
 ```
 
 #### Options
@@ -109,7 +110,7 @@ Default: `'utf8'`
 
 ##### `options.sourcemaps`
 
-Enables sourcemap support on files passed through the stream.  Will load inline sourcemaps and resolve sourcemap links from files.
+Enables sourcemap support on files passed through the stream. Will load inline sourcemaps and resolve sourcemap links from files.
 
 Type: `Boolean`
 
@@ -127,7 +128,7 @@ Default: `true`
 
 Whether or not you want globs to match on dot files (e.g. `.gitignore`).
 
-__Note: This option is not resolved from a function because it is passed verbatim to anymatch.__
+**Note: This option is not resolved from a function because it is passed verbatim to anymatch.**
 
 Type: `Boolean`
 
@@ -145,16 +146,17 @@ Returns a stream that accepts [vinyl] `File` objects, writes them to disk at the
 Once the file is written to disk, an attempt is made to determine if the `stat.mode`, `stat.mtime` and `stat.atime` of the [vinyl] `File` object differ from the file on the filesystem.
 If they differ and the running process owns the file, the corresponding filesystem metadata is updated.
 If they don't differ or the process doesn't own the file, the attempt is skipped silently.
-__This functionality is disabled on Windows operating systems or any other OS that doesn't support `process.getuid` or `process.geteuid` in node. This is due to Windows having very unexpected results through usage of `fs.fchmod` and `fs.futimes`.__
+**This functionality is disabled on Windows operating systems or any other OS that doesn't support `process.getuid` or `process.geteuid` in node. This is due to Windows having very unexpected results through usage of `fs.fchmod` and `fs.futimes`.**
 
-__Note: The `fs.futimes()` method internally converts `stat.mtime` and `stat.atime` timestamps to seconds; this division by `1000` may cause some loss of precision in 32-bit Node.js.__
+**Note: The `fs.futimes()` method internally converts `stat.mtime` and `stat.atime` timestamps to seconds; this division by `1000` may cause some loss of precision in 32-bit Node.js.**
 
 If the file has a `symlink` attribute specifying a target path, then a symlink will be created.
 
-__Note: The file will be modified after being written to this stream.__
-  - `cwd`, `base`, and `path` will be overwritten to match the folder.
-  - `stat` will be updated to match the file on the filesystem.
-  - `contents` will have it's position reset to the beginning if it is a stream.
+**Note: The file will be modified after being written to this stream.**
+
+- `cwd`, `base`, and `path` will be overwritten to match the folder.
+- `stat` will be updated to match the file on the filesystem.
+- `contents` will have it's position reset to the beginning if it is a stream.
 
 #### Options
 
@@ -214,7 +216,7 @@ Default: `'utf8'`.
 
 ##### `options.sourcemaps`
 
-Enables sourcemap support on files passed through the stream.  Will write inline soucemaps if specified as `true`.
+Enables sourcemap support on files passed through the stream. Will write inline soucemaps if specified as `true`.
 Specifying a `String` path will write external sourcemaps at the given path.
 
 Examples:
@@ -235,7 +237,7 @@ Default: `undefined` (do not write sourcemaps)
 
 When creating a symlink, whether or not the created symlink should be relative. If `false`, the symlink will be absolute.
 
-__Note: This option will be ignored if a `junction` is being created, as they must be absolute.__
+**Note: This option will be ignored if a `junction` is being created, as they must be absolute.**
 
 Type: `Boolean`
 
@@ -255,13 +257,14 @@ Default: `true`
 Takes a folder path string or a function as the first argument and an options object as the second. If given a function, it will be called with each [vinyl] `File` object and must return a folder path.
 Returns a stream that accepts [vinyl] `File` objects, creates a symbolic link (i.e. symlink) at the folder/cwd specified, and passes them downstream so you can keep piping these around.
 
-__Note: The file will be modified after being written to this stream.__
-  - `cwd`, `base`, and `path` will be overwritten to match the folder.
-  - `stat` will be updated to match the symlink on the filesystem.
-  - `contents` will be set to `null`.
-  - `symlink` will be added or replaced to be the original path.
+**Note: The file will be modified after being written to this stream.**
 
-__Note: On Windows, directory links are created using Junctions by default. Use the `useJunctions` option to disable this behavior.__
+- `cwd`, `base`, and `path` will be overwritten to match the folder.
+- `stat` will be updated to match the symlink on the filesystem.
+- `contents` will be set to `null`.
+- `symlink` will be added or replaced to be the original path.
+
+**Note: On Windows, directory links are created using Junctions by default. Use the `useJunctions` option to disable this behavior.**
 
 #### Options
 
@@ -296,7 +299,7 @@ Default: `true` (always overwrite existing files)
 
 Whether or not the created symlinks should be relative. If `false`, the symlink will be absolute.
 
-__Note: This option will be ignored if a `junction` is being created, as they must be absolute.__
+**Note: This option will be ignored if a `junction` is being created, as they must be absolute.**
 
 Type: `Boolean`
 
