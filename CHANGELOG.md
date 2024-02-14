@@ -10,6 +10,7 @@
 * Consider the greater of ctime & mtime when comparing since option (#340)
 * Normalize repository, dropping node <10.13 support
 * Switch stream implementation to streamx (#333)
+* Default to `utf8` decoding and encoding. Add `encoding` option to change (#287)
 
 ### Features
 
@@ -19,7 +20,7 @@
 * Replace lazystream with streamx Composer ([#344](https://www.github.com/gulpjs/vinyl-fs/issues/344)) ([a80dae3](https://www.github.com/gulpjs/vinyl-fs/commit/a80dae30d7fb1c0f51acc00170648792f740b54b))
 * Switch stream implementation to streamx ([#333](https://www.github.com/gulpjs/vinyl-fs/issues/333)) ([910c8a5](https://www.github.com/gulpjs/vinyl-fs/commit/910c8a521834d5aa9dec5a83102b59ba5c531e08))
 * Test against streams from core, streamx, and readable-stream ([910c8a5](https://www.github.com/gulpjs/vinyl-fs/commit/910c8a521834d5aa9dec5a83102b59ba5c531e08))
-
+* Default to `utf8` decoding and encoding. Add `encoding` option to change (#287)
 
 ### Bug Fixes
 
