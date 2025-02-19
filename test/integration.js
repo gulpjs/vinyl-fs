@@ -25,6 +25,7 @@ var outputPath = path.join(outputBase, './test.txt');
 var outputSymlink = path.join(symlinkDirpath, './foo');
 var outputDirpathSymlink = path.join(outputDirpath, './foo');
 var content = testConstants.contents;
+var ranBomInputPath = testConstants.ranBomInputPath;
 
 var clean = cleanup(base);
 
@@ -233,6 +234,27 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputBase),
       ],
       assert
+    );
+  });
+
+  it('preserves binary file contents when streaming without encoding', function (done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var outputPath = path.join(outputBase, './ranbom.bin');
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(expectedContents);
+    }
+
+    pipeline(
+      [
+        vfs.src(ranBomInputPath, { encoding: false, buffer: false }),
+        vfs.dest(outputBase),
+        concatArray(assert),
+      ],
+      done
     );
   });
 });
