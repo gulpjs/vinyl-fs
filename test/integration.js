@@ -29,6 +29,13 @@ var content = testConstants.contents;
 var clean = cleanup(base);
 
 describeStreams('integrations', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 

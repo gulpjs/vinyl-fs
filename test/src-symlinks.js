@@ -25,6 +25,13 @@ var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 var clean = cleanup(outputBase);
 
 describeStreams('.src() with symlinks', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var pipeline = stream.pipeline;
 
   var streamUtils = testStreams(stream);

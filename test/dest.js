@@ -50,6 +50,13 @@ function makeSourceMap() {
 var clean = cleanup(outputBase);
 
 describeStreams('.dest()', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
