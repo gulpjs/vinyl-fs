@@ -5,7 +5,6 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -802,6 +801,13 @@ describeStreams('.src()', function (stream) {
   });
 
   it('does not pass options on to stream', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = sinon.fake.returns(false);
 

@@ -3,7 +3,6 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -299,6 +298,13 @@ describeStreams('.dest() with custom modes', function (stream) {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var expectedMode = applyUmask('777');
@@ -326,6 +332,13 @@ describeStreams('.dest() with custom modes', function (stream) {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var fchmodSpy = sinon.spy(fs, 'fchmod');
 
@@ -358,6 +371,13 @@ describeStreams('.dest() with custom modes', function (stream) {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var expectedMode = applyUmask('722');
 
