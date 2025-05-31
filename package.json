@@ -36,7 +36,7 @@
     "streamx": "^2.14.0",
     "to-through": "^3.0.0",
     "value-or-function": "^4.0.0",
-    "vinyl": "^3.0.0",
+    "vinyl": "^3.0.1",
     "vinyl-sourcemap": "^2.0.0"
   },
   "devDependencies": {
