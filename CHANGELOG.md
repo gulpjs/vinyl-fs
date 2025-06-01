@@ -1,5 +1,13 @@
 # Changelog
 
+### [4.0.1](https://www.github.com/gulpjs/vinyl-fs/compare/v4.0.0...v4.0.1) (2025-06-01)
+
+
+### Bug Fixes
+
+* Avoid Node.js deprecation warning for `fs.Stats` ([#358](https://www.github.com/gulpjs/vinyl-fs/issues/358)) ([3ed0c3f](https://www.github.com/gulpjs/vinyl-fs/commit/3ed0c3f104fec5f05ffc68f198fdc0aae7a68efe))
+* Avoid transcoding streaming output with default options ([#360](https://www.github.com/gulpjs/vinyl-fs/issues/360)) ([7b6dcd3](https://www.github.com/gulpjs/vinyl-fs/commit/7b6dcd3561cee6cae2e90ae9096cb1ca31953db5))
+
 ## [4.0.0](https://www.github.com/gulpjs/vinyl-fs/compare/v3.0.3...v4.0.0) (2023-06-11)
 
 
