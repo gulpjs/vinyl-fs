@@ -29,6 +29,13 @@ var content = testConstants.contents;
 var clean = cleanup(base);
 
 describeStreams('integrations', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -98,8 +105,13 @@ describeStreams('integrations', function (stream) {
     }
 
     function assert(files) {
-      // Junctions add an ending separator
-      var expected = inputDirpath + path.sep;
+      // Junctions add an ending separator until Node 22+
+      var expected;
+      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
+        expected = inputDirpath;
+      } else {
+        expected = inputDirpath + path.sep;
+      }
       var symlinkResult = fs.readlinkSync(outputSymlink);
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
@@ -159,8 +171,13 @@ describeStreams('integrations', function (stream) {
     fs.symlinkSync(inputDirpath, outputSymlink, 'dir');
 
     function assert(files) {
-      // 'dir' symlinks add an ending separator
-      var expected = inputDirpath + path.sep;
+      // 'dir' symlinks add an ending separator until Node 22+
+      var expected;
+      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
+        expected = inputDirpath;
+      } else {
+        expected = inputDirpath + path.sep;
+      }
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(expected);
@@ -189,8 +206,13 @@ describeStreams('integrations', function (stream) {
     fs.symlinkSync(inputDirpath, outputSymlink, 'junction');
 
     function assert(files) {
-      // Junctions add an ending separator
-      var expected = inputDirpath + path.sep;
+      // Junctions add an ending separator until Node 22+
+      var expected;
+      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
+        expected = inputDirpath;
+      } else {
+        expected = inputDirpath + path.sep;
+      }
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(expected);

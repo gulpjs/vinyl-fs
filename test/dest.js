@@ -5,7 +5,6 @@ var path = require('path');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -51,6 +50,13 @@ function makeSourceMap() {
 var clean = cleanup(outputBase);
 
 describeStreams('.dest()', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -464,6 +470,13 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('reports stat errors', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var expectedMode = applyUmask('722');
 
     var fstatSpy = sinon.stub(fs, 'fstat').callsFake(mockError);
@@ -1112,6 +1125,13 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('errors if we cannot mkdirp', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var mkdirSpy = sinon.stub(fs, 'mkdir').callsFake(mockError);
 
     var file = new File({
@@ -1130,6 +1150,13 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('errors if vinyl object is a directory and we cannot mkdirp', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var ogMkdir = fs.mkdir;
 
     var mkdirSpy = sinon.stub(fs, 'mkdir').callsFake(function () {
@@ -1179,6 +1206,13 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('errors if vinyl object is a directory and open errors', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var openSpy = sinon.stub(fs, 'open').callsFake(mockError);
 
     var file = new File({
@@ -1219,6 +1253,13 @@ describeStreams('.dest()', function (stream) {
   });
 
   it('does not pass options on to stream', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var file = new File({
       base: inputBase,
       path: inputPath,

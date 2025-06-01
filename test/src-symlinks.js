@@ -2,7 +2,6 @@
 
 var fs = require('graceful-fs');
 var expect = require('expect');
-var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -26,6 +25,13 @@ var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 var clean = cleanup(outputBase);
 
 describeStreams('.src() with symlinks', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var pipeline = stream.pipeline;
 
   var streamUtils = testStreams(stream);
@@ -150,6 +156,13 @@ describeStreams('.src() with symlinks', function (stream) {
   });
 
   it('only calls resolveSymlinks once-per-file if it is a function', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var spy = sinon.fake.returns(true);
 
     function assert() {

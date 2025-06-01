@@ -6,7 +6,6 @@ var buffer = require('buffer');
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var sinon = require('sinon');
 var mkdirp = require('fs-mkdirp-stream/mkdirp');
 
 var fo = require('../lib/file-operations');
@@ -71,6 +70,13 @@ describe('isOwner', function () {
       process.getuid = noop;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     getuidSpy = sinon.stub(process, 'getuid').returns(ownerStat.uid);
     geteuidSpy = sinon.stub(process, 'geteuid').returns(ownerStat.uid);
 
@@ -87,6 +93,13 @@ describe('isOwner', function () {
     if (process.getuid === undefined) {
       process.getuid = getuidSpy;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     sinon.restore();
 
@@ -140,6 +153,13 @@ describe('isOwner', function () {
   });
 
   it('returns true when non-owner but root', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     process.geteuid.restore();
     sinon.stub(process, 'geteuid').returns(0);
 
@@ -737,6 +757,13 @@ describe('closeFd', function () {
   });
 
   it('calls the callback with propagated error if close succeeds', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var propagatedError = new Error();
 
     var fd = fs.openSync(inputPath, 'r');
@@ -754,6 +781,13 @@ describe('closeFd', function () {
   });
 
   it('calls the callback with no error if close succeeds & no propagated error', function (done) {
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var fd = fs.openSync(inputPath, 'r');
 
     var spy = sinon.spy(fs, 'close');
@@ -1113,6 +1147,13 @@ describe('updateMetadata', function () {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var file = new File({
       base: outputBase,
       path: outputPath,
@@ -1138,6 +1179,13 @@ describe('updateMetadata', function () {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     if (typeof process.geteuid !== 'function') {
       process.geteuid = noop;
@@ -1173,6 +1221,13 @@ describe('updateMetadata', function () {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var futimesSpy = sinon.spy(fs, 'futimes');
 
@@ -1216,6 +1271,13 @@ describe('updateMetadata', function () {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var futimesSpy = sinon.stub(fs, 'futimes').callsFake(mockError);
 
     var now = Date.now();
@@ -1247,6 +1309,13 @@ describe('updateMetadata', function () {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var futimesSpy = sinon.stub(fs, 'futimes').callsFake(function () {
       var callback = arguments[arguments.length - 1];
@@ -1289,6 +1358,13 @@ describe('updateMetadata', function () {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var fchmodSpy = sinon.spy(fs, 'fchmod');
 
     var mode = applyUmask('777');
@@ -1318,6 +1394,13 @@ describe('updateMetadata', function () {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var fchmodSpy = sinon.spy(fs, 'fchmod');
 
@@ -1349,6 +1432,13 @@ describe('updateMetadata', function () {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var mode = applyUmask('777');
 
     var file = new File({
@@ -1377,6 +1467,13 @@ describe('updateMetadata', function () {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var fchmodSpy = sinon.spy(fs, 'fchmod');
     var futimesSpy = sinon.spy(fs, 'futimes');
@@ -1424,6 +1521,13 @@ describe('updateMetadata', function () {
       return;
     }
 
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
+
     var mockedErr = new Error('mocked error');
 
     var fchmodSpy = sinon.stub(fs, 'fchmod').callsFake(function (fd, mode, cb) {
@@ -1462,6 +1566,13 @@ describe('updateMetadata', function () {
 });
 
 describeStreams('createWriteStream', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 

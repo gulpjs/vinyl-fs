@@ -1,13 +1,16 @@
 'use strict';
 
 var rimraf = require('rimraf');
-var sinon = require('sinon');
 
 function cleanup(glob) {
   return function (cb) {
     this.timeout(0);
 
-    sinon.restore();
+    if (!process.versions.node.startsWith("10.") && !process.versions.node.startsWith("12.")) {
+      var sinon = require('sinon');
+
+      sinon.restore();
+    }
 
     if (!glob) {
       return cb();

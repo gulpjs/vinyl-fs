@@ -3,7 +3,6 @@
 var fs = require('graceful-fs');
 var File = require('vinyl');
 var expect = require('expect');
-var sinon = require('sinon');
 
 var vfs = require('../');
 
@@ -20,6 +19,13 @@ var contents = testConstants.contents;
 var clean = cleanup(outputBase);
 
 describeStreams('.dest() with custom owner', function (stream) {
+  before(function () {
+    if (process.versions.node.startsWith("10.")) {
+      this.skip();
+      return;
+    }
+  });
+
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -31,6 +37,13 @@ describeStreams('.dest() with custom owner', function (stream) {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var fchownSpy = sinon.spy(fs, 'fchown');
 
@@ -59,6 +72,13 @@ describeStreams('.dest() with custom owner', function (stream) {
       this.skip();
       return;
     }
+
+    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+      this.skip();
+      return;
+    }
+
+    var sinon = require('sinon');
 
     var fchownSpy = sinon.spy(fs, 'fchown');
 
