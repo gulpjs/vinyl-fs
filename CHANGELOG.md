@@ -1,5 +1,12 @@
 # Changelog
 
+### [4.0.2](https://www.github.com/gulpjs/vinyl-fs/compare/v4.0.1...v4.0.2) (2025-06-01)
+
+
+### Bug Fixes
+
+* Avoid globbing before read stream is opened ([#362](https://www.github.com/gulpjs/vinyl-fs/issues/362)) ([a13a79a](https://www.github.com/gulpjs/vinyl-fs/commit/a13a79ae67beecf32d0121153a08333bae69fa17))
+
 ### [4.0.1](https://www.github.com/gulpjs/vinyl-fs/compare/v4.0.0...v4.0.1) (2025-06-01)
 
 
