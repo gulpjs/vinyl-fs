@@ -697,6 +697,31 @@ describeStreams('.dest()', function (stream) {
     );
   });
 
+  it('does not do any transcoding with encoding defaulted (buffer)', function (done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: expectedContents,
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(expectedContents);
+    }
+
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase),
+        concatArray(assert),
+      ],
+      done
+    );
+  });
+
   it('does not do any transcoding with encoding option set to false (buffer)', function (done) {
     var expectedContents = fs.readFileSync(ranBomInputPath);
     var file = new File({
@@ -716,6 +741,31 @@ describeStreams('.dest()', function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { encoding: false }),
+        concatArray(assert),
+      ],
+      done
+    );
+  });
+
+  it('does not do any transcoding with encoding defaulted (stream)', function (done) {
+    var expectedContents = fs.readFileSync(ranBomInputPath);
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: fs.createReadStream(ranBomInputPath),
+    });
+
+    function assert(files) {
+      var outputContents = fs.readFileSync(outputPath);
+
+      expect(files.length).toEqual(1);
+      expect(outputContents).toEqual(expectedContents);
+    }
+
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase),
         concatArray(assert),
       ],
       done
