@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-var expect = require('expect');
+var expect = require("expect");
 
 module.exports = function makeUtils(stream) {
   function chunks(length) {
     var arr = new Array(length);
-    arr.fill('a');
+    arr.fill("a");
     return stream.Readable.from(arr);
   }
 
@@ -13,7 +13,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Transform({
       objectMode: true,
       transform: function (file, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
 
@@ -27,7 +27,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Transform({
       objectMode: true,
       transform: function (file, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
 
@@ -42,7 +42,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Transform({
       objectMode: true,
       transform: function (file, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
 
@@ -61,7 +61,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Writable({
       objectMode: true,
       write: function (file, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
 
@@ -79,11 +79,11 @@ module.exports = function makeUtils(stream) {
   }
 
   function concatString(fn, timeout) {
-    var collect = '';
+    var collect = "";
     return new stream.Writable({
       objectMode: true,
       write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
         setTimeout(function () {
@@ -92,7 +92,7 @@ module.exports = function makeUtils(stream) {
         }, timeout || 1);
       },
       final: function (cb) {
-        if (typeof fn === 'function') {
+        if (typeof fn === "function") {
           fn(collect);
         }
 
@@ -106,7 +106,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Writable({
       objectMode: true,
       write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
         setTimeout(function () {
@@ -115,7 +115,7 @@ module.exports = function makeUtils(stream) {
         }, timeout || 1);
       },
       final: function (cb) {
-        if (typeof fn === 'function') {
+        if (typeof fn === "function") {
           fn(collect);
         }
 
@@ -129,7 +129,7 @@ module.exports = function makeUtils(stream) {
     return new stream.Writable({
       objectMode: true,
       write: function (chunk, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
         setTimeout(function () {
@@ -138,7 +138,7 @@ module.exports = function makeUtils(stream) {
         }, timeout || 1);
       },
       final: function (cb) {
-        if (typeof fn === 'function') {
+        if (typeof fn === "function") {
           fn(collect);
         }
 
@@ -151,14 +151,14 @@ module.exports = function makeUtils(stream) {
     return new stream.Transform({
       objectMode: true,
       transform: function (file, enc, cb) {
-        if (typeof enc === 'function') {
+        if (typeof enc === "function") {
           cb = enc;
         }
         stream.pipeline(
           [file.contents, concatBuffer(comparator)],
           function (err) {
             cb(err, file);
-          }
+          },
         );
       },
     });
@@ -167,7 +167,7 @@ module.exports = function makeUtils(stream) {
   function fromError(error) {
     return new stream.Readable({
       read: function (cb) {
-        if (typeof cb === 'function') {
+        if (typeof cb === "function") {
           cb(error);
         } else {
           this.destroy(error);

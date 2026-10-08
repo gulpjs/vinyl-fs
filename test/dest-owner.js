@@ -1,15 +1,15 @@
-'use strict';
+"use strict";
 
-var fs = require('graceful-fs');
-var File = require('vinyl');
-var expect = require('expect');
+var fs = require("graceful-fs");
+var File = require("vinyl");
+var expect = require("expect");
 
-var vfs = require('../');
+var vfs = require("../");
 
-var cleanup = require('./utils/cleanup');
-var isWindows = require('./utils/is-windows');
-var testConstants = require('./utils/test-constants');
-var describeStreams = require('./utils/suite');
+var cleanup = require("./utils/cleanup");
+var isWindows = require("./utils/is-windows");
+var testConstants = require("./utils/test-constants");
+var describeStreams = require("./utils/suite");
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -18,7 +18,7 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describeStreams('.dest() with custom owner', function (stream) {
+describeStreams(".dest() with custom owner", function (stream) {
   before(function () {
     if (process.versions.node.startsWith("10.")) {
       this.skip();
@@ -32,20 +32,23 @@ describeStreams('.dest() with custom owner', function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it('calls fchown when the uid and/or gid are provided on the vinyl stat', function (done) {
+  it("calls fchown when the uid and/or gid are provided on the vinyl stat", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+    if (
+      process.versions.node.startsWith("10.") ||
+      process.versions.node.startsWith("12.")
+    ) {
       this.skip();
       return;
     }
 
-    var sinon = require('sinon');
+    var sinon = require("sinon");
 
-    var fchownSpy = sinon.spy(fs, 'fchown');
+    var fchownSpy = sinon.spy(fs, "fchown");
 
     var file = new File({
       base: inputBase,
@@ -67,20 +70,23 @@ describeStreams('.dest() with custom owner', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it('does not call fchown when the uid and gid provided on the vinyl stat are invalid', function (done) {
+  it("does not call fchown when the uid and gid provided on the vinyl stat are invalid", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
+    if (
+      process.versions.node.startsWith("10.") ||
+      process.versions.node.startsWith("12.")
+    ) {
       this.skip();
       return;
     }
 
-    var sinon = require('sinon');
+    var sinon = require("sinon");
 
-    var fchownSpy = sinon.spy(fs, 'fchown');
+    var fchownSpy = sinon.spy(fs, "fchown");
 
     var file = new File({
       base: inputBase,

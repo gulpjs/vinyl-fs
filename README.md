@@ -21,8 +21,8 @@ While Vinyl provides a clean way to describe a file, we now need a way to access
 ## Usage
 
 ```javascript
-var map = require('map-stream');
-var vfs = require('vinyl-fs');
+var map = require("map-stream");
+var vfs = require("vinyl-fs");
 
 var log = function (file, cb) {
   console.log(file.path);
@@ -30,9 +30,9 @@ var log = function (file, cb) {
 };
 
 vfs
-  .src(['./js/**/*.js', '!./js/vendor/*.js'])
+  .src(["./js/**/*.js", "!./js/vendor/*.js"])
   .pipe(map(log))
-  .pipe(vfs.dest('./output'));
+  .pipe(vfs.dest("./output"));
 ```
 
 ## API
@@ -51,13 +51,13 @@ Globs are executed in order, so negations should follow positive globs.
 For example:
 
 ```js
-fs.src(['!b*', '*']);
+fs.src(["!b*", "*"]);
 ```
 
 would not exclude any files, but the following would exclude all files starting with "b":
 
 ```js
-fs.src(['*', '!b*']);
+fs.src(["*", "!b*"]);
 ```
 
 #### Options
@@ -223,10 +223,10 @@ Examples:
 
 ```js
 // Write as inline comments
-vfs.dest('./', { sourcemaps: true });
+vfs.dest("./", { sourcemaps: true });
 
 // Write as files in the same folder
-vfs.dest('./', { sourcemaps: '.' });
+vfs.dest("./", { sourcemaps: "." });
 ```
 
 Type: `Boolean` or `String`

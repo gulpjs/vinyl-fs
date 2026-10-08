@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-var fs = require('graceful-fs');
+var fs = require("graceful-fs");
 
-var constants = require('../../lib/constants');
+var constants = require("../../lib/constants");
 
 function masked(mode) {
   return mode & constants.MASK_MODE;

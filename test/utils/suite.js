@@ -1,10 +1,10 @@
-var streams = ['stream', 'streamx', 'readable-stream'];
+var streams = ["stream", "streamx", "readable-stream"];
 
 function describeStreams(name, suite) {
   streams.forEach(function (moduleName) {
     var stream = require(moduleName);
 
-    describe(name + ' (using ' + moduleName + ')', function () {
+    describe(name + " (using " + moduleName + ")", function () {
       suite(stream);
     });
   });
