@@ -31,13 +31,6 @@ var neOutputDirpath = testConstants.neOutputDirpath;
 var clean = cleanup(outputBase);
 
 describeStreams(".dest() with symlinks", function (stream) {
-  before(function () {
-    if (process.versions.node.startsWith("10.")) {
-      this.skip();
-      return;
-    }
-  });
-
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -223,15 +216,8 @@ describeStreams(".dest() with symlinks", function (stream) {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      // When creating a junction, it seems Windows appends a separator until Node 22+
-      if (
-        process.versions.node.startsWith("22.") ||
-        process.versions.node.startsWith("24.")
-      ) {
-        expect(outputLink).toEqual(inputDirpath);
-      } else {
-        expect(outputLink).toEqual(inputDirpath + path.sep);
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
     }
@@ -469,15 +455,8 @@ describeStreams(".dest() with symlinks", function (stream) {
       var outputLink = fs.readlinkSync(outputDirpath);
 
       expect(files.length).toEqual(1);
-      // When creating a junction, it seems Windows appends a separator until Node 22+
-      if (
-        process.versions.node.startsWith("22.") ||
-        process.versions.node.startsWith("24.")
-      ) {
-        expect(outputLink).toEqual(inputDirpath);
-      } else {
-        expect(outputLink).toEqual(inputDirpath + path.sep);
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      expect(outputLink).toEqual(inputDirpath);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
     }

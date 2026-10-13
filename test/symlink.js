@@ -4,6 +4,7 @@ var path = require("path");
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
+var sinon = require("sinon");
 var expect = require("expect");
 
 var vfs = require("../");
@@ -30,13 +31,6 @@ var contents = testConstants.contents;
 var clean = cleanup(outputBase);
 
 describeStreams("symlink stream", function (stream) {
-  before(function () {
-    if (process.versions.node.startsWith("10.")) {
-      this.skip();
-      return;
-    }
-  });
-
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -377,15 +371,8 @@ describeStreams("symlink stream", function (stream) {
       expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase);
       expect(files[0].path).toEqual(outputDirpath);
-      // When creating a junction, it seems Windows appends a separator until Node 22+
-      if (
-        process.versions.node.startsWith("22.") ||
-        process.versions.node.startsWith("24.")
-      ) {
-        expect(files[0].symlink).toEqual(outputLink);
-      } else {
-        expect(files[0].symlink + path.sep).toEqual(outputLink);
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      expect(files[0].symlink).toEqual(outputLink);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
     }
@@ -545,15 +532,8 @@ describeStreams("symlink stream", function (stream) {
       expect(files).toContain(file);
       expect(files[0].base).toEqual(outputBase);
       expect(files[0].path).toEqual(outputDirpath);
-      // When creating a junction, it seems Windows appends a separator until Node 22+
-      if (
-        process.versions.node.startsWith("22.") ||
-        process.versions.node.startsWith("24.")
-      ) {
-        expect(files[0].symlink).toEqual(outputLink);
-      } else {
-        expect(files[0].symlink + path.sep).toEqual(outputLink);
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      expect(files[0].symlink).toEqual(outputLink);
       expect(stats.isDirectory()).toEqual(true);
       expect(lstats.isDirectory()).toEqual(false);
     }
@@ -1035,16 +1015,6 @@ describeStreams("symlink stream", function (stream) {
   });
 
   it("does not pass options on to stream", function (done) {
-    if (
-      process.versions.node.startsWith("10.") ||
-      process.versions.node.startsWith("12.")
-    ) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require("sinon");
-
     var file = new File({
       base: inputBase,
       path: inputPath,

@@ -2,6 +2,7 @@
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
+var sinon = require("sinon");
 var expect = require("expect");
 
 var vfs = require("../");
@@ -61,16 +62,6 @@ describeStreams(".dest() on not owned files", function (stream) {
       return;
     }
 
-    if (
-      process.versions.node.startsWith("10.") ||
-      process.versions.node.startsWith("12.")
-    ) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require("sinon");
-
     var futimesSpy = sinon.spy(fs, "futimes");
 
     var earlier = Date.now() - 1000;
@@ -96,16 +87,6 @@ describeStreams(".dest() on not owned files", function (stream) {
       this.skip();
       return;
     }
-
-    if (
-      process.versions.node.startsWith("10.") ||
-      process.versions.node.startsWith("12.")
-    ) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require("sinon");
 
     var fchmodSpy = sinon.spy(fs, "fchmod");
 
