@@ -39,15 +39,15 @@ describeStreams(".dest() with custom owner", function (stream) {
       path: inputPath,
       contents: Buffer.from(contents),
       stat: {
-        uid: 1001,
-        gid: 1001,
+        uid: 1002,
+        gid: 1002,
       },
     });
 
     function assert() {
       expect(fchownSpy.callCount).toEqual(1);
-      expect(fchownSpy.getCall(0).args[1]).toEqual(1001);
-      expect(fchownSpy.getCall(0).args[2]).toEqual(1001);
+      expect(fchownSpy.getCall(0).args[1]).toEqual(1002);
+      expect(fchownSpy.getCall(0).args[2]).toEqual(1002);
       done();
     }
 
