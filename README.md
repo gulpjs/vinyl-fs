@@ -366,3 +366,11 @@ MIT
 [coveralls-url]: https://coveralls.io/r/gulpjs/vinyl-fs
 [coveralls-image]: https://img.shields.io/coveralls/gulpjs/vinyl-fs/main.svg?style=flat-square
 <!-- prettier-ignore-end -->
+
+<!-- prettier-ignore-start -->
+[symbolic-caveats]: #symbolic-links-on-windows
+[glob-stream]: https://github.com/gulpjs/glob-stream
+[anymatch]: https://github.com/micromatch/anymatch
+[vinyl]: https://github.com/gulpjs/vinyl
+[iconv-lite]: https://github.com/ashtuchkin/iconv-lite
+<!-- prettier-ignore-end -->
