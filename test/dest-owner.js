@@ -26,7 +26,7 @@ describeStreams(".dest() with custom owner", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it.only("calls fchown when the uid and/or gid are provided on the vinyl stat", function (done) {
+  it("calls fchown when the uid and/or gid are provided on the vinyl stat", function (done) {
     if (isWindows) {
       this.skip();
       return;
