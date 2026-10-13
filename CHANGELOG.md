@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/gulpjs/vinyl-fs/compare/v4.0.2...v5.0.0) (2026-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* Normalize repository, dropping Node <26.1.0 ([#368](https://github.com/gulpjs/vinyl-fs/issues/368))
+
+### Miscellaneous Chores
+
+* Normalize repository, dropping Node &lt;26.1.0 ([#368](https://github.com/gulpjs/vinyl-fs/issues/368)) ([b51443e](https://github.com/gulpjs/vinyl-fs/commit/b51443e8fe3f1c26beeebf1b69a2079acca0554f))
+
 ### [4.0.2](https://www.github.com/gulpjs/vinyl-fs/compare/v4.0.1...v4.0.2) (2025-06-01)
 
 
