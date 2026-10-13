@@ -1,17 +1,18 @@
-'use strict';
+"use strict";
 
-var path = require('path');
+var path = require("path");
 
-var fs = require('graceful-fs');
-var File = require('vinyl');
-var expect = require('expect');
+var fs = require("graceful-fs");
+var File = require("vinyl");
+var sinon = require("sinon");
+var expect = require("expect");
 
-var vfs = require('../');
+var vfs = require("../");
 
-var cleanup = require('./utils/cleanup');
-var testStreams = require('./utils/test-streams');
-var testConstants = require('./utils/test-constants');
-var describeStreams = require('./utils/suite');
+var cleanup = require("./utils/cleanup");
+var testStreams = require("./utils/test-streams");
+var testConstants = require("./utils/test-constants");
+var describeStreams = require("./utils/suite");
 
 var inputBase = testConstants.inputBase;
 var inputPath = testConstants.inputPath;
@@ -31,14 +32,7 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describeStreams('.src()', function (stream) {
-  before(function () {
-    if (process.versions.node.startsWith("10.")) {
-      this.skip();
-      return;
-    }
-  });
-
+describeStreams(".src()", function (stream) {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -49,7 +43,7 @@ describeStreams('.src()', function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it('throws on invalid glob (empty)', function (done) {
+  it("throws on invalid glob (empty)", function (done) {
     var stream;
     try {
       stream = vfs.src();
@@ -60,10 +54,10 @@ describeStreams('.src()', function (stream) {
     }
   });
 
-  it('throws on invalid glob (empty string)', function (done) {
+  it("throws on invalid glob (empty string)", function (done) {
     var stream;
     try {
-      stream = vfs.src('');
+      stream = vfs.src("");
     } catch (err) {
       expect(err).toEqual(expect.anything());
       expect(stream).not.toEqual(expect.anything());
@@ -71,7 +65,7 @@ describeStreams('.src()', function (stream) {
     }
   });
 
-  it('throws on invalid glob (number)', function (done) {
+  it("throws on invalid glob (number)", function (done) {
     var stream;
     try {
       stream = vfs.src(123);
@@ -82,22 +76,22 @@ describeStreams('.src()', function (stream) {
     }
   });
 
-  it('throws on invalid glob (nested array)', function (done) {
+  it("throws on invalid glob (nested array)", function (done) {
     var stream;
     try {
-      stream = vfs.src([['./fixtures/*.coffee']]);
+      stream = vfs.src([["./fixtures/*.coffee"]]);
     } catch (err) {
       expect(err).toEqual(expect.anything());
       expect(stream).not.toEqual(expect.anything());
-      expect(err.message).toMatch('Invalid glob argument');
+      expect(err.message).toMatch("Invalid glob argument");
       done();
     }
   });
 
-  it('throws on invalid glob (empty string in array)', function (done) {
+  it("throws on invalid glob (empty string in array)", function (done) {
     var stream;
     try {
-      stream = vfs.src(['']);
+      stream = vfs.src([""]);
     } catch (err) {
       expect(err).toEqual(expect.anything());
       expect(stream).not.toEqual(expect.anything());
@@ -105,7 +99,7 @@ describeStreams('.src()', function (stream) {
     }
   });
 
-  it('throws on invalid glob (empty array)', function (done) {
+  it("throws on invalid glob (empty array)", function (done) {
     var stream;
     try {
       stream = vfs.src([]);
@@ -116,26 +110,26 @@ describeStreams('.src()', function (stream) {
     }
   });
 
-  it('supports arrays of globs', function (done) {
+  it("supports arrays of globs", function (done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
-    var stream = vfs.src(['./fixtures/test.txt', './fixtures/bom-*.txt'], {
+    var stream = vfs.src(["./fixtures/test.txt", "./fixtures/bom-*.txt"], {
       cwd: cwd,
     });
     expect(stream).toEqual(expect.anything());
     done();
   });
 
-  it('emits an error on file not existing', function (done) {
+  it("emits an error on file not existing", function (done) {
     function assert(err) {
       expect(err).toEqual(expect.anything());
       done();
     }
 
-    pipeline([vfs.src('./fixtures/noexist.coffee'), concatArray()], assert);
+    pipeline([vfs.src("./fixtures/noexist.coffee"), concatArray()], assert);
   });
 
-  it('passes through writes', function (done) {
+  it("passes through writes", function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -155,8 +149,8 @@ describeStreams('.src()', function (stream) {
     pipeline([srcStream, concatArray(assert)], done);
   });
 
-  it('removes BOM from utf8-encoded files by default (buffer)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
+  it("removes BOM from utf8-encoded files by default (buffer)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "8"));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -166,8 +160,8 @@ describeStreams('.src()', function (stream) {
     pipeline([vfs.src(bomInputPath), concatArray(assert)], done);
   });
 
-  it('removes BOM from utf8-encoded files by default (stream)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '8'));
+  it("removes BOM from utf8-encoded files by default (stream)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "8"));
 
     function assertContent(contents) {
       expect(contents).toEqual(expectedContent);
@@ -184,12 +178,12 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf8-encoded files if option is false (buffer)', function (done) {
-    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
+  it("does not remove BOM from utf8-encoded files if option is false (buffer)", function (done) {
+    var expectedContent = Buffer.from("\ufeff" + bomContents.replace("X", "8"));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -198,12 +192,12 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(bomInputPath, { removeBOM: false }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf8-encoded files if option is false (stream)', function (done) {
-    var expectedContent = Buffer.from('\ufeff' + bomContents.replace('X', '8'));
+  it("does not remove BOM from utf8-encoded files if option is false (stream)", function (done) {
+    var expectedContent = Buffer.from("\ufeff" + bomContents.replace("X", "8"));
 
     function assertContent(contents) {
       expect(contents).toEqual(expectedContent);
@@ -220,12 +214,12 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('removes BOM from utf16be-encoded files by default (buffer)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
+  it("removes BOM from utf16be-encoded files by default (buffer)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "16-BE"));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -233,13 +227,13 @@ describeStreams('.src()', function (stream) {
     }
 
     pipeline(
-      [vfs.src(beBomInputPath, { encoding: 'utf16be' }), concatArray(assert)],
-      done
+      [vfs.src(beBomInputPath, { encoding: "utf16be" }), concatArray(assert)],
+      done,
     );
   });
 
-  it('removes BOM from utf16be-encoded files by default (stream)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '16-BE'));
+  it("removes BOM from utf16be-encoded files by default (stream)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "16-BE"));
 
     function assertContent(contents) {
       expect(contents).toEqual(expectedContent);
@@ -252,17 +246,17 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(beBomInputPath, { encoding: 'utf16be', buffer: false }),
+        vfs.src(beBomInputPath, { encoding: "utf16be", buffer: false }),
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf16be-encoded files if option is false (buffer)', function (done) {
+  it("does not remove BOM from utf16be-encoded files if option is false (buffer)", function (done) {
     var expectedContent = Buffer.from(
-      '\ufeff' + bomContents.replace('X', '16-BE')
+      "\ufeff" + bomContents.replace("X", "16-BE"),
     );
 
     function assert(files) {
@@ -272,16 +266,16 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(beBomInputPath, { encoding: 'utf16be', removeBOM: false }),
+        vfs.src(beBomInputPath, { encoding: "utf16be", removeBOM: false }),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf16be-encoded files if option is false (stream)', function (done) {
+  it("does not remove BOM from utf16be-encoded files if option is false (stream)", function (done) {
     var expectedContent = Buffer.from(
-      '\ufeff' + bomContents.replace('X', '16-BE')
+      "\ufeff" + bomContents.replace("X", "16-BE"),
     );
 
     function assertContent(contents) {
@@ -296,19 +290,19 @@ describeStreams('.src()', function (stream) {
     pipeline(
       [
         vfs.src(beBomInputPath, {
-          encoding: 'utf16be',
+          encoding: "utf16be",
           removeBOM: false,
           buffer: false,
         }),
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('removes BOM from utf16le-encoded files by default (buffer)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
+  it("removes BOM from utf16le-encoded files by default (buffer)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "16-LE"));
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -316,13 +310,13 @@ describeStreams('.src()', function (stream) {
     }
 
     pipeline(
-      [vfs.src(leBomInputPath, { encoding: 'utf16le' }), concatArray(assert)],
-      done
+      [vfs.src(leBomInputPath, { encoding: "utf16le" }), concatArray(assert)],
+      done,
     );
   });
 
-  it('removes BOM from utf16le-encoded files by default (stream)', function (done) {
-    var expectedContent = Buffer.from(bomContents.replace('X', '16-LE'));
+  it("removes BOM from utf16le-encoded files by default (stream)", function (done) {
+    var expectedContent = Buffer.from(bomContents.replace("X", "16-LE"));
 
     function assertContent(contents) {
       expect(contents).toEqual(expectedContent);
@@ -335,17 +329,17 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(leBomInputPath, { encoding: 'utf16le', buffer: false }),
+        vfs.src(leBomInputPath, { encoding: "utf16le", buffer: false }),
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf16le-encoded files if option is false (buffer)', function (done) {
+  it("does not remove BOM from utf16le-encoded files if option is false (buffer)", function (done) {
     var expectedContent = Buffer.from(
-      '\ufeff' + bomContents.replace('X', '16-LE')
+      "\ufeff" + bomContents.replace("X", "16-LE"),
     );
 
     function assert(files) {
@@ -355,16 +349,16 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(leBomInputPath, { encoding: 'utf16le', removeBOM: false }),
+        vfs.src(leBomInputPath, { encoding: "utf16le", removeBOM: false }),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove BOM from utf16le-encoded files if option is false (stream)', function (done) {
+  it("does not remove BOM from utf16le-encoded files if option is false (stream)", function (done) {
     var expectedContent = Buffer.from(
-      '\ufeff' + bomContents.replace('X', '16-LE')
+      "\ufeff" + bomContents.replace("X", "16-LE"),
     );
 
     function assertContent(contents) {
@@ -379,20 +373,20 @@ describeStreams('.src()', function (stream) {
     pipeline(
       [
         vfs.src(leBomInputPath, {
-          encoding: 'utf16le',
+          encoding: "utf16le",
           removeBOM: false,
           buffer: false,
         }),
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-BE is enough to demonstrate this is done properly.
-  it('does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (buffer)', function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (buffer)", function (done) {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
     function assert(files) {
@@ -402,11 +396,11 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(beNotBomInputPath, { encoding: false }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (stream)', function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (stream)", function (done) {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
     function assertContent(contents) {
@@ -424,13 +418,13 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-LE is enough to demonstrate this is done properly.
-  it('does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (buffer)', function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (buffer)", function (done) {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
     function assert(files) {
@@ -440,11 +434,11 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(leNotBomInputPath, { encoding: false }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (stream)', function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (stream)", function (done) {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
     function assertContent(contents) {
@@ -462,11 +456,11 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not do any transcoding with encoding option set to false (buffer)', function (done) {
+  it("does not do any transcoding with encoding option set to false (buffer)", function (done) {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
     function assert(files) {
@@ -476,11 +470,11 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(ranBomInputPath, { encoding: false }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not do any transcoding with encoding option set to false (stream)', function (done) {
+  it("does not do any transcoding with encoding option set to false (stream)", function (done) {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
     function assertContent(contents) {
@@ -498,11 +492,11 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('does not remove utf8 BOM with encoding option set to false (buffer)', function (done) {
+  it("does not remove utf8 BOM with encoding option set to false (buffer)", function (done) {
     var expectedContents = fs.readFileSync(bomInputPath);
 
     function assert(files) {
@@ -512,11 +506,11 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(bomInputPath, { encoding: false }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not remove utf8 BOM with encoding option set to false (stream)', function (done) {
+  it("does not remove utf8 BOM with encoding option set to false (stream)", function (done) {
     var expectedContents = fs.readFileSync(bomInputPath);
 
     function assertContent(contents) {
@@ -533,11 +527,11 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('transcodes gb2312 to utf8 with encoding option (buffer)', function (done) {
+  it("transcodes gb2312 to utf8 with encoding option (buffer)", function (done) {
     var expectedContents = Buffer.from(encodedContents);
 
     function assert(files) {
@@ -546,12 +540,12 @@ describeStreams('.src()', function (stream) {
     }
 
     pipeline(
-      [vfs.src(encodedInputPath, { encoding: 'gb2312' }), concatArray(assert)],
-      done
+      [vfs.src(encodedInputPath, { encoding: "gb2312" }), concatArray(assert)],
+      done,
     );
   });
 
-  it('transcodes gb2312 to utf8 with encoding option (stream)', function (done) {
+  it("transcodes gb2312 to utf8 with encoding option (stream)", function (done) {
     var expectedContents = Buffer.from(encodedContents);
 
     function assertContent(contents) {
@@ -565,63 +559,63 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(encodedInputPath, { encoding: 'gb2312', buffer: false }),
+        vfs.src(encodedInputPath, { encoding: "gb2312", buffer: false }),
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('reports unsupported encoding errors (buffer)', function (done) {
+  it("reports unsupported encoding errors (buffer)", function (done) {
     function assert(files) {
       expect(files.length).toEqual(0);
     }
 
     function finish(err) {
       expect(err).toEqual(expect.anything());
-      expect(err.message).toEqual('Unsupported encoding: fubar42');
+      expect(err.message).toEqual("Unsupported encoding: fubar42");
       done();
     }
 
     pipeline(
-      [vfs.src(inputPath, { encoding: 'fubar42' }), concatArray(assert)],
-      finish
+      [vfs.src(inputPath, { encoding: "fubar42" }), concatArray(assert)],
+      finish,
     );
   });
 
-  it('reports unsupported encoding errors (stream)', function (done) {
+  it("reports unsupported encoding errors (stream)", function (done) {
     function assert(files) {
       expect(files.length).toEqual(0);
     }
 
     function finish(err) {
       expect(err).toEqual(expect.anything());
-      expect(err.message).toEqual('Unsupported encoding: fubar42');
+      expect(err.message).toEqual("Unsupported encoding: fubar42");
       done();
     }
 
     pipeline(
       [
-        vfs.src(inputPath, { encoding: 'fubar42', buffer: false }),
+        vfs.src(inputPath, { encoding: "fubar42", buffer: false }),
         concatArray(assert),
       ],
-      finish
+      finish,
     );
   });
 
-  it('globs files with default settings', function (done) {
+  it("globs files with default settings", function (done) {
     function assert(files) {
       expect(files.length).toEqual(7);
     }
 
     pipeline(
-      [vfs.src('./fixtures/*.txt', { cwd: __dirname }), concatArray(assert)],
-      done
+      [vfs.src("./fixtures/*.txt", { cwd: __dirname }), concatArray(assert)],
+      done,
     );
   });
 
-  it('globs files with default settings and relative cwd', function (done) {
+  it("globs files with default settings and relative cwd", function (done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
     function assert(files) {
@@ -629,12 +623,12 @@ describeStreams('.src()', function (stream) {
     }
 
     pipeline(
-      [vfs.src('./fixtures/*.txt', { cwd: cwd }), concatArray(assert)],
-      done
+      [vfs.src("./fixtures/*.txt", { cwd: cwd }), concatArray(assert)],
+      done,
     );
   });
 
-  it('supports glob negation with ../ paths (issue 306)', function (done) {
+  it("supports glob negation with ../ paths (issue 306)", function (done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
     function assert(files) {
@@ -643,18 +637,18 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [
-        vfs.src(['../test/fixtures/*.txt', '!../test/fixtures/bom-*.txt'], {
+        vfs.src(["../test/fixtures/*.txt", "!../test/fixtures/bom-*.txt"], {
           cwd: cwd,
         }),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
   // TODO: need to normalize the path of a directory vinyl object
-  it('globs a directory with default settings', function (done) {
-    var inputDirGlob = path.join(inputBase, './f*/');
+  it("globs a directory with default settings", function (done) {
+    var inputDirGlob = path.join(inputBase, "./f*/");
 
     function assert(files) {
       expect(files.length).toEqual(1);
@@ -665,7 +659,7 @@ describeStreams('.src()', function (stream) {
     pipeline([vfs.src(inputDirGlob), concatArray(assert)], done);
   });
 
-  it('globs a directory with default settings and relative cwd', function (done) {
+  it("globs a directory with default settings and relative cwd", function (done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
     function assert(files) {
@@ -675,12 +669,12 @@ describeStreams('.src()', function (stream) {
     }
 
     pipeline(
-      [vfs.src('./fixtures/f*/', { cwd: cwd }), concatArray(assert)],
-      done
+      [vfs.src("./fixtures/f*/", { cwd: cwd }), concatArray(assert)],
+      done,
     );
   });
 
-  it('streams a directory with default settings', function (done) {
+  it("streams a directory with default settings", function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files[0].path).toEqual(inputDirpath);
@@ -691,7 +685,7 @@ describeStreams('.src()', function (stream) {
     pipeline([vfs.src(inputDirpath), concatArray(assert)], done);
   });
 
-  it('streams file with with no contents using read: false option', function (done) {
+  it("streams file with with no contents using read: false option", function (done) {
     function assert(files) {
       expect(files.length).toEqual(1);
       expect(files[0].path).toEqual(inputPath);
@@ -702,7 +696,7 @@ describeStreams('.src()', function (stream) {
     pipeline([vfs.src(inputPath, { read: false }), concatArray(assert)], done);
   });
 
-  it('streams a file changed after since', function (done) {
+  it("streams a file changed after since", function (done) {
     var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime - 1000);
 
     function assert(files) {
@@ -712,11 +706,11 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not stream a file changed before since', function (done) {
+  it("does not stream a file changed before since", function (done) {
     var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime + 1000);
 
     function assert(files) {
@@ -725,15 +719,15 @@ describeStreams('.src()', function (stream) {
 
     pipeline(
       [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('streams a file with ctime greater than mtime', function (done) {
+  it("streams a file with ctime greater than mtime", function (done) {
     fs.mkdirSync(outputBase);
     fs.copyFileSync(inputPath, outputPath);
 
-    var renamedPath = path.join(outputBase, 'foo.txt');
+    var renamedPath = path.join(outputBase, "foo.txt");
 
     setTimeout(function () {
       // rename changes ctime but not mtime
@@ -752,12 +746,12 @@ describeStreams('.src()', function (stream) {
 
       pipeline(
         [vfs.src(renamedPath, { since: lastMtime }), concatArray(assert)],
-        done
+        done,
       );
     }, 250);
   });
 
-  it('streams a file with streaming contents', function (done) {
+  it("streams a file with streaming contents", function (done) {
     var expectedContent = fs.readFileSync(inputPath);
 
     function assertContent(contents) {
@@ -776,11 +770,11 @@ describeStreams('.src()', function (stream) {
         compareContents(assertContent),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('can be used as a through stream and adds new files to the end', function (done) {
+  it("can be used as a through stream and adds new files to the end", function (done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -796,25 +790,18 @@ describeStreams('.src()', function (stream) {
     pipeline([from([file]), vfs.src(inputPath), concatArray(assert)], done);
   });
 
-  it('can be used at beginning and in the middle', function (done) {
+  it("can be used at beginning and in the middle", function (done) {
     function assert(files) {
       expect(files.length).toEqual(2);
     }
 
     pipeline(
       [vfs.src(inputPath), vfs.src(inputPath), concatArray(assert)],
-      done
+      done,
     );
   });
 
-  it('does not pass options on to stream', function (done) {
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
+  it("does not pass options on to stream", function (done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = sinon.fake.returns(false);
 

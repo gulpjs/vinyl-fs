@@ -1,15 +1,16 @@
-'use strict';
+"use strict";
 
-var fs = require('graceful-fs');
-var File = require('vinyl');
-var expect = require('expect');
+var fs = require("graceful-fs");
+var File = require("vinyl");
+var sinon = require("sinon");
+var expect = require("expect");
 
-var vfs = require('../');
+var vfs = require("../");
 
-var cleanup = require('./utils/cleanup');
-var isWindows = require('./utils/is-windows');
-var testConstants = require('./utils/test-constants');
-var describeStreams = require('./utils/suite');
+var cleanup = require("./utils/cleanup");
+var isWindows = require("./utils/is-windows");
+var testConstants = require("./utils/test-constants");
+var describeStreams = require("./utils/suite");
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -19,21 +20,14 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describeStreams('.dest() with custom times', function (stream) {
-  before(function () {
-    if (process.versions.node.startsWith("10.")) {
-      this.skip();
-      return;
-    }
-  });
-
+describeStreams(".dest() with custom times", function (stream) {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it('does not call futimes when no mtime is provided on the vinyl stat', function (done) {
+  it("does not call futimes when no mtime is provided on the vinyl stat", function (done) {
     // Changing the time of a directory errors in Windows.
     // Windows is treated as though it does not have permission to make this operation.
     if (isWindows) {
@@ -41,16 +35,9 @@ describeStreams('.dest() with custom times', function (stream) {
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
     var earlier = Date.now() - 1001;
 
-    var futimesSpy = sinon.spy(fs, 'futimes');
+    var futimesSpy = sinon.spy(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -71,23 +58,16 @@ describeStreams('.dest() with custom times', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('calls futimes when an mtime is provided on the vinyl stat', function (done) {
+  it("calls futimes when an mtime is provided on the vinyl stat", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
 
-    var futimesSpy = sinon.spy(fs, 'futimes');
+    var futimesSpy = sinon.spy(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -114,22 +94,15 @@ describeStreams('.dest() with custom times', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('does not call futimes when provided mtime on the vinyl stat is invalid', function (done) {
+  it("does not call futimes when provided mtime on the vinyl stat is invalid", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
     var earlier = Date.now() - 1001;
 
-    var futimesSpy = sinon.spy(fs, 'futimes');
+    var futimesSpy = sinon.spy(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -152,24 +125,17 @@ describeStreams('.dest() with custom times', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid', function (done) {
+  it("calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
     var invalidAtime = new Date(undefined);
 
-    var futimesSpy = sinon.spy(fs, 'futimes');
+    var futimesSpy = sinon.spy(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -194,24 +160,17 @@ describeStreams('.dest() with custom times', function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it('writes file atime and mtime using the vinyl stat', function (done) {
+  it("writes file atime and mtime using the vinyl stat", function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    if (process.versions.node.startsWith("10.") || process.versions.node.startsWith("12.")) {
-      this.skip();
-      return;
-    }
-
-    var sinon = require('sinon');
-
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
     var mtime = new Date(Date.now() - 1024);
 
-    var futimesSpy = sinon.spy(fs, 'futimes');
+    var futimesSpy = sinon.spy(fs, "futimes");
 
     var file = new File({
       base: inputBase,

@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 function applyUmask(mode) {
-  if (typeof mode !== 'number') {
+  if (typeof mode !== "number") {
     mode = parseInt(mode, 8);
   }
 

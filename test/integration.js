@@ -1,41 +1,34 @@
-'use strict';
+"use strict";
 
-var path = require('path');
+var path = require("path");
 
-var fs = require('graceful-fs');
-var expect = require('expect');
+var fs = require("graceful-fs");
+var expect = require("expect");
 
-var vfs = require('../');
+var vfs = require("../");
 
-var cleanup = require('./utils/cleanup');
-var isWindows = require('./utils/is-windows');
-var testStreams = require('./utils/test-streams');
-var testConstants = require('./utils/test-constants');
-var describeStreams = require('./utils/suite');
+var cleanup = require("./utils/cleanup");
+var isWindows = require("./utils/is-windows");
+var testStreams = require("./utils/test-streams");
+var testConstants = require("./utils/test-constants");
+var describeStreams = require("./utils/suite");
 
 var base = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
 var inputDirpath = testConstants.inputDirpath;
 var outputDirpath = testConstants.outputDirpath;
 var symlinkDirpath = testConstants.symlinkDirpath;
-var inputBase = path.join(base, './in/');
-var inputGlob = path.join(inputBase, './*.txt');
-var outputBase = path.join(base, './out/');
-var outputPath = path.join(outputBase, './test.txt');
-var outputSymlink = path.join(symlinkDirpath, './foo');
-var outputDirpathSymlink = path.join(outputDirpath, './foo');
+var inputBase = path.join(base, "./in/");
+var inputGlob = path.join(inputBase, "./*.txt");
+var outputBase = path.join(base, "./out/");
+var outputPath = path.join(outputBase, "./test.txt");
+var outputSymlink = path.join(symlinkDirpath, "./foo");
+var outputDirpathSymlink = path.join(outputDirpath, "./foo");
 var content = testConstants.contents;
 
 var clean = cleanup(base);
 
-describeStreams('integrations', function (stream) {
-  before(function () {
-    if (process.versions.node.startsWith("10.")) {
-      this.skip();
-      return;
-    }
-  });
-
+describeStreams("integrations", function (stream) {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -46,7 +39,7 @@ describeStreams('integrations', function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it('does not exhaust available file descriptors when streaming thousands of files', function (done) {
+  it("does not exhaust available file descriptors when streaming thousands of files", function (done) {
     // This can be a very slow test on boxes with slow disk i/o
     this.timeout(0);
 
@@ -57,7 +50,7 @@ describeStreams('integrations', function (stream) {
     fs.mkdirSync(inputBase);
 
     for (var idx = 0; idx < expectedCount; idx++) {
-      var filepath = path.join(inputBase, './test' + idx + '.txt');
+      var filepath = path.join(inputBase, "./test" + idx + ".txt");
       fs.writeFileSync(filepath, content);
     }
 
@@ -67,11 +60,11 @@ describeStreams('integrations', function (stream) {
         count(expectedCount),
         vfs.dest(outputBase),
       ],
-      done
+      done,
     );
   });
 
-  it('(*nix) sources a directory, creates a symlink and copies it', function (done) {
+  it("(*nix) sources a directory, creates a symlink and copies it", function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -94,24 +87,19 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputDirpath),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('(windows) sources a directory, creates a junction and copies it', function (done) {
+  it("(windows) sources a directory, creates a junction and copies it", function (done) {
     if (!isWindows) {
       this.skip();
       return;
     }
 
     function assert(files) {
-      // Junctions add an ending separator until Node 22+
-      var expected;
-      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
-        expected = inputDirpath;
-      } else {
-        expected = inputDirpath + path.sep;
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      var expected = inputDirpath;
       var symlinkResult = fs.readlinkSync(outputSymlink);
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
@@ -128,11 +116,11 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputDirpath),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('(*nix) sources a symlink and copies it', function (done) {
+  it("(*nix) sources a symlink and copies it", function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -156,11 +144,11 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputDirpath),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('(windows) sources a directory symlink and copies it', function (done) {
+  it("(windows) sources a directory symlink and copies it", function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -168,16 +156,11 @@ describeStreams('integrations', function (stream) {
 
     fs.mkdirSync(base);
     fs.mkdirSync(symlinkDirpath);
-    fs.symlinkSync(inputDirpath, outputSymlink, 'dir');
+    fs.symlinkSync(inputDirpath, outputSymlink, "dir");
 
     function assert(files) {
-      // 'dir' symlinks add an ending separator until Node 22+
-      var expected;
-      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
-        expected = inputDirpath;
-      } else {
-        expected = inputDirpath + path.sep;
-      }
+      // When creating `dir` symlinks, it seems Windows no longer appends a separator as of Node 22+
+      var expected = inputDirpath;
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(expected);
@@ -191,11 +174,11 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputDirpath),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('(windows) sources a junction and copies it', function (done) {
+  it("(windows) sources a junction and copies it", function (done) {
     if (!isWindows) {
       this.skip();
       return;
@@ -203,16 +186,11 @@ describeStreams('integrations', function (stream) {
 
     fs.mkdirSync(base);
     fs.mkdirSync(symlinkDirpath);
-    fs.symlinkSync(inputDirpath, outputSymlink, 'junction');
+    fs.symlinkSync(inputDirpath, outputSymlink, "junction");
 
     function assert(files) {
-      // Junctions add an ending separator until Node 22+
-      var expected;
-      if (process.versions.node.startsWith("22.") || process.versions.node.startsWith("24.")) {
-        expected = inputDirpath;
-      } else {
-        expected = inputDirpath + path.sep;
-      }
+      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+      var expected = inputDirpath;
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
       expect(destResult).toEqual(expected);
@@ -226,15 +204,15 @@ describeStreams('integrations', function (stream) {
         vfs.dest(outputDirpath),
         concatArray(assert),
       ],
-      done
+      done,
     );
   });
 
-  it('can re-assign contents to a well-behaving stream as per issue #310', function (done) {
-    var contents = ['something', ' ', 'else'];
+  it("can re-assign contents to a well-behaving stream as per issue #310", function (done) {
+    var contents = ["something", " ", "else"];
 
     function assert() {
-      expect(fs.readFileSync(outputPath).toString()).toEqual(contents.join(''));
+      expect(fs.readFileSync(outputPath).toString()).toEqual(contents.join(""));
       done();
     }
 
@@ -244,7 +222,7 @@ describeStreams('integrations', function (stream) {
         new stream.Transform({
           objectMode: true,
           transform: function (file, enc, cb) {
-            if (typeof enc === 'function') {
+            if (typeof enc === "function") {
               cb = enc;
             }
 
@@ -254,7 +232,7 @@ describeStreams('integrations', function (stream) {
         }),
         vfs.dest(outputBase),
       ],
-      assert
+      assert,
     );
   });
 });
