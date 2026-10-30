@@ -593,10 +593,10 @@ describeStreams(".src()", function (stream) {
     );
   });
 
-  // TODO Might not be running
   it("reports unsupported encoding errors (stream)", function (t, done) {
+    // assertion isn't being called here is this an error checker.
     function assertion(files) {
-      assert.strictEqual(files.length, 0);
+      assert.strictEqual(files.length, 2);
     }
 
     function finish(err) {

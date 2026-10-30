@@ -63,7 +63,7 @@ describeStreams(".dest() with custom times", function (stream) {
 
   it(
     "calls futimes when an mtime is provided on the vinyl stat",
-    { skips: isWindows },
+    { skip: isWindows },
     function (t, done) {
       // Use new mtime
       var mtime = new Date(Date.now() - 2048);
@@ -101,7 +101,7 @@ describeStreams(".dest() with custom times", function (stream) {
 
   it(
     "does not call futimes when provided mtime on the vinyl stat is invalid",
-    { skips: isWindows },
+    { skip: isWindows },
     function (t, done) {
       var earlier = Date.now() - 1001;
 
