@@ -658,7 +658,7 @@ describe("writeFile", function () {
 
   it("writes a file to the filesystem, does not close and returns the fd", function (t, done) {
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
@@ -675,7 +675,7 @@ describe("writeFile", function () {
     var expected = applyUmask("666");
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
@@ -697,7 +697,7 @@ describe("writeFile", function () {
       };
 
       writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-        assert.strictEqual(err === null, true);
+        assert.ifError(err);
         assert.strictEqual(typeof fd === "number", true);
 
         fs.close(fd, function () {
@@ -713,7 +713,7 @@ describe("writeFile", function () {
     var length = contents.length;
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.read(fd, Buffer.alloc(length), 0, length, 0, function (readErr) {
@@ -731,7 +731,7 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.read(
@@ -764,7 +764,7 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(toWrite), options, function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
@@ -819,7 +819,7 @@ describe("writeFile", function () {
       buf.copy(content, 0, 0, length);
 
       writeFile(outputPath, content, function (err, fd) {
-        assert.strictEqual(err === null, true);
+        assert.ifError(err);
         assert.strictEqual(typeof fd === "number", true);
 
         fs.close(fd, function () {
@@ -835,7 +835,7 @@ describe("writeFile", function () {
 
   it("does not error if options is falsey", function (t, done) {
     writeFile(outputPath, Buffer.from(contents), null, function (err, fd) {
-      assert.strictEqual(err === null, true);
+      assert.ifError(err);
       assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, done);
@@ -974,7 +974,7 @@ describe("updateMetadata", function () {
       updateMetadata(fd, file, function () {
         // Not sure why .toEqual doesn't match these
         Object.keys(file.stat).forEach(function (key) {
-          assert.strictEqual(file.stat[key], stats[key]);
+          assert.deepStrictEqual(file.stat[key], stats[key]);
         });
 
         fs.close(fd, done);
@@ -1147,7 +1147,7 @@ describe("updateMetadata", function () {
       });
 
       updateMetadata(fd, file, function (err) {
-        assert.strictEqual(err === null, true);
+        assert.ifError(err);
         assert.strictEqual(futimesSpy.mock.callCount(), 1);
         // Times were updated to match the filesystem since futimes wasn't implemented
         assert.deepStrictEqual(file.stat.mtime, stat.mtime);

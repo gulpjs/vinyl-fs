@@ -1,8 +1,9 @@
 "use strict";
 
-var fs = require("graceful-fs");
 var assert = require("node:assert");
 var { describe, it } = require("node:test");
+
+var fs = require("graceful-fs");
 
 var getCodec = require("../lib/codecs");
 var DEFAULT_ENCODING = require("../lib/constants").DEFAULT_ENCODING;

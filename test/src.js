@@ -140,7 +140,7 @@ describeStreams(".src()", function (stream) {
     var srcStream = vfs.src(inputPath);
 
     function assertion(files) {
-      assert.strictEqual(files.length, 2);
+      assert.strictEqual(files.length, 0);
       assert.strictEqual(files[0], file);
     }
 
