@@ -1,9 +1,10 @@
 "use strict";
 
+var assert = require("node:assert");
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -56,53 +57,57 @@ describeStreams(".dest() on not owned files", function (stream) {
     return false;
   }
 
-  it("does not error if mtime is different", function (done) {
-    if (needsAction()) {
-      this.skip();
-      return;
-    }
+  it(
+    "does not error if mtime is different",
+    { skip: needsAction() },
+    function (t, done) {
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+      var earlier = Date.now() - 1000;
 
-    var earlier = Date.now() - 1000;
+      var file = new File({
+        base: notOwnedBase,
+        path: notOwnedPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mtime: new Date(earlier),
+        },
+      });
 
-    var file = new File({
-      base: notOwnedBase,
-      path: notOwnedPath,
-      contents: Buffer.from(contents),
-      stat: {
-        mtime: new Date(earlier),
-      },
-    });
+      function assertion() {
+        assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      }
 
-    function assert() {
-      expect(futimesSpy.callCount).toEqual(0);
-    }
+      pipeline(
+        [from([file]), vfs.dest(notOwnedBase), concatArray(assertion)],
+        done,
+      );
+    },
+  );
 
-    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
-  });
+  it(
+    "does not error if mode is different",
+    { skip: needsAction() },
+    function (t, done) {
+      var fchmodSpy = t.mock.method(fs, "fchmod");
 
-  it("does not error if mode is different", function (done) {
-    if (needsAction()) {
-      this.skip();
-      return;
-    }
+      var file = new File({
+        base: notOwnedBase,
+        path: notOwnedPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mode: applyUmask("777"),
+        },
+      });
 
-    var fchmodSpy = sinon.spy(fs, "fchmod");
+      function assertion() {
+        assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+      }
 
-    var file = new File({
-      base: notOwnedBase,
-      path: notOwnedPath,
-      contents: Buffer.from(contents),
-      stat: {
-        mode: applyUmask("777"),
-      },
-    });
-
-    function assert() {
-      expect(fchmodSpy.callCount).toEqual(0);
-    }
-
-    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
-  });
+      pipeline(
+        [from([file]), vfs.dest(notOwnedBase), concatArray(assertion)],
+        done,
+      );
+    },
+  );
 });

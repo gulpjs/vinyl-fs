@@ -1,11 +1,11 @@
 "use strict";
 
-var path = require("path");
+var path = require("node:path");
+var assert = require("node:assert");
+var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -43,93 +43,93 @@ describeStreams(".src()", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("throws on invalid glob (empty)", function (done) {
+  it("throws on invalid glob (empty)", function (t, done) {
     var stream;
     try {
       stream = vfs.src();
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
       done();
     }
   });
 
-  it("throws on invalid glob (empty string)", function (done) {
+  it("throws on invalid glob (empty string)", function (t, done) {
     var stream;
     try {
       stream = vfs.src("");
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
       done();
     }
   });
 
-  it("throws on invalid glob (number)", function (done) {
+  it("throws on invalid glob (number)", function (t, done) {
     var stream;
     try {
       stream = vfs.src(123);
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
       done();
     }
   });
 
-  it("throws on invalid glob (nested array)", function (done) {
+  it("throws on invalid glob (nested array)", function (t, done) {
     var stream;
     try {
       stream = vfs.src([["./fixtures/*.coffee"]]);
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
-      expect(err.message).toMatch("Invalid glob argument");
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
+      assert.match(err.message, /Invalid glob argument/);
       done();
     }
   });
 
-  it("throws on invalid glob (empty string in array)", function (done) {
+  it("throws on invalid glob (empty string in array)", function (t, done) {
     var stream;
     try {
       stream = vfs.src([""]);
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
       done();
     }
   });
 
-  it("throws on invalid glob (empty array)", function (done) {
+  it("throws on invalid glob (empty array)", function (t, done) {
     var stream;
     try {
       stream = vfs.src([]);
     } catch (err) {
-      expect(err).toEqual(expect.anything());
-      expect(stream).not.toEqual(expect.anything());
+      assert.ok(err != null);
+      assert.ok(stream === undefined);
       done();
     }
   });
 
-  it("supports arrays of globs", function (done) {
+  it("supports arrays of globs", function (t, done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
     var stream = vfs.src(["./fixtures/test.txt", "./fixtures/bom-*.txt"], {
       cwd: cwd,
     });
-    expect(stream).toEqual(expect.anything());
+    assert.ok(stream != null);
     done();
   });
 
-  it("emits an error on file not existing", function (done) {
-    function assert(err) {
-      expect(err).toEqual(expect.anything());
+  it("emits an error on file not existing", function (t, done) {
+    function assertion(err) {
+      assert.ok(err != null);
       done();
     }
 
-    pipeline([vfs.src("./fixtures/noexist.coffee"), concatArray()], assert);
+    pipeline([vfs.src("./fixtures/noexist.coffee"), concatArray()], assertion);
   });
 
-  it("passes through writes", function (done) {
+  it("passes through writes", function (t, done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -139,152 +139,155 @@ describeStreams(".src()", function (stream) {
 
     var srcStream = vfs.src(inputPath);
 
-    function assert(files) {
-      expect(files.length).toEqual(2);
-      expect(files[0]).toEqual(file);
+    function assertion(files) {
+      assert.strictEqual(files.length, 2);
+      assert.strictEqual(files[0], file);
     }
 
     srcStream.write(file);
 
-    pipeline([srcStream, concatArray(assert)], done);
+    pipeline([srcStream, concatArray(assertion)], done);
   });
 
-  it("removes BOM from utf8-encoded files by default (buffer)", function (done) {
+  it("removes BOM from utf8-encoded files by default (buffer)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "8"));
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
-    pipeline([vfs.src(bomInputPath), concatArray(assert)], done);
+    pipeline([vfs.src(bomInputPath), concatArray(assertion)], done);
   });
 
-  it("removes BOM from utf8-encoded files by default (stream)", function (done) {
+  it("removes BOM from utf8-encoded files by default (stream)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "8"));
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(bomInputPath, { buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove BOM from utf8-encoded files if option is false (buffer)", function (done) {
+  it("does not remove BOM from utf8-encoded files if option is false (buffer)", function (t, done) {
     var expectedContent = Buffer.from("\ufeff" + bomContents.replace("X", "8"));
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
-      [vfs.src(bomInputPath, { removeBOM: false }), concatArray(assert)],
+      [vfs.src(bomInputPath, { removeBOM: false }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not remove BOM from utf8-encoded files if option is false (stream)", function (done) {
+  it("does not remove BOM from utf8-encoded files if option is false (stream)", function (t, done) {
     var expectedContent = Buffer.from("\ufeff" + bomContents.replace("X", "8"));
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(bomInputPath, { removeBOM: false, buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("removes BOM from utf16be-encoded files by default (buffer)", function (done) {
+  it("removes BOM from utf16be-encoded files by default (buffer)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "16-BE"));
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
-      [vfs.src(beBomInputPath, { encoding: "utf16be" }), concatArray(assert)],
+      [
+        vfs.src(beBomInputPath, { encoding: "utf16be" }),
+        concatArray(assertion),
+      ],
       done,
     );
   });
 
-  it("removes BOM from utf16be-encoded files by default (stream)", function (done) {
+  it("removes BOM from utf16be-encoded files by default (stream)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "16-BE"));
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(beBomInputPath, { encoding: "utf16be", buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove BOM from utf16be-encoded files if option is false (buffer)", function (done) {
+  it("does not remove BOM from utf16be-encoded files if option is false (buffer)", function (t, done) {
     var expectedContent = Buffer.from(
       "\ufeff" + bomContents.replace("X", "16-BE"),
     );
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
       [
         vfs.src(beBomInputPath, { encoding: "utf16be", removeBOM: false }),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove BOM from utf16be-encoded files if option is false (stream)", function (done) {
+  it("does not remove BOM from utf16be-encoded files if option is false (stream)", function (t, done) {
     var expectedContent = Buffer.from(
       "\ufeff" + bomContents.replace("X", "16-BE"),
     );
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
@@ -295,79 +298,82 @@ describeStreams(".src()", function (stream) {
           buffer: false,
         }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("removes BOM from utf16le-encoded files by default (buffer)", function (done) {
+  it("removes BOM from utf16le-encoded files by default (buffer)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "16-LE"));
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
-      [vfs.src(leBomInputPath, { encoding: "utf16le" }), concatArray(assert)],
+      [
+        vfs.src(leBomInputPath, { encoding: "utf16le" }),
+        concatArray(assertion),
+      ],
       done,
     );
   });
 
-  it("removes BOM from utf16le-encoded files by default (stream)", function (done) {
+  it("removes BOM from utf16le-encoded files by default (stream)", function (t, done) {
     var expectedContent = Buffer.from(bomContents.replace("X", "16-LE"));
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(leBomInputPath, { encoding: "utf16le", buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove BOM from utf16le-encoded files if option is false (buffer)", function (done) {
+  it("does not remove BOM from utf16le-encoded files if option is false (buffer)", function (t, done) {
     var expectedContent = Buffer.from(
       "\ufeff" + bomContents.replace("X", "16-LE"),
     );
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
       [
         vfs.src(leBomInputPath, { encoding: "utf16le", removeBOM: false }),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove BOM from utf16le-encoded files if option is false (stream)", function (done) {
+  it("does not remove BOM from utf16le-encoded files if option is false (stream)", function (t, done) {
     var expectedContent = Buffer.from(
       "\ufeff" + bomContents.replace("X", "16-LE"),
     );
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
@@ -378,7 +384,7 @@ describeStreams(".src()", function (stream) {
           buffer: false,
         }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
@@ -386,37 +392,37 @@ describeStreams(".src()", function (stream) {
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-BE is enough to demonstrate this is done properly.
-  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (buffer)", function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (buffer)", function (t, done) {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
-      [vfs.src(beNotBomInputPath, { encoding: false }), concatArray(assert)],
+      [vfs.src(beNotBomInputPath, { encoding: false }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (stream)", function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16be-encoded files (stream)", function (t, done) {
     var expectedContent = fs.readFileSync(beNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(beNotBomInputPath, { buffer: false, encoding: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
@@ -424,215 +430,219 @@ describeStreams(".src()", function (stream) {
 
   // This goes for any non-UTF-8 encoding.
   // UTF-16-LE is enough to demonstrate this is done properly.
-  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (buffer)", function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (buffer)", function (t, done) {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContent);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContent);
     }
 
     pipeline(
-      [vfs.src(leNotBomInputPath, { encoding: false }), concatArray(assert)],
+      [vfs.src(leNotBomInputPath, { encoding: false }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (stream)", function (done) {
+  it("does not remove anything that looks like a utf8-encoded BOM from utf16le-encoded files (stream)", function (t, done) {
     var expectedContent = fs.readFileSync(leNotBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(leNotBomInputPath, { buffer: false, encoding: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not do any transcoding with encoding option set to false (buffer)", function (done) {
+  it("does not do any transcoding with encoding option set to false (buffer)", function (t, done) {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContents);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContents);
     }
 
     pipeline(
-      [vfs.src(ranBomInputPath, { encoding: false }), concatArray(assert)],
+      [vfs.src(ranBomInputPath, { encoding: false }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not do any transcoding with encoding option set to false (stream)", function (done) {
+  it("does not do any transcoding with encoding option set to false (stream)", function (t, done) {
     var expectedContents = fs.readFileSync(ranBomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContents);
+      assert.deepStrictEqual(contents, expectedContents);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(ranBomInputPath, { encoding: false, buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("does not remove utf8 BOM with encoding option set to false (buffer)", function (done) {
+  it("does not remove utf8 BOM with encoding option set to false (buffer)", function (t, done) {
     var expectedContents = fs.readFileSync(bomInputPath);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContents);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContents);
     }
 
     pipeline(
-      [vfs.src(bomInputPath, { encoding: false }), concatArray(assert)],
+      [vfs.src(bomInputPath, { encoding: false }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not remove utf8 BOM with encoding option set to false (stream)", function (done) {
+  it("does not remove utf8 BOM with encoding option set to false (stream)", function (t, done) {
     var expectedContents = fs.readFileSync(bomInputPath);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContents);
+      assert.deepStrictEqual(contents, expectedContents);
     }
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(bomInputPath, { encoding: false, buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("transcodes gb2312 to utf8 with encoding option (buffer)", function (done) {
+  it("transcodes gb2312 to utf8 with encoding option (buffer)", function (t, done) {
     var expectedContents = Buffer.from(encodedContents);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].contents).toEqual(expectedContents);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.deepStrictEqual(files[0].contents, expectedContents);
     }
 
     pipeline(
-      [vfs.src(encodedInputPath, { encoding: "gb2312" }), concatArray(assert)],
+      [
+        vfs.src(encodedInputPath, { encoding: "gb2312" }),
+        concatArray(assertion),
+      ],
       done,
     );
   });
 
-  it("transcodes gb2312 to utf8 with encoding option (stream)", function (done) {
+  it("transcodes gb2312 to utf8 with encoding option (stream)", function (t, done) {
     var expectedContents = Buffer.from(encodedContents);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContents);
+      assert.deepStrictEqual(contents, expectedContents);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(encodedInputPath, { encoding: "gb2312", buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("reports unsupported encoding errors (buffer)", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(0);
+  it("reports unsupported encoding errors (buffer)", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 0);
     }
 
     function finish(err) {
-      expect(err).toEqual(expect.anything());
-      expect(err.message).toEqual("Unsupported encoding: fubar42");
+      assert.ok(err != null);
+      assert.strictEqual(err.message, "Unsupported encoding: fubar42");
       done();
     }
 
     pipeline(
-      [vfs.src(inputPath, { encoding: "fubar42" }), concatArray(assert)],
+      [vfs.src(inputPath, { encoding: "fubar42" }), concatArray(assertion)],
       finish,
     );
   });
 
-  it("reports unsupported encoding errors (stream)", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(0);
+  // TODO Might not be running
+  it("reports unsupported encoding errors (stream)", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 0);
     }
 
     function finish(err) {
-      expect(err).toEqual(expect.anything());
-      expect(err.message).toEqual("Unsupported encoding: fubar42");
+      assert.ok(err != null);
+      assert.strictEqual(err.message, "Unsupported encoding: fubar42");
       done();
     }
 
     pipeline(
       [
         vfs.src(inputPath, { encoding: "fubar42", buffer: false }),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       finish,
     );
   });
 
-  it("globs files with default settings", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(7);
+  it("globs files with default settings", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 7);
     }
 
     pipeline(
-      [vfs.src("./fixtures/*.txt", { cwd: __dirname }), concatArray(assert)],
+      [vfs.src("./fixtures/*.txt", { cwd: __dirname }), concatArray(assertion)],
       done,
     );
   });
 
-  it("globs files with default settings and relative cwd", function (done) {
+  it("globs files with default settings and relative cwd", function (t, done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
-    function assert(files) {
-      expect(files.length).toEqual(7);
+    function assertion(files) {
+      assert.strictEqual(files.length, 7);
     }
 
     pipeline(
-      [vfs.src("./fixtures/*.txt", { cwd: cwd }), concatArray(assert)],
+      [vfs.src("./fixtures/*.txt", { cwd: cwd }), concatArray(assertion)],
       done,
     );
   });
 
-  it("supports glob negation with ../ paths (issue 306)", function (done) {
+  it("supports glob negation with ../ paths (issue 306)", function (t, done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
-    function assert(files) {
-      expect(files.length).toEqual(4);
+    function assertion(files) {
+      assert.strictEqual(files.length, 4);
     }
 
     pipeline(
@@ -640,90 +650,93 @@ describeStreams(".src()", function (stream) {
         vfs.src(["../test/fixtures/*.txt", "!../test/fixtures/bom-*.txt"], {
           cwd: cwd,
         }),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
   // TODO: need to normalize the path of a directory vinyl object
-  it("globs a directory with default settings", function (done) {
+  it("globs a directory with default settings", function (t, done) {
     var inputDirGlob = path.join(inputBase, "./f*/");
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isNull()).toEqual(true);
-      expect(files[0].isDirectory()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isNull(), true);
+      assert.strictEqual(files[0].isDirectory(), true);
     }
 
-    pipeline([vfs.src(inputDirGlob), concatArray(assert)], done);
+    pipeline([vfs.src(inputDirGlob), concatArray(assertion)], done);
   });
 
-  it("globs a directory with default settings and relative cwd", function (done) {
+  it("globs a directory with default settings and relative cwd", function (t, done) {
     var cwd = path.relative(process.cwd(), __dirname);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isNull()).toEqual(true);
-      expect(files[0].isDirectory()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].isNull(), true);
+      assert.strictEqual(files[0].isDirectory(), true);
     }
 
     pipeline(
-      [vfs.src("./fixtures/f*/", { cwd: cwd }), concatArray(assert)],
+      [vfs.src("./fixtures/f*/", { cwd: cwd }), concatArray(assertion)],
       done,
     );
   });
 
-  it("streams a directory with default settings", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(inputDirpath);
-      expect(files[0].isNull()).toEqual(true);
-      expect(files[0].isDirectory()).toEqual(true);
+  it("streams a directory with default settings", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].path, inputDirpath);
+      assert.strictEqual(files[0].isNull(), true);
+      assert.strictEqual(files[0].isDirectory(), true);
     }
 
-    pipeline([vfs.src(inputDirpath), concatArray(assert)], done);
+    pipeline([vfs.src(inputDirpath), concatArray(assertion)], done);
   });
 
-  it("streams file with with no contents using read: false option", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(inputPath);
-      expect(files[0].isNull()).toEqual(true);
-      expect(files[0].contents).toEqual(null);
+  it("streams file with with no contents using read: false option", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].path, inputPath);
+      assert.strictEqual(files[0].isNull(), true);
+      assert.strictEqual(files[0].contents, null);
     }
 
-    pipeline([vfs.src(inputPath, { read: false }), concatArray(assert)], done);
+    pipeline(
+      [vfs.src(inputPath, { read: false }), concatArray(assertion)],
+      done,
+    );
   });
 
-  it("streams a file changed after since", function (done) {
+  it("streams a file changed after since", function (t, done) {
     var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime - 1000);
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(inputPath);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].path, inputPath);
     }
 
     pipeline(
-      [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assert)],
+      [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not stream a file changed before since", function (done) {
+  it("does not stream a file changed before since", function (t, done) {
     var lastUpdateDate = new Date(+fs.statSync(inputPath).mtime + 1000);
 
-    function assert(files) {
-      expect(files.length).toEqual(0);
+    function assertion(files) {
+      assert.strictEqual(files.length, 0);
     }
 
     pipeline(
-      [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assert)],
+      [vfs.src(inputPath, { since: lastUpdateDate }), concatArray(assertion)],
       done,
     );
   });
 
-  it("streams a file with ctime greater than mtime", function (done) {
+  it("streams a file with ctime greater than mtime", function (t, done) {
     fs.mkdirSync(outputBase);
     fs.copyFileSync(inputPath, outputPath);
 
@@ -735,46 +748,46 @@ describeStreams(".src()", function (stream) {
 
       var stat = fs.statSync(renamedPath);
 
-      expect(+stat.ctime).toBeGreaterThan(+stat.mtime);
+      assert.strictEqual(+stat.ctime >= +stat.mtime, true);
 
       var lastMtime = new Date(+stat.mtime);
 
-      function assert(files) {
-        expect(files.length).toEqual(1);
-        expect(files[0].path).toEqual(renamedPath);
+      function assertion(files) {
+        assert.strictEqual(files.length, 1);
+        assert.strictEqual(files[0].path, renamedPath);
       }
 
       pipeline(
-        [vfs.src(renamedPath, { since: lastMtime }), concatArray(assert)],
+        [vfs.src(renamedPath, { since: lastMtime }), concatArray(assertion)],
         done,
       );
     }, 250);
   });
 
-  it("streams a file with streaming contents", function (done) {
+  it("streams a file with streaming contents", function (t, done) {
     var expectedContent = fs.readFileSync(inputPath);
 
     function assertContent(contents) {
-      expect(contents).toEqual(expectedContent);
+      assert.deepStrictEqual(contents, expectedContent);
     }
 
-    function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(inputPath);
-      expect(files[0].isStream()).toEqual(true);
+    function assertion(files) {
+      assert.strictEqual(files.length, 1);
+      assert.strictEqual(files[0].path, inputPath);
+      assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
       [
         vfs.src(inputPath, { buffer: false }),
         compareContents(assertContent),
-        concatArray(assert),
+        concatArray(assertion),
       ],
       done,
     );
   });
 
-  it("can be used as a through stream and adds new files to the end", function (done) {
+  it("can be used as a through stream and adds new files to the end", function (t, done) {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -782,34 +795,37 @@ describeStreams(".src()", function (stream) {
       stat: fs.statSync(inputPath),
     });
 
-    function assert(files) {
-      expect(files.length).toEqual(2);
-      expect(files[0]).toEqual(file);
+    function assertion(files) {
+      assert.strictEqual(files.length, 2);
+      assert.strictEqual(files[0], file);
     }
 
-    pipeline([from([file]), vfs.src(inputPath), concatArray(assert)], done);
+    pipeline([from([file]), vfs.src(inputPath), concatArray(assertion)], done);
   });
 
-  it("can be used at beginning and in the middle", function (done) {
-    function assert(files) {
-      expect(files.length).toEqual(2);
+  it("can be used at beginning and in the middle", function (t, done) {
+    function assertion(files) {
+      assert.strictEqual(files.length, 2);
     }
 
     pipeline(
-      [vfs.src(inputPath), vfs.src(inputPath), concatArray(assert)],
+      [vfs.src(inputPath), vfs.src(inputPath), concatArray(assertion)],
       done,
     );
   });
 
-  it("does not pass options on to stream", function (done) {
+  it("does not pass options on to stream", function (t, done) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
-    var read = sinon.fake.returns(false);
+    var read = t.mock.fn(() => false);
 
-    function assert() {
+    function assertion() {
       // Called once to resolve the option
-      expect(read.callCount).toEqual(1);
+      assert.strictEqual(read.mock.callCount(), 1);
     }
 
-    pipeline([vfs.src(inputPath, { read: read }), concatArray(assert)], done);
+    pipeline(
+      [vfs.src(inputPath, { read: read }), concatArray(assertion)],
+      done,
+    );
   });
 });

@@ -1,9 +1,10 @@
 "use strict";
 
+var assert = require("node:assert");
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -26,57 +27,55 @@ describeStreams(".dest() with custom owner", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("calls fchown when the uid and/or gid are provided on the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  it(
+    "calls fchown when the uid and/or gid are provided on the vinyl stat",
+    { skip: isWindows },
+    function (t, done) {
+      var fchownSpy = t.mock.method(fs, "fchown");
 
-    var fchownSpy = sinon.spy(fs, "fchown");
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          uid: 1002,
+          gid: 1002,
+        },
+      });
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        uid: 1002,
-        gid: 1002,
-      },
-    });
+      function assertion() {
+        assert.strictEqual(fchownSpy.mock.callCount(), 1);
+        assert.strictEqual(fchownSpy.mock.calls[0].arguments[1], 1002);
+        assert.strictEqual(fchownSpy.mock.calls[0].arguments[2], 1002);
+        done();
+      }
 
-    function assert() {
-      expect(fchownSpy.callCount).toEqual(1);
-      expect(fchownSpy.getCall(0).args[1]).toEqual(1002);
-      expect(fchownSpy.getCall(0).args[2]).toEqual(1002);
-      done();
-    }
+      pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    },
+  );
 
-    pipeline([from([file]), vfs.dest(outputBase)], assert);
-  });
+  it(
+    "does not call fchown when the uid and gid provided on the vinyl stat are invalid",
+    { skip: isWindows },
+    function (t, done) {
+      var fchownSpy = t.mock.method(fs, "fchown");
 
-  it("does not call fchown when the uid and gid provided on the vinyl stat are invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          uid: -1,
+          gid: -1,
+        },
+      });
 
-    var fchownSpy = sinon.spy(fs, "fchown");
+      function assertion() {
+        assert.strictEqual(fchownSpy.mock.callCount(), 0);
+        done();
+      }
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        uid: -1,
-        gid: -1,
-      },
-    });
-
-    function assert() {
-      expect(fchownSpy.callCount).toEqual(0);
-      done();
-    }
-
-    pipeline([from([file]), vfs.dest(outputBase)], assert);
-  });
+      pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    },
+  );
 });

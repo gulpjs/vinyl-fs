@@ -1,20 +1,14 @@
 "use strict";
 
-var sinon = require("sinon");
 var rimraf = require("rimraf");
 
 function cleanup(glob) {
-  return function (cb) {
-    this.timeout(0);
-
-    sinon.restore();
-
+  return function (t, done) {
     if (!glob) {
-      return cb();
+      return done();
     }
 
-    // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
-    rimraf(glob, cb);
+    rimraf(glob, done);
   };
 }
 

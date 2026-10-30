@@ -1,12 +1,13 @@
 "use strict";
 
-var path = require("path");
-var buffer = require("buffer");
+var path = require("node:path");
+var buffer = require("node:buffer");
+var assert = require("node:assert");
+var { afterEach, beforeEach, describe, it } = require("node:test");
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var expect = require("expect");
-var sinon = require("sinon");
+
 var mkdirp = require("fs-mkdirp-stream/mkdirp");
 
 var fo = require("../lib/file-operations");
@@ -58,320 +59,230 @@ describe("isOwner", function () {
     uid: 9002,
   };
 
-  var getuidSpy;
-  var geteuidSpy;
-
-  beforeEach(function (done) {
-    if (typeof process.geteuid !== "function") {
-      process.geteuid = noop;
-    }
-
-    // Windows :(
-    if (typeof process.getuid !== "function") {
-      process.getuid = noop;
-    }
-
-    getuidSpy = sinon.stub(process, "getuid").returns(ownerStat.uid);
-    geteuidSpy = sinon.stub(process, "geteuid").returns(ownerStat.uid);
-
-    done();
-  });
-
-  afterEach(function (done) {
-    // Because there are cases that delete process.geteuid or process.getuid,
-    // though an error occurs in sinon.restore if a spied function is
-    // undefined.
-    if (process.geteuid === undefined) {
-      process.geteuid = geteuidSpy;
-    }
-    if (process.getuid === undefined) {
-      process.getuid = getuidSpy;
-    }
-
-    sinon.restore();
-
-    if (process.geteuid === noop) {
-      delete process.geteuid;
-    }
-
-    // Windows :(
-    if (process.getuid === noop) {
-      delete process.getuid;
-    }
-
-    done();
-  });
-
   // TODO: test for having neither
+  // TODO something is funky with how these methods interact if we do not mock gateuid later tests will fail most likely something gets overwritten in the chain.
+  it("uses process.geteuid() when available", function (t) {
+    var getuidSpy = t.mock.method(process, "getuid", () => ownerStat.uid);
+    var geteuidSpy = t.mock.method(process, "geteuid", () => ownerStat.uid);
 
-  it("uses process.geteuid() when available", function (done) {
     isOwner(ownerStat);
 
-    expect(getuidSpy.callCount).toEqual(0);
-    expect(geteuidSpy.callCount).toEqual(1);
-
-    done();
+    assert.strictEqual(getuidSpy.mock.callCount(), 0);
+    assert.strictEqual(geteuidSpy.mock.callCount(), 1);
   });
 
-  it("uses process.getuid() when geteuid() is not available", function (done) {
+  it("uses process.getuid() when geteuid() is not available", function (t) {
+    var getuidSpy = t.mock.method(process, "getuid", () => ownerStat.uid);
+    // TODO why will this cause fs methods to fail in updateMetadata if not mocked
+    t.mock.method(process, "geteuid", () => ownerStat.uid);
+
     delete process.geteuid;
 
     isOwner(ownerStat);
 
-    expect(getuidSpy.callCount).toEqual(1);
-
-    done();
+    assert.strictEqual(getuidSpy.mock.callCount(), 1);
   });
 
-  it("returns false when non-root and non-owner", function (done) {
+  it("returns false when non-root and non-owner", function () {
     var result = isOwner(nonOwnerStat);
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns true when owner and non-root", function (done) {
+  it("returns true when owner and non-root", function (t) {
+    t.mock.method(process, "geteuid", () => ownerStat.uid);
     var result = isOwner(ownerStat);
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 
-  it("returns true when non-owner but root", function (done) {
-    process.geteuid.restore();
-    sinon.stub(process, "geteuid").returns(0);
+  it("returns true when non-owner but root", function (t) {
+    var spy = t.mock.method(process, "geteuid", () => 0);
 
     var result = isOwner(nonOwnerStat);
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
+    assert.strictEqual(spy.mock.callCount(), 1);
   });
 });
 
 describe("isValidUnixId", function () {
-  it("returns true if the given id is a valid unix id", function (done) {
+  it("returns true if the given id is a valid unix id", function () {
     var result = isValidUnixId(1000);
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 
-  it("returns false if the given id is not a number", function (done) {
+  it("returns false if the given id is not a number", function () {
     var result = isValidUnixId("root");
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns false when the given id is less than 0", function (done) {
+  it("returns false when the given id is less than 0", function () {
     var result = isValidUnixId(-1);
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 });
 
 describe("getFlags", function () {
-  it("returns wx if overwrite is false and append is false", function (done) {
+  it("returns wx if overwrite is false and append is false", function () {
     var result = getFlags({
       overwrite: false,
       append: false,
     });
 
-    expect(result).toEqual("wx");
-
-    done();
+    assert.strictEqual(result, "wx");
   });
 
-  it("returns w if overwrite is true and append is false", function (done) {
+  it("returns w if overwrite is true and append is false", function () {
     var result = getFlags({
       overwrite: true,
       append: false,
     });
 
-    expect(result).toEqual("w");
-
-    done();
+    assert.strictEqual(result, "w");
   });
 
-  it("returns ax if overwrite is false and append is true", function (done) {
+  it("returns ax if overwrite is false and append is true", function () {
     var result = getFlags({
       overwrite: false,
       append: true,
     });
 
-    expect(result).toEqual("ax");
-
-    done();
+    assert.strictEqual(result, "ax");
   });
 
-  it("returns a if overwrite is true and append is true", function (done) {
+  it("returns a if overwrite is true and append is true", function () {
     var result = getFlags({
       overwrite: true,
       append: true,
     });
 
-    expect(result).toEqual("a");
-
-    done();
+    assert.strictEqual(result, "a");
   });
 });
 
 describe("isFatalOverwriteError", function () {
-  it("returns false if not given any error", function (done) {
+  it("returns false if not given any error", function () {
     var result = isFatalOverwriteError(null);
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns true if code != EEXIST", function (done) {
+  it("returns true if code != EEXIST", function () {
     var result = isFatalOverwriteError({ code: "EOTHER" });
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 
-  it("returns false if code == EEXIST and flags == wx", function (done) {
+  it("returns false if code == EEXIST and flags == wx", function () {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "wx");
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns false if code == EEXIST and flags == ax", function (done) {
+  it("returns false if code == EEXIST and flags == ax", function () {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "ax");
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns true if error.code == EEXIST and flags == w", function (done) {
+  it("returns true if error.code == EEXIST and flags == w", function () {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "w");
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 
-  it("returns true if error.code == EEXIST and flags == a", function (done) {
+  it("returns true if error.code == EEXIST and flags == a", function () {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "a");
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 });
 
 describe("isFatalUnlinkError", function () {
-  it("returns false if not given any error", function (done) {
+  it("returns false if not given any error", function () {
     var result = isFatalUnlinkError(null);
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns false if code == ENOENT", function (done) {
+  it("returns false if code == ENOENT", function () {
     var result = isFatalUnlinkError({ code: "ENOENT" }, "wx");
 
-    expect(result).toEqual(false);
-
-    done();
+    assert.strictEqual(result, false);
   });
 
-  it("returns true if code != ENOENT", function (done) {
+  it("returns true if code != ENOENT", function () {
     var result = isFatalUnlinkError({ code: "EOTHER" });
 
-    expect(result).toEqual(true);
-
-    done();
+    assert.strictEqual(result, true);
   });
 });
 
 describe("getModeDiff", function () {
-  it("returns 0 if both modes are the same", function (done) {
+  it("returns 0 if both modes are the same", function () {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("777");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(0);
-
-    done();
+    assert.strictEqual(result, 0);
   });
 
-  it("returns 0 if vinyl mode is not a number", function (done) {
+  it("returns 0 if vinyl mode is not a number", function () {
     var fsMode = applyUmask("777");
     var vfsMode = undefined;
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(0);
-
-    done();
+    assert.strictEqual(result, 0);
   });
 
-  it("returns a value greater than 0 if modes are different", function (done) {
+  it("returns a value greater than 0 if modes are different", function () {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("744");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toBeGreaterThan(0);
-
-    done();
+    assert.strictEqual(result > 0, true);
   });
 
-  it("returns the proper diff", function (done) {
+  it("returns the proper diff", function () {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("744");
     var expectedDiff = applyUmask("33");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(expectedDiff);
-
-    done();
+    assert.strictEqual(result, expectedDiff);
   });
 
-  it("does not matter the order of diffing", function (done) {
+  it("does not matter the order of diffing", function () {
     var fsMode = applyUmask("655");
     var vfsMode = applyUmask("777");
     var expectedDiff = applyUmask("122");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(expectedDiff);
-
-    done();
+    assert.strictEqual(result, expectedDiff);
   });
 
-  it("includes the sticky/setuid/setgid bits", function (done) {
+  it("includes the sticky/setuid/setgid bits", function () {
     var fsMode = applyUmask("1777");
     var vfsMode = applyUmask("4777");
     var expectedDiff = applyUmask("5000");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    expect(result).toEqual(expectedDiff);
-
-    done();
+    assert.strictEqual(result, expectedDiff);
   });
 });
 
 describe("getTimesDiff", function () {
-  it("returns undefined if vinyl mtime is not a valid date", function (done) {
+  it("returns undefined if vinyl mtime is not a valid date", function () {
     var fsStat = {
       mtime: new Date(),
     };
@@ -381,12 +292,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if vinyl mtime & atime are both equal to counterparts", function (done) {
+  it("returns undefined if vinyl mtime & atime are both equal to counterparts", function () {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -399,13 +308,11 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
   // TODO: is this proper/expected?
-  it("returns undefined if vinyl mtimes equals the counterpart and atimes are null", function (done) {
+  it("returns undefined if vinyl mtimes equals the counterpart and atimes are null", function () {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -418,12 +325,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
-  it("returns a diff object if mtimes do not match", function (done) {
+  it("returns a diff object if mtimes do not match", function () {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -439,12 +344,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
-  it("returns a diff object if atimes do not match", function (done) {
+  it("returns a diff object if atimes do not match", function () {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -462,12 +365,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs atime if the vinyl atime is invalid", function (done) {
+  it("returns the fs atime if the vinyl atime is invalid", function () {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -484,13 +385,11 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
   // TODO: is this proper/expected?
-  it("makes atime diff undefined if fs and vinyl atime are invalid", function (done) {
+  it("makes atime diff undefined if fs and vinyl atime are invalid", function () {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -507,14 +406,12 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 });
 
 describe("getOwnerDiff", function () {
-  it("returns undefined if vinyl uid & gid are invalid", function (done) {
+  it("returns undefined if vinyl uid & gid are invalid", function () {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -526,12 +423,10 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if vinyl uid & gid are both equal to counterparts", function (done) {
+  it("returns undefined if vinyl uid & gid are both equal to counterparts", function () {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -543,12 +438,10 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
-  it("returns a diff object if uid or gid do not match", function (done) {
+  it("returns a diff object if uid or gid do not match", function () {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -564,7 +457,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: 1000,
@@ -577,12 +470,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs uid if the vinyl uid is invalid", function (done) {
+  it("returns the fs uid if the vinyl uid is invalid", function () {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -598,7 +489,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: -1,
@@ -607,12 +498,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs gid if the vinyl gid is invalid", function (done) {
+  it("returns the fs gid if the vinyl gid is invalid", function () {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -628,7 +517,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
+    assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: 1001,
@@ -637,12 +526,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(expected);
-
-    done();
+    assert.deepStrictEqual(result, expected);
   });
 
-  it("returns undefined if fs and vinyl uid are invalid", function (done) {
+  it("returns undefined if fs and vinyl uid are invalid", function () {
     var fsStat = {
       uid: undefined,
       gid: 1000,
@@ -654,7 +541,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
+    assert.strictEqual(result, undefined);
 
     fsStat = {
       uid: -1,
@@ -667,12 +554,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if fs and vinyl gid are invalid", function (done) {
+  it("returns undefined if fs and vinyl gid are invalid", function () {
     var fsStat = {
       uid: 1000,
       gid: undefined,
@@ -684,7 +569,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
+    assert.strictEqual(result, undefined);
 
     fsStat = {
       uid: 1000,
@@ -697,9 +582,7 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    expect(result).toEqual(undefined);
-
-    done();
+    assert.strictEqual(result, undefined);
   });
 });
 
@@ -708,61 +591,57 @@ describe("closeFd", function () {
   // We're also doing some hacky version matching because node 0.12 accepts 10000 on Windows (and fails the test)
   var invalidFd = process.version[1] === "0" ? -1 : 10000;
 
-  it("calls the callback with propagated error if fd is not a number", function (done) {
+  it("calls the callback with propagated error if fd is not a number", function (t, done) {
     var propagatedError = new Error();
 
     closeFd(propagatedError, null, function (err) {
-      expect(err).toEqual(propagatedError);
+      assert.strictEqual(err, propagatedError);
 
       done();
     });
   });
 
-  it("calls the callback with close error if no error to propagate", function (done) {
+  it("calls the callback with close error if no error to propagate", function (t, done) {
     closeFd(null, invalidFd, function (err) {
-      expect(err).toEqual(expect.anything());
+      assert.ok(err != null);
 
       done();
     });
   });
 
-  it("calls the callback with propagated error if close errors", function (done) {
+  it("calls the callback with propagated error if close errors", function (t, done) {
     var propagatedError = new Error();
 
     closeFd(propagatedError, invalidFd, function (err) {
-      expect(err).toEqual(propagatedError);
+      assert.strictEqual(err, propagatedError);
 
       done();
     });
   });
 
-  it("calls the callback with propagated error if close succeeds", function (done) {
+  it("calls the callback with propagated error if close succeeds", function (t, done) {
     var propagatedError = new Error();
 
     var fd = fs.openSync(inputPath, "r");
 
-    var closeSpy = sinon.spy(fs, "close");
+    var closeSpy = t.mock.method(fs, "close");
 
     closeFd(propagatedError, fd, function (err) {
-      closeSpy.restore();
-
-      expect(closeSpy.callCount).toEqual(1);
-      expect(err).toEqual(propagatedError);
+      assert.strictEqual(closeSpy.mock.callCount(), 1);
+      assert.strictEqual(err, propagatedError);
 
       done();
     });
   });
 
-  it("calls the callback with no error if close succeeds & no propagated error", function (done) {
+  it("calls the callback with no error if close succeeds & no propagated error", function (t, done) {
     var fd = fs.openSync(inputPath, "r");
 
-    var spy = sinon.spy(fs, "close");
+    var spy = t.mock.method(fs, "close");
 
     closeFd(null, fd, function (err) {
-      sinon.restore();
-
-      expect(spy.callCount).toEqual(1);
-      expect(err).toEqual(undefined);
+      assert.strictEqual(spy.mock.callCount(), 1);
+      assert.strictEqual(err, undefined);
 
       done();
     });
@@ -773,88 +652,87 @@ describe("writeFile", function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach(function (t, done) {
     mkdirp(outputBase, done);
   });
 
-  it("writes a file to the filesystem, does not close and returns the fd", function (done) {
+  it("writes a file to the filesystem, does not close and returns the fd", function (t, done) {
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        expect(written).toEqual(contents);
+        assert.strictEqual(written, contents);
 
         done();
       });
     });
   });
 
-  it("defaults to writing files with 0666 mode", function (done) {
+  it("defaults to writing files with 0666 mode", function (t, done) {
     var expected = applyUmask("666");
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
-        expect(statMode(outputPath)).toEqual(expected);
+        assert.strictEqual(statMode(outputPath), expected);
 
         done();
       });
     });
   });
 
-  it("accepts a different mode in options", function (done) {
-    // Changing the mode of a file is not supported by node.js in Windows.
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  // Changing the mode of a file is not supported by node.js in Windows.
+  it(
+    "accepts a different mode in options",
+    { skip: isWindows },
+    function (t, done) {
+      var expected = applyUmask("777");
+      var options = {
+        mode: expected,
+      };
 
-    var expected = applyUmask("777");
-    var options = {
-      mode: expected,
-    };
+      writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
+        assert.strictEqual(err === undefined, true);
+        assert.strictEqual(typeof fd === "number", true);
 
-    writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+        fs.close(fd, function () {
+          assert.strictEqual(statMode(outputPath), expected);
 
-      fs.close(fd, function () {
-        expect(statMode(outputPath)).toEqual(expected);
-
-        done();
+          done();
+        });
       });
-    });
-  });
+    },
+  );
 
-  it("defaults to opening files with write flag", function (done) {
+  it("defaults to opening files with write flag", function (t, done) {
     var length = contents.length;
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.read(fd, Buffer.alloc(length), 0, length, 0, function (readErr) {
-        expect(readErr).toEqual(expect.anything());
+        assert.ok(readErr != null);
 
         fs.close(fd, done);
       });
     });
   });
 
-  it("accepts a different flags in options", function (done) {
+  it("accepts a different flags in options", function (t, done) {
     var length = contents.length;
     var options = {
       flags: "w+",
     };
 
     writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.read(
         fd,
@@ -863,9 +741,9 @@ describe("writeFile", function () {
         length,
         0,
         function (readErr, _, written) {
-          expect(readErr).not.toEqual(expect.anything());
+          assert.ifError(readErr);
 
-          expect(written.toString()).toEqual(contents);
+          assert.strictEqual(written.toString(), contents);
 
           fs.close(fd, done);
         },
@@ -873,7 +751,7 @@ describe("writeFile", function () {
     });
   });
 
-  it("appends to a file if append flag is given", function (done) {
+  it("appends to a file if append flag is given", function (t, done) {
     var initial = "test";
     var toWrite = "-a-thing";
 
@@ -886,52 +764,52 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(toWrite), options, function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        expect(written).toEqual(expected);
+        assert.strictEqual(written, expected);
 
         done();
       });
     });
   });
 
-  it("does not pass a file descriptor if open call errors", function (done) {
+  it("does not pass a file descriptor if open call errors", function (t, done) {
     var notExistDir = path.join(__dirname, "./not-exist-dir/writeFile.txt");
 
     writeFile(notExistDir, Buffer.from(contents), function (err, fd) {
-      expect(err).toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(false);
+      assert.ok(err != null);
+      assert.strictEqual(typeof fd === "number", false);
 
       done();
     });
   });
 
-  it("passes a file descriptor if write call errors", function (done) {
+  it("passes a file descriptor if write call errors", function (t, done) {
     var options = {
       flags: "r",
     };
 
     writeFile(inputPath, Buffer.from(contents), options, function (err, fd) {
-      expect(err).toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.ok(err != null);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, done);
     });
   });
 
-  it("passes an error if called with string as data", function (done) {
+  it("passes an error if called with string as data", function (t, done) {
     writeFile(outputPath, contents, function (err) {
-      expect(err).toEqual(expect.anything());
+      assert.ok(err != null);
 
       done();
     });
   });
 
-  it("does not error on SlowBuffer", function (done) {
+  it("does not error on SlowBuffer", function (t, done) {
     if (!buffer.SlowBuffer) {
       this.skip();
       return;
@@ -943,23 +821,23 @@ describe("writeFile", function () {
     buf.copy(content, 0, 0, length);
 
     writeFile(outputPath, content, function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, function () {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        expect(written).toEqual(contents);
+        assert.strictEqual(written, contents);
 
         done();
       });
     });
   });
 
-  it("does not error if options is falsey", function (done) {
+  it("does not error if options is falsey", function (t, done) {
     writeFile(outputPath, Buffer.from(contents), null, function (err, fd) {
-      expect(err).not.toEqual(expect.anything());
-      expect(typeof fd === "number").toEqual(true);
+      assert.strictEqual(err === undefined, true);
+      assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, done);
     });
@@ -970,21 +848,21 @@ describe("reflectStat", function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach(function (t, done) {
     mkdirp(outputBase, done);
   });
 
-  it("passes the error if stat fails", function (done) {
+  it("passes the error if stat fails", function (t, done) {
     var file = new File();
 
     reflectStat(neInputDirpath, file, function (err) {
-      expect(err).toEqual(expect.anything());
+      assert.ok(err != null);
 
       done();
     });
   });
 
-  it("updates the vinyl with filesystem stats", function (done) {
+  it("updates the vinyl with filesystem stats", function (t, done) {
     var file = new File();
 
     fs.symlinkSync(inputPath, symlinkPath);
@@ -995,7 +873,7 @@ describe("reflectStat", function () {
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
       fs.stat(symlinkPath, function (err, stat) {
-        expect(file.stat).toEqual(stat);
+        assert.deepStrictEqual(file.stat, stat);
 
         done();
       });
@@ -1007,21 +885,21 @@ describe("reflectLinkStat", function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach(function (t, done) {
     mkdirp(outputBase, done);
   });
 
-  it("passes the error if lstat fails", function (done) {
+  it("passes the error if lstat fails", function (t, done) {
     var file = new File();
 
     reflectLinkStat(neInputDirpath, file, function (err) {
-      expect(err).toEqual(expect.anything());
+      assert.ok(err != null);
 
       done();
     });
   });
 
-  it("updates the vinyl with filesystem symbolic stats", function (done) {
+  it("updates the vinyl with filesystem symbolic stats", function (t, done) {
     var file = new File();
 
     fs.symlinkSync(inputPath, symlinkPath);
@@ -1032,7 +910,7 @@ describe("reflectLinkStat", function () {
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
       fs.lstat(symlinkPath, function (err, stat) {
-        expect(file.stat).toEqual(stat);
+        assert.deepStrictEqual(file.stat, stat);
 
         done();
       });
@@ -1044,11 +922,11 @@ describe("updateMetadata", function () {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach(function (t, done) {
     mkdirp(outputBase, done);
   });
 
-  afterEach(function (done) {
+  afterEach(function (t, done) {
     if (process.geteuid === noop) {
       delete process.geteuid;
     }
@@ -1056,407 +934,407 @@ describe("updateMetadata", function () {
     done();
   });
 
-  it("passes the error if fstat fails", function (done) {
-    // Changing the time of a directory errors in Windows.
-    // Changing the mode of a file is not supported by node.js in Windows.
-    // Windows is treated as though it does not have permission to make these operations.
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  // Changing the time of a directory errors in Windows.
+  // Changing the mode of a file is not supported by node.js in Windows.
+  // Windows is treated as though it does not have permission to make these operations.
+  it(
+    "passes the error if fstat fails",
+    { skip: isWindows },
+    function (t, done) {
+      var fd = 9001;
 
-    var fd = 9001;
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {},
-    });
-
-    updateMetadata(fd, file, function (err) {
-      expect(err).toEqual(expect.anything());
-
-      done();
-    });
-  });
-
-  it("updates the vinyl object with fs stats", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {},
-    });
-
-    var fd = fs.openSync(outputPath, "w+");
-    var stats = fs.fstatSync(fd);
-
-    updateMetadata(fd, file, function () {
-      // Not sure why .toEqual doesn't match these
-      Object.keys(file.stat).forEach(function (key) {
-        expect(file.stat[key]).toEqual(stats[key]);
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {},
       });
 
-      fs.close(fd, done);
-    });
-  });
+      updateMetadata(fd, file, function (err) {
+        assert.ok(err != null);
 
-  it("does not touch the fs if nothing to update", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+        done();
+      });
+    },
+  );
 
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {},
-    });
+  it(
+    "updates the vinyl object with fs stats",
+    { skip: isWindows },
+    function (t, done) {
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {},
+      });
 
-    var fchmodSpy = sinon.spy(fs, "fchmod");
-    var futimesSpy = sinon.spy(fs, "futimes");
-
-    var fd = fs.openSync(outputPath, "w+");
-
-    updateMetadata(fd, file, function () {
-      expect(fchmodSpy.callCount).toEqual(0);
-      expect(futimesSpy.callCount).toEqual(0);
-
-      fs.close(fd, done);
-    });
-  });
-
-  it("does not touch the fs if process is not owner of the file", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    if (typeof process.geteuid !== "function") {
-      process.geteuid = noop;
-    }
-
-    var earlier = Date.now() - 1000;
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(earlier),
-      },
-    });
-
-    sinon.stub(process, "geteuid").returns(9002);
-    var fchmodSpy = sinon.spy(fs, "fchmod");
-    var futimesSpy = sinon.spy(fs, "futimes");
-
-    var fd = fs.openSync(outputPath, "w+");
-
-    updateMetadata(fd, file, function () {
-      expect(fchmodSpy.callCount).toEqual(0);
-      expect(futimesSpy.callCount).toEqual(0);
-
-      fs.close(fd, done);
-    });
-  });
-
-  it("updates times on fs and vinyl object if there is a diff", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var futimesSpy = sinon.spy(fs, "futimes");
-
-    // Use new atime/mtime
-    var atime = new Date(Date.now() - 2048);
-    var mtime = new Date(Date.now() - 1024);
-    var mtimeEarlier = mtime.getTime() - 1000;
-    var atimeEarlier = atime.getTime() - 1000;
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(mtimeEarlier),
-        atime: new Date(atimeEarlier),
-      },
-    });
-
-    var fd = fs.openSync(outputPath, "w+");
-
-    updateMetadata(fd, file, function () {
-      expect(futimesSpy.callCount).toEqual(1);
-      // Var stats = fs.fstatSync(fd);
-
-      var atimeSpy = futimesSpy.getCall(0).args[1];
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
-
-      expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
-      expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
-      expect(file.stat.atime).toEqual(new Date(atimeEarlier));
-      expect(atimeSpy.getTime()).toEqual(atimeEarlier);
-
-      fs.close(fd, done);
-    });
-  });
-
-  it("forwards futimes error and descriptor upon error", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var futimesSpy = sinon.stub(fs, "futimes").callsFake(mockError);
-
-    var now = Date.now();
-    var then = now - 1000;
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(then),
-        atime: new Date(then),
-      },
-    });
-
-    var fd = fs.openSync(outputPath, "w+");
-    expect(typeof fd === "number").toEqual(true);
-
-    updateMetadata(fd, file, function (err) {
-      expect(err).toEqual(expect.anything());
-      expect(futimesSpy.callCount).toEqual(1);
-
-      fs.close(fd, done);
-    });
-  });
-
-  it("sets stats to filesystem stats if futimes is not implemented (issue 302)", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var futimesSpy = sinon.stub(fs, "futimes").callsFake(function () {
-      var callback = arguments[arguments.length - 1];
-      var err = new Error("ENOSYS: function not implemented, futime");
-      err.errno = -109;
-      err.code = "ENOSYS";
-      err.syscall = "futime";
-      callback(err);
-    });
-
-    var fd = fs.openSync(outputPath, "w+");
-    expect(typeof fd === "number").toEqual(true);
-
-    var stat = fs.fstatSync(fd);
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(stat.mtime - 1000),
-        atime: new Date(stat.atime - 1000),
-      },
-    });
-
-    updateMetadata(fd, file, function (err) {
-      expect(err).not.toEqual(expect.anything());
-      expect(futimesSpy.callCount).toEqual(1);
-      // Times were updated to match the filesystem since futimes wasn't implemented
-      expect(file.stat.mtime).toEqual(stat.mtime);
-      expect(file.stat.atime).toEqual(stat.atime);
-
-      fs.close(fd, done);
-    });
-  });
-
-  it("updates the mode on fs and vinyl object if there is a diff", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var fchmodSpy = sinon.spy(fs, "fchmod");
-
-    var mode = applyUmask("777");
-
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mode: mode,
-      },
-    });
-
-    var fd = fs.openSync(outputPath, "w+");
-
-    updateMetadata(fd, file, function () {
-      expect(fchmodSpy.callCount).toEqual(1);
+      var fd = fs.openSync(outputPath, "w+");
       var stats = fs.fstatSync(fd);
-      expect(file.stat.mode).toEqual(stats.mode);
 
-      fs.close(fd, done);
-    });
-  });
+      updateMetadata(fd, file, function () {
+        // Not sure why .toEqual doesn't match these
+        Object.keys(file.stat).forEach(function (key) {
+          assert.strictEqual(file.stat[key], stats[key]);
+        });
 
-  it("updates the sticky bit on mode on fs and vinyl object if there is a diff", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+        fs.close(fd, done);
+      });
+    },
+  );
 
-    var fchmodSpy = sinon.spy(fs, "fchmod");
+  it(
+    "does not touch the fs if nothing to update",
+    { skip: isWindows },
+    function (t, done) {
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {},
+      });
 
-    var mode = applyUmask("1777");
+      var fchmodSpy = t.mock.method(fs, "fchmod");
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mode: mode,
-      },
-    });
+      var fd = fs.openSync(outputPath, "w+");
 
-    var fd = fs.openSync(outputPath, "w+");
+      updateMetadata(fd, file, function () {
+        assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+        assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
-    updateMetadata(fd, file, function () {
-      expect(fchmodSpy.callCount).toEqual(1);
-      var stats = fs.fstatSync(fd);
-      expect(file.stat.mode).toEqual(stats.mode);
+        fs.close(fd, done);
+      });
+    },
+  );
 
-      fs.close(fd, done);
-    });
-  });
+  it(
+    "does not touch the fs if process is not owner of the file",
+    { skip: isWindows },
+    function (t, done) {
+      if (typeof process.geteuid !== "function") {
+        process.geteuid = noop;
+      }
 
-  it("forwards fchmod error and descriptor upon error", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      var earlier = Date.now() - 1000;
 
-    var mode = applyUmask("777");
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(earlier),
+        },
+      });
 
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mode: mode,
-      },
-    });
+      t.mock.method(process, "geteuid", () => 9002);
+      var fchmodSpy = t.mock.method(fs, "fchmod");
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-    var fd = fs.openSync(outputPath, "w+");
+      var fd = fs.openSync(outputPath, "w+");
 
-    var fchmodSpy = sinon.stub(fs, "fchmod").callsFake(mockError);
+      updateMetadata(fd, file, function () {
+        assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+        assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
-    updateMetadata(fd, file, function (err) {
-      expect(err).toEqual(expect.anything());
-      expect(fchmodSpy.callCount).toEqual(1);
+        fs.close(fd, done);
+      });
+    },
+  );
 
-      fs.close(fd, done);
-    });
-  });
+  it(
+    "updates times on fs and vinyl object if there is a diff",
+    { skip: isWindows },
+    function (t, done) {
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-  it("updates the mode & times on fs and vinyl object if there is a diff", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      // Use new atime/mtime
+      var atime = new Date(Date.now() - 2048);
+      var mtime = new Date(Date.now() - 1024);
+      var mtimeEarlier = mtime.getTime() - 1000;
+      var atimeEarlier = atime.getTime() - 1000;
 
-    var fchmodSpy = sinon.spy(fs, "fchmod");
-    var futimesSpy = sinon.spy(fs, "futimes");
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(mtimeEarlier),
+          atime: new Date(atimeEarlier),
+        },
+      });
 
-    // Use new atime/mtime
-    var atime = new Date(Date.now() - 2048);
-    var mtime = new Date(Date.now() - 1024);
-    var mtimeEarlier = mtime.getTime() - 1000;
-    var atimeEarlier = atime.getTime() - 1000;
+      var fd = fs.openSync(outputPath, "w+");
 
-    var mode = applyUmask("777");
+      updateMetadata(fd, file, function () {
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+        // Var stats = fs.fstatSync(fd);
+        var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
+        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(mtimeEarlier),
-        atime: new Date(atimeEarlier),
-        mode: mode,
-      },
-    });
+        assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
+        assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
+        assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
+        assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
 
-    var fd = fs.openSync(outputPath, "w+");
+        fs.close(fd, done);
+      });
+    },
+  );
 
-    updateMetadata(fd, file, function () {
-      expect(fchmodSpy.callCount).toEqual(1);
-      expect(futimesSpy.callCount).toEqual(1);
+  it(
+    "forwards futimes error and descriptor upon error",
+    { skip: isWindows },
+    function (t, done) {
+      var futimesSpy = t.mock.method(fs, "futimes", (fd, atime, mtime, cb) => {
+        process.nextTick(cb, mockError);
+      });
 
-      var atimeSpy = futimesSpy.getCall(0).args[1];
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+      var now = Date.now();
+      var then = now - 1000;
 
-      expect(file.stat.mtime).toEqual(new Date(mtimeEarlier));
-      expect(mtimeSpy.getTime()).toEqual(mtimeEarlier);
-      expect(file.stat.atime).toEqual(new Date(atimeEarlier));
-      expect(atimeSpy.getTime()).toEqual(atimeEarlier);
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(then),
+          atime: new Date(then),
+        },
+      });
 
-      fs.close(fd, done);
-    });
-  });
+      var fd = fs.openSync(outputPath, "w+");
+      assert.strictEqual(typeof fd === "number", true);
 
-  it("forwards fchmod error and descriptor through futimes if there is a time diff", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      updateMetadata(fd, file, function (err) {
+        assert.ok(err != null);
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-    var mockedErr = new Error("mocked error");
+        fs.close(fd, done);
+      });
+    },
+  );
 
-    var fchmodSpy = sinon.stub(fs, "fchmod").callsFake(function (fd, mode, cb) {
-      cb(mockedErr);
-    });
-    var futimesSpy = sinon.spy(fs, "futimes");
+  it(
+    "sets stats to filesystem stats if futimes is not implemented (issue 302)",
+    { skip: isWindows },
+    function (t, done) {
+      var futimesSpy = t.mock.method(
+        fs,
+        "futimes",
+        function (fd, atime, mtime, cb) {
+          var err = new Error("ENOSYS: function not implemented, futime");
+          err.errno = -109;
+          err.code = "ENOSYS";
+          err.syscall = "futime";
+          //Mock timing difference
+          process.nextTick(cb, err);
+        },
+      );
 
-    var now = Date.now();
-    var then = now - 1000;
-    var mode = applyUmask("777");
+      var fd = fs.openSync(outputPath, "w+");
+      assert.strictEqual(typeof fd === "number", true);
 
-    var file = new File({
-      base: outputBase,
-      path: outputPath,
-      contents: null,
-      stat: {
-        mtime: new Date(then),
-        atime: new Date(then),
-        mode: mode,
-      },
-    });
+      var stat = fs.fstatSync(fd);
 
-    var fd = fs.openSync(outputPath, "w");
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(stat.mtime - 1000),
+          atime: new Date(stat.atime - 1000),
+        },
+      });
 
-    updateMetadata(fd, file, function (err) {
-      expect(err).toEqual(expect.anything());
-      expect(err).toEqual(mockedErr);
-      expect(fchmodSpy.callCount).toEqual(1);
-      expect(futimesSpy.callCount).toEqual(1);
+      updateMetadata(fd, file, function (err) {
+        assert.strictEqual(err === undefined, true);
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+        // Times were updated to match the filesystem since futimes wasn't implemented
+        assert.deepStrictEqual(file.stat.mtime, stat.mtime);
+        assert.deepStrictEqual(file.stat.atime, stat.atime);
 
-      fs.close(fd, done);
-    });
-  });
+        fs.close(fd, done);
+      });
+    },
+  );
+
+  it(
+    "updates the mode on fs and vinyl object if there is a diff",
+    { skip: isWindows },
+    function (t, done) {
+      var fchmodSpy = t.mock.method(fs, "fchmod");
+
+      var mode = applyUmask("777");
+
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mode: mode,
+        },
+      });
+
+      var fd = fs.openSync(outputPath, "w+");
+
+      updateMetadata(fd, file, function (err) {
+        assert.ifError(err);
+        assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+        var stats = fs.fstatSync(fd);
+        assert.strictEqual(file.stat.mode, stats.mode);
+
+        fs.close(fd, done);
+      });
+    },
+  );
+
+  it(
+    "updates the sticky bit on mode on fs and vinyl object if there is a diff",
+    { skip: isWindows },
+    function (t, done) {
+      var fchmodSpy = t.mock.method(fs, "fchmod");
+
+      var mode = applyUmask("1777");
+
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mode: mode,
+        },
+      });
+
+      var fd = fs.openSync(outputPath, "w+");
+
+      updateMetadata(fd, file, function () {
+        assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+        var stats = fs.fstatSync(fd);
+        assert.strictEqual(file.stat.mode, stats.mode);
+
+        fs.close(fd, done);
+      });
+    },
+  );
+
+  it(
+    "forwards fchmod error and descriptor upon error",
+    { skip: isWindows },
+    function (t, done) {
+      var mode = applyUmask("777");
+
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mode: mode,
+        },
+      });
+
+      var fd = fs.openSync(outputPath, "w+");
+      var fchmodSpy = t.mock.method(fs, "fchmod", (fd, mode, cb) => {
+        process.nextTick(cb, mockError);
+      });
+
+      updateMetadata(fd, file, function (err) {
+        assert.ok(err != null);
+        assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+
+        fs.close(fd, done);
+      });
+    },
+  );
+
+  it(
+    "updates the mode & times on fs and vinyl object if there is a diff",
+    { skip: isWindows },
+    function (t, done) {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
+
+      var fchmodSpy = t.mock.method(fs, "fchmod");
+      var futimesSpy = t.mock.method(fs, "futimes");
+
+      // Use new atime/mtime
+      var atime = new Date(Date.now() - 2048);
+      var mtime = new Date(Date.now() - 1024);
+      var mtimeEarlier = mtime.getTime() - 1000;
+      var atimeEarlier = atime.getTime() - 1000;
+
+      var mode = applyUmask("777");
+
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(mtimeEarlier),
+          atime: new Date(atimeEarlier),
+          mode: mode,
+        },
+      });
+
+      var fd = fs.openSync(outputPath, "w+");
+
+      updateMetadata(fd, file, function () {
+        assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+
+        var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
+        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
+
+        assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
+        assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
+        assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
+        assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
+
+        fs.close(fd, done);
+      });
+    },
+  );
+
+  it(
+    "forwards fchmod error and descriptor through futimes if there is a time diff",
+    { skip: isWindows },
+    function (t, done) {
+      var mockedErr = new Error("mocked error");
+
+      var fchmodSpy = t.mock.method(fs, "fchmod", function (fd, mode, cb) {
+        cb(mockedErr);
+      });
+      var futimesSpy = t.mock.method(fs, "futimes");
+
+      var now = Date.now();
+      var then = now - 1000;
+      var mode = applyUmask("777");
+
+      var file = new File({
+        base: outputBase,
+        path: outputPath,
+        contents: null,
+        stat: {
+          mtime: new Date(then),
+          atime: new Date(then),
+          mode: mode,
+        },
+      });
+
+      var fd = fs.openSync(outputPath, "w");
+
+      updateMetadata(fd, file, function (err) {
+        assert.ok(err != null);
+        assert.strictEqual(err, mockedErr);
+        assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+
+        fs.close(fd, done);
+      });
+    },
+  );
 
   // TODO: forward fchown error tests
 });
@@ -1471,44 +1349,42 @@ describeStreams("createWriteStream", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach(function (t, done) {
     // For some reason, the outputDir sometimes exists on Windows
     // So we use our mkdirp to create it
     mkdirp(outputBase, done);
   });
 
-  it("accepts just a file path and writes to it", function (done) {
-    function assert(err) {
+  it("accepts just a file path and writes to it", function (t, done) {
+    function assertion(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      expect(outputContents).toEqual(contents);
+      assert.strictEqual(outputContents, contents);
       done(err);
     }
 
-    pipeline([from([contents]), createWriteStream(outputPath)], assert);
+    pipeline([from([contents]), createWriteStream(outputPath)], assertion);
   });
 
-  it("accepts just a file path and writes a large file to it", function (done) {
-    this.timeout(0);
-
+  it("accepts just a file path and writes a large file to it", function (t, done) {
     var size = 40000;
 
-    function assert(err) {
+    function assertion(err) {
       var stats = fs.lstatSync(outputPath);
 
-      expect(stats.size).toEqual(size);
+      assert.strictEqual(stats.size, size);
       done(err);
     }
 
-    pipeline([chunks(size), createWriteStream(outputPath)], assert);
+    pipeline([chunks(size), createWriteStream(outputPath)], assertion);
   });
 
-  it("accepts flags option", function (done) {
+  it("accepts flags option", function (t, done) {
     // Write 13 stars then 12345 because the length of expected is 13
     fs.writeFileSync(outputPath, "*************12345");
 
-    function assert(err) {
+    function assertion(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      expect(outputContents).toEqual(contents + "12345");
+      assert.strictEqual(outputContents, contents + "12345");
       done(err);
     }
 
@@ -1518,16 +1394,16 @@ describeStreams("createWriteStream", function (stream) {
         // Replaces from the beginning of the file
         createWriteStream(outputPath, { flags: "r+" }),
       ],
-      assert,
+      assertion,
     );
   });
 
-  it("accepts append flag as option & places cursor at the end", function (done) {
+  it("accepts append flag as option & places cursor at the end", function (t, done) {
     fs.writeFileSync(outputPath, "12345");
 
-    function assert(err) {
+    function assertion(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      expect(outputContents).toEqual("12345" + contents);
+      assert.strictEqual(outputContents, "12345" + contents);
       done(err);
     }
 
@@ -1537,11 +1413,11 @@ describeStreams("createWriteStream", function (stream) {
         // Appends to the end of the file
         createWriteStream(outputPath, { flags: "a" }),
       ],
-      assert,
+      assertion,
     );
   });
 
-  it("accepts mode option", function (done) {
+  it("accepts mode option", function (t, done) {
     if (isWindows) {
       console.log(
         "Changing the mode of a file is not supported by node.js in Windows.",
@@ -1552,29 +1428,29 @@ describeStreams("createWriteStream", function (stream) {
 
     var mode = applyUmask("777");
 
-    function assert(err) {
-      expect(statMode(outputPath)).toEqual(mode);
+    function assertion(err) {
+      assert.strictEqual(statMode(outputPath), mode);
       done(err);
     }
 
     pipeline(
       [from([contents]), createWriteStream(outputPath, { mode: mode })],
-      assert,
+      assertion,
     );
   });
 
-  it("uses default file mode if no mode options", function (done) {
+  it("uses default file mode if no mode options", function (t, done) {
     var defaultMode = applyUmask(DEFAULT_FILE_MODE);
 
-    function assert(err) {
-      expect(statMode(outputPath)).toEqual(defaultMode);
+    function assertion(err) {
+      assert.strictEqual(statMode(outputPath), defaultMode);
       done(err);
     }
 
-    pipeline([from([contents]), createWriteStream(outputPath)], assert);
+    pipeline([from([contents]), createWriteStream(outputPath)], assertion);
   });
 
-  it("accepts a flush function that is called before close emitted", function (done) {
+  it("accepts a flush function that is called before close emitted", function (t, done) {
     var flushCalled = false;
 
     var outStream = createWriteStream(outputPath, {}, function (fd, cb) {
@@ -1582,15 +1458,15 @@ describeStreams("createWriteStream", function (stream) {
       cb();
     });
 
-    function assert(err) {
-      expect(flushCalled).toEqual(true);
+    function assertion(err) {
+      assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assert);
+    pipeline([from([contents]), outStream], assertion);
   });
 
-  it("can specify flush without options argument", function (done) {
+  it("can specify flush without options argument", function (t, done) {
     var flushCalled = false;
 
     var outStream = createWriteStream(outputPath, function (fd, cb) {
@@ -1598,32 +1474,32 @@ describeStreams("createWriteStream", function (stream) {
       cb();
     });
 
-    function assert(err) {
-      expect(flushCalled).toEqual(true);
+    function assertion(err) {
+      assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assert);
+    pipeline([from([contents]), outStream], assertion);
   });
 
-  it("passes the file descriptor to flush", function (done) {
+  it("passes the file descriptor to flush", function (t, done) {
     var flushCalled = false;
 
     var outStream = createWriteStream(outputPath, function (fd, cb) {
-      expect(typeof fd).toEqual("number");
+      assert.strictEqual(typeof fd, "number");
       flushCalled = true;
       cb();
     });
 
-    function assert(err) {
-      expect(flushCalled).toEqual(true);
+    function assertion(err) {
+      assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assert);
+    pipeline([from([contents]), outStream], assertion);
   });
 
-  it("passes a callback to flush to call when work is done", function (done) {
+  it("passes a callback to flush to call when work is done", function (t, done) {
     var flushCalled = false;
     var timeoutCalled = false;
 
@@ -1635,38 +1511,38 @@ describeStreams("createWriteStream", function (stream) {
       }, 250);
     });
 
-    function assert(err) {
-      expect(flushCalled).toEqual(true);
-      expect(timeoutCalled).toEqual(true);
+    function assertion(err) {
+      assert.strictEqual(flushCalled, true);
+      assert.strictEqual(timeoutCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assert);
+    pipeline([from([contents]), outStream], assertion);
   });
 
-  it("emits an error if open fails", function (done) {
+  it("emits an error if open fails", function (t, done) {
     var badOutputPath = path.join(outputBase, "./non-exist/test.coffee");
 
-    function assert(err) {
-      expect(err).toBeInstanceOf(Error);
+    function assertion(err) {
+      assert.ok(err instanceof Error);
       done();
     }
 
-    pipeline([from([contents]), createWriteStream(badOutputPath)], assert);
+    pipeline([from([contents]), createWriteStream(badOutputPath)], assertion);
   });
 
-  it("emits an error if write fails", function (done) {
+  it("emits an error if write fails", function (t, done) {
     // Create the file so it can be opened with `r`
     fs.writeFileSync(outputPath, contents);
 
-    function assert(err) {
-      expect(err).toBeInstanceOf(Error);
+    function assertion(err) {
+      assert.ok(err instanceof Error);
       done();
     }
 
     pipeline(
       [from([contents]), createWriteStream(outputPath, { flags: "r" })],
-      assert,
+      assertion,
     );
   });
 });

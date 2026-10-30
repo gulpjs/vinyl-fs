@@ -1,9 +1,10 @@
 "use strict";
 
+var assert = require("node:assert");
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -27,175 +28,185 @@ describeStreams(".dest() with custom times", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("does not call futimes when no mtime is provided on the vinyl stat", function (done) {
-    // Changing the time of a directory errors in Windows.
-    // Windows is treated as though it does not have permission to make this operation.
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  it(
+    "does not call futimes when no mtime is provided on the vinyl stat",
+    { skip: isWindows },
+    function (t, done) {
+      // Changing the time of a directory errors in Windows.
+      // Windows is treated as though it does not have permission to make this operation.
+      var earlier = Date.now() - 1001;
+      //
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-    var earlier = Date.now() - 1001;
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {},
+      });
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+      function assertion() {
+        var stats = fs.lstatSync(outputPath);
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {},
-    });
+        assert.strictEqual(futimesSpy.mock.callCount(), 0);
+        assert.strictEqual(stats.atime.getTime() >= earlier, true);
+        assert.strictEqual(stats.mtime.getTime() >= earlier, true);
+        done();
+      }
 
-    function assert() {
-      var stats = fs.lstatSync(outputPath);
+      pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assertion,
+      );
+    },
+  );
 
-      expect(futimesSpy.callCount).toEqual(0);
-      expect(stats.atime.getTime()).toBeGreaterThan(earlier);
-      expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
-      done();
-    }
+  it(
+    "calls futimes when an mtime is provided on the vinyl stat",
+    { skips: isWindows },
+    function (t, done) {
+      // Use new mtime
+      var mtime = new Date(Date.now() - 2048);
 
-    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
-  });
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-  it("calls futimes when an mtime is provided on the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mtime: mtime,
+        },
+      });
 
-    // Use new mtime
-    var mtime = new Date(Date.now() - 2048);
+      function assertion() {
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+        // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
+        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        mtime: mtime,
-      },
-    });
+        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
-    function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
+        assert.strictEqual(file.stat.mtime, mtime);
 
-      // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+        done();
+      }
 
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
+      pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assertion,
+      );
+    },
+  );
 
-      expect(file.stat.mtime).toEqual(mtime);
+  it(
+    "does not call futimes when provided mtime on the vinyl stat is invalid",
+    { skips: isWindows },
+    function (t, done) {
+      var earlier = Date.now() - 1001;
 
-      done();
-    }
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
-  });
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          mtime: new Date(undefined),
+        },
+      });
 
-  it("does not call futimes when provided mtime on the vinyl stat is invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+      function assertion() {
+        var stats = fs.lstatSync(outputPath);
 
-    var earlier = Date.now() - 1001;
+        assert.strictEqual(futimesSpy.mock.callCount(), 0);
+        assert.strictEqual(stats.mtime.getTime() >= earlier, true);
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+        done();
+      }
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        mtime: new Date(undefined),
-      },
-    });
+      pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assertion,
+      );
+    },
+  );
 
-    function assert() {
-      var stats = fs.lstatSync(outputPath);
+  it(
+    "calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid",
+    { skip: isWindows },
+    function (t, done) {
+      // Use new mtime
+      var mtime = new Date(Date.now() - 2048);
+      var invalidAtime = new Date(undefined);
 
-      expect(futimesSpy.callCount).toEqual(0);
-      expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-      done();
-    }
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          atime: invalidAtime,
+          mtime: mtime,
+        },
+      });
 
-    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
-  });
+      function assertion() {
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-  it("calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-    // Use new mtime
-    var mtime = new Date(Date.now() - 2048);
-    var invalidAtime = new Date(undefined);
+        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+        done();
+      }
 
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        atime: invalidAtime,
-        mtime: mtime,
-      },
-    });
+      pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assertion,
+      );
+    },
+  );
 
-    function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
+  it(
+    "writes file atime and mtime using the vinyl stat",
+    { skip: isWindows },
+    function (t, done) {
+      // Use new atime/mtime
+      var atime = new Date(Date.now() - 2048);
+      var mtime = new Date(Date.now() - 1024);
 
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+      var futimesSpy = t.mock.method(fs, "futimes");
 
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
+      var file = new File({
+        base: inputBase,
+        path: inputPath,
+        contents: Buffer.from(contents),
+        stat: {
+          atime: atime,
+          mtime: mtime,
+        },
+      });
 
-      done();
-    }
+      function assertion() {
+        assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
-  });
+        var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
+        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-  it("writes file atime and mtime using the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+        assert.strictEqual(atimeSpy.getTime(), atime.getTime());
+        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
+        assert.strictEqual(file.stat.mtime, mtime);
+        assert.deepStrictEqual(file.stat.atime, atime);
 
-    // Use new atime/mtime
-    var atime = new Date(Date.now() - 2048);
-    var mtime = new Date(Date.now() - 1024);
+        done();
+      }
 
-    var futimesSpy = sinon.spy(fs, "futimes");
-
-    var file = new File({
-      base: inputBase,
-      path: inputPath,
-      contents: Buffer.from(contents),
-      stat: {
-        atime: atime,
-        mtime: mtime,
-      },
-    });
-
-    function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
-
-      var atimeSpy = futimesSpy.getCall(0).args[1];
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
-
-      expect(atimeSpy.getTime()).toEqual(atime.getTime());
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
-      expect(file.stat.mtime).toEqual(mtime);
-      expect(file.stat.atime).toEqual(atime);
-
-      done();
-    }
-
-    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
-  });
+      pipeline(
+        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
+        assertion,
+      );
+    },
+  );
 });

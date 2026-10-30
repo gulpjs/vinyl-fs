@@ -1,9 +1,10 @@
 "use strict";
 
-var path = require("path");
+var path = require("node:path");
+var assert = require("node:assert");
+var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -39,10 +40,8 @@ describeStreams("integrations", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("does not exhaust available file descriptors when streaming thousands of files", function (done) {
-    // This can be a very slow test on boxes with slow disk i/o
-    this.timeout(0);
-
+  // This can be a very slow test on boxes with slow disk i/o
+  it("does not exhaust available file descriptors when streaming thousands of files", function (t, done) {
     // Make a ton of files. Changed from hard links due to Windows failures
     var expectedCount = 6000;
 
@@ -64,155 +63,153 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(*nix) sources a directory, creates a symlink and copies it", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  it(
+    "(*nix) sources a directory, creates a symlink and copies it",
+    { skip: isWindows },
+    function (t, done) {
+      function assertion(files) {
+        var symlinkResult = fs.readlinkSync(outputSymlink);
+        var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-    function assert(files) {
-      var symlinkResult = fs.readlinkSync(outputSymlink);
-      var destResult = fs.readlinkSync(outputDirpathSymlink);
+        assert.strictEqual(symlinkResult, inputDirpath);
+        assert.strictEqual(destResult, inputDirpath);
+        assert.strictEqual(files[0].isSymbolic(), true);
+        assert.strictEqual(files[0].symlink, inputDirpath);
+      }
 
-      expect(symlinkResult).toEqual(inputDirpath);
-      expect(destResult).toEqual(inputDirpath);
-      expect(files[0].isSymbolic()).toBe(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
-    }
+      pipeline(
+        [
+          vfs.src(inputDirpath),
+          vfs.symlink(symlinkDirpath),
+          vfs.dest(outputDirpath),
+          concatArray(assertion),
+        ],
+        done,
+      );
+    },
+  );
 
-    pipeline(
-      [
-        vfs.src(inputDirpath),
-        vfs.symlink(symlinkDirpath),
-        vfs.dest(outputDirpath),
-        concatArray(assert),
-      ],
-      done,
-    );
-  });
+  it(
+    "(windows) sources a directory, creates a junction and copies it",
+    { skip: !isWindows },
+    function (t, done) {
+      function assertion(files) {
+        // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+        var expected = inputDirpath;
+        var symlinkResult = fs.readlinkSync(outputSymlink);
+        var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-  it("(windows) sources a directory, creates a junction and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
+        assert.strictEqual(symlinkResult, expected);
+        assert.strictEqual(destResult, expected);
+        assert.strictEqual(files[0].isSymbolic(), true);
+        assert.strictEqual(files[0].symlink, inputDirpath);
+      }
 
-    function assert(files) {
-      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
-      var expected = inputDirpath;
-      var symlinkResult = fs.readlinkSync(outputSymlink);
-      var destResult = fs.readlinkSync(outputDirpathSymlink);
+      pipeline(
+        [
+          vfs.src(inputDirpath),
+          vfs.symlink(symlinkDirpath),
+          vfs.dest(outputDirpath),
+          concatArray(assertion),
+        ],
+        done,
+      );
+    },
+  );
 
-      expect(symlinkResult).toEqual(expected);
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toBe(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
-    }
+  it(
+    "(*nix) sources a symlink and copies it",
+    { skip: isWindows },
+    function (t, done) {
+      fs.mkdirSync(base);
+      fs.mkdirSync(symlinkDirpath);
+      fs.symlinkSync(inputDirpath, outputSymlink);
 
-    pipeline(
-      [
-        vfs.src(inputDirpath),
-        vfs.symlink(symlinkDirpath),
-        vfs.dest(outputDirpath),
-        concatArray(assert),
-      ],
-      done,
-    );
-  });
+      function assertion(files) {
+        var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-  it("(*nix) sources a symlink and copies it", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+        assert.strictEqual(destResult, inputDirpath);
+        assert.strictEqual(files[0].isSymbolic(), true);
+        assert.strictEqual(files[0].symlink, inputDirpath);
+      }
 
-    fs.mkdirSync(base);
-    fs.mkdirSync(symlinkDirpath);
-    fs.symlinkSync(inputDirpath, outputSymlink);
+      pipeline(
+        [
+          vfs.src(outputSymlink, { resolveSymlinks: false }),
+          vfs.dest(outputDirpath),
+          concatArray(assertion),
+        ],
+        done,
+      );
+    },
+  );
 
-    function assert(files) {
-      var destResult = fs.readlinkSync(outputDirpathSymlink);
+  it(
+    "(windows) sources a directory symlink and copies it",
+    { skip: !isWindows },
+    function (t, done) {
+      fs.mkdirSync(base);
+      fs.mkdirSync(symlinkDirpath);
+      fs.symlinkSync(inputDirpath, outputSymlink, "dir");
 
-      expect(destResult).toEqual(inputDirpath);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
-    }
+      function assertion(files) {
+        // When creating `dir` symlinks, it seems Windows no longer appends a separator as of Node 22+
+        var expected = inputDirpath;
+        var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-    pipeline(
-      [
-        vfs.src(outputSymlink, { resolveSymlinks: false }),
-        vfs.dest(outputDirpath),
-        concatArray(assert),
-      ],
-      done,
-    );
-  });
+        assert.strictEqual(destResult, expected);
+        assert.strictEqual(files[0].isSymbolic(), true);
+        assert.strictEqual(files[0].symlink, inputDirpath);
+      }
 
-  it("(windows) sources a directory symlink and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
+      pipeline(
+        [
+          vfs.src(outputSymlink, { resolveSymlinks: false }),
+          vfs.dest(outputDirpath),
+          concatArray(assertion),
+        ],
+        done,
+      );
+    },
+  );
 
-    fs.mkdirSync(base);
-    fs.mkdirSync(symlinkDirpath);
-    fs.symlinkSync(inputDirpath, outputSymlink, "dir");
+  it(
+    "(windows) sources a junction and copies it",
+    { skip: !isWindows },
+    function (t, done) {
+      fs.mkdirSync(base);
+      fs.mkdirSync(symlinkDirpath);
+      fs.symlinkSync(inputDirpath, outputSymlink, "junction");
 
-    function assert(files) {
-      // When creating `dir` symlinks, it seems Windows no longer appends a separator as of Node 22+
-      var expected = inputDirpath;
-      var destResult = fs.readlinkSync(outputDirpathSymlink);
+      function assertion(files) {
+        // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
+        var expected = inputDirpath;
+        var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
-    }
+        assert.strictEqual(destResult, expected);
+        assert.strictEqual(files[0].isSymbolic(), true);
+        assert.strictEqual(files[0].symlink, inputDirpath);
+      }
 
-    pipeline(
-      [
-        vfs.src(outputSymlink, { resolveSymlinks: false }),
-        vfs.dest(outputDirpath),
-        concatArray(assert),
-      ],
-      done,
-    );
-  });
+      pipeline(
+        [
+          vfs.src(outputSymlink, { resolveSymlinks: false }),
+          vfs.dest(outputDirpath),
+          concatArray(assertion),
+        ],
+        done,
+      );
+    },
+  );
 
-  it("(windows) sources a junction and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
-    fs.mkdirSync(base);
-    fs.mkdirSync(symlinkDirpath);
-    fs.symlinkSync(inputDirpath, outputSymlink, "junction");
-
-    function assert(files) {
-      // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
-      var expected = inputDirpath;
-      var destResult = fs.readlinkSync(outputDirpathSymlink);
-
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
-    }
-
-    pipeline(
-      [
-        vfs.src(outputSymlink, { resolveSymlinks: false }),
-        vfs.dest(outputDirpath),
-        concatArray(assert),
-      ],
-      done,
-    );
-  });
-
-  it("can re-assign contents to a well-behaving stream as per issue #310", function (done) {
+  it("can re-assign contents to a well-behaving stream as per issue #310", function (t, done) {
     var contents = ["something", " ", "else"];
 
-    function assert() {
-      expect(fs.readFileSync(outputPath).toString()).toEqual(contents.join(""));
+    function assertion() {
+      assert.strictEqual(
+        fs.readFileSync(outputPath).toString(),
+        contents.join(""),
+      );
       done();
     }
 
@@ -232,7 +229,7 @@ describeStreams("integrations", function (stream) {
         }),
         vfs.dest(outputBase),
       ],
-      assert,
+      assertion,
     );
   });
 });
