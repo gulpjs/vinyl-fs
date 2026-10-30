@@ -1086,7 +1086,7 @@ describe("updateMetadata", function () {
     { skip: isWindows },
     function (t, done) {
       var futimesSpy = t.mock.method(fs, "futimes", (fd, atime, mtime, cb) => {
-        process.nextTick(cb, mockError);
+        process.nextTick(mockError, fd, atime, mtime, cb);
       });
 
       var now = Date.now();
@@ -1234,7 +1234,7 @@ describe("updateMetadata", function () {
 
       var fd = fs.openSync(outputPath, "w+");
       var fchmodSpy = t.mock.method(fs, "fchmod", (fd, mode, cb) => {
-        process.nextTick(cb, mockError);
+        process.nextTick(mockError, fd, mode, cb);
       });
 
       updateMetadata(fd, file, function (err) {

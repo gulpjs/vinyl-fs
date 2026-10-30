@@ -230,7 +230,7 @@ describeStreams(".dest() with symlinks", function (stream) {
 
         assert.strictEqual(files.length, 1);
         // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
-        assert.strictEqual.strictEqual(outputLink, inputDirpath);
+        assert.strictEqual(outputLink, inputDirpath);
         assert.strictEqual(stats.isDirectory(), true);
         assert.strictEqual(lstats.isDirectory(), false);
       }

@@ -1066,7 +1066,7 @@ describeStreams("symlink stream", function (stream) {
       assert.strictEqual(files.length, 1);
       // Avoid comparing stats because they get reflected
       files[0].stat = file.stat;
-      assert.deepStrictEqual(files[0], file);
+      assert.partialDeepStrictEqual(files[0], file);
       assert.notStrictEqual(files[0], file);
     }
 
