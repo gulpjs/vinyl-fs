@@ -31,7 +31,7 @@ module.exports = function makeUtils(stream) {
           cb = enc;
         }
 
-        assert.strictEqual(file.path,obj.path);
+        assert.strictEqual(file.path, obj.path);
         cb(null, file);
       },
     });
@@ -50,7 +50,7 @@ module.exports = function makeUtils(stream) {
         cb(null, file);
       },
       flush: function (cb) {
-        assert.strictEqual(count,value);
+        assert.strictEqual(count, value);
         cb();
       },
     });
@@ -72,7 +72,7 @@ module.exports = function makeUtils(stream) {
         }, 250);
       },
       end: function (data, enc, cb) {
-        assert.strictEqual(count,value);
+        assert.strictEqual(count, value);
         cb();
       },
     });

@@ -809,30 +809,29 @@ describe("writeFile", function () {
     });
   });
 
-  it("does not error on SlowBuffer", function (t, done) {
-    if (!buffer.SlowBuffer) {
-      this.skip();
-      return;
-    }
+  it(
+    "does not error on SlowBuffer",
+    { skip: !buffer.SlowBuffer },
+    function (t, done) {
+      var length = contents.length;
+      var buf = Buffer.from(contents);
+      var content = new buffer.SlowBuffer(length);
+      buf.copy(content, 0, 0, length);
 
-    var length = contents.length;
-    var buf = Buffer.from(contents);
-    var content = new buffer.SlowBuffer(length);
-    buf.copy(content, 0, 0, length);
+      writeFile(outputPath, content, function (err, fd) {
+        assert.strictEqual(err === null, true);
+        assert.strictEqual(typeof fd === "number", true);
 
-    writeFile(outputPath, content, function (err, fd) {
-      assert.strictEqual(err === null, true);
-      assert.strictEqual(typeof fd === "number", true);
+        fs.close(fd, function () {
+          var written = fs.readFileSync(outputPath, "utf8");
 
-      fs.close(fd, function () {
-        var written = fs.readFileSync(outputPath, "utf8");
+          assert.strictEqual(written, contents);
 
-        assert.strictEqual(written, contents);
-
-        done();
+          done();
+        });
       });
-    });
-  });
+    },
+  );
 
   it("does not error if options is falsey", function (t, done) {
     writeFile(outputPath, Buffer.from(contents), null, function (err, fd) {
@@ -1251,11 +1250,6 @@ describe("updateMetadata", function () {
     "updates the mode & times on fs and vinyl object if there is a diff",
     { skip: isWindows },
     function (t, done) {
-      if (isWindows) {
-        this.skip();
-        return;
-      }
-
       var fchmodSpy = t.mock.method(fs, "fchmod");
       var futimesSpy = t.mock.method(fs, "futimes");
 
@@ -1417,15 +1411,7 @@ describeStreams("createWriteStream", function (stream) {
     );
   });
 
-  it("accepts mode option", function (t, done) {
-    if (isWindows) {
-      console.log(
-        "Changing the mode of a file is not supported by node.js in Windows.",
-      );
-      this.skip();
-      return;
-    }
-
+  it("accepts mode option", { skip: isWindows }, function (t, done) {
     var mode = applyUmask("777");
 
     function assertion(err) {
