@@ -59,6 +59,29 @@ describe("isOwner", function () {
     uid: 9002,
   };
 
+  beforeEach(function () {
+    if (typeof process.geteuid !== "function") {
+      process.geteuid = noop;
+    }
+
+    if (typeof process.getuid !== "function") {
+      process.getuid = noop;
+    }
+  });
+
+  afterEach(function (t) {
+    // Restore mocked methods before removing Windows placeholders.
+    t.mock.restoreAll();
+
+    if (process.geteuid === noop) {
+      delete process.geteuid;
+    }
+
+    if (process.getuid === noop) {
+      delete process.getuid;
+    }
+  });
+
   // TODO: test for having neither
   // TODO something is funky with how these methods interact if we do not mock gateuid later tests will fail most likely something gets overwritten in the chain.
   it("uses process.geteuid() when available", function (t) {
