@@ -1,16 +1,16 @@
 "use strict";
 
-var expect = require("expect");
+var assert = require("node:assert");
 
 function checkCodec(codec) {
-  expect(typeof codec).toEqual("object");
-  expect(codec.constructor.name).toEqual("Codec");
-  expect(typeof codec.enc).toEqual("string");
-  expect(typeof codec.bomAware).toEqual("boolean");
-  expect(typeof codec.encode).toEqual("function");
-  expect(typeof codec.encodeStream).toEqual("function");
-  expect(typeof codec.decode).toEqual("function");
-  expect(typeof codec.decodeStream).toEqual("function");
+  assert.strictEqual(typeof codec,"object");
+  assert.strictEqual(codec.constructor.name,"Codec");
+  assert.strictEqual(typeof codec.enc,"string");
+  assert.strictEqual(typeof codec.bomAware,"boolean");
+  assert.strictEqual(typeof codec.encode,"function");
+  assert.strictEqual(typeof codec.encodeStream,"function");
+  assert.strictEqual(typeof codec.decode,"function");
+  assert.strictEqual(typeof codec.decodeStream,"function");
 }
 
 module.exports = checkCodec;
