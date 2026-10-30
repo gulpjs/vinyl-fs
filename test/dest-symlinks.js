@@ -283,7 +283,7 @@ describeStreams(".dest() with symlinks", function (stream) {
   it(
     "(windows) options can disable junctions for a directory (as a function)",
     { skip: !isWindows },
-    function (done) {
+    function (t, done) {
       var file = new File({
         base: inputBase,
         path: inputDirpath,
