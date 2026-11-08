@@ -125,15 +125,12 @@ describeStreams(".dest() with symlinks", function (stream) {
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
     file.symlink = inputPath;
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files[0].isSymbolic(), true);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
   it("can create relative links", function (t, done) {
@@ -149,19 +146,19 @@ describeStreams(".dest() with symlinks", function (stream) {
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
     file.symlink = inputPath;
 
-    function assertion(files) {
+    function assert(files) {
       var outputLink = fs.readlinkSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputLink, path.normalize("../fixtures/test.txt"));
-      assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/test.txt"));
+      t.assert.strictEqual(files[0].isSymbolic(), true);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { relativeSymlinks: true }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
@@ -183,21 +180,18 @@ describeStreams(".dest() with symlinks", function (stream) {
       // `src()` adds this side-effect with `resolveSymlinks` option set to false
       file.symlink = inputDirpath;
 
-      function assertion(files) {
+      function assert(files) {
         var stats = fs.statSync(outputDirpath);
         var lstats = fs.lstatSync(outputDirpath);
         var outputLink = fs.readlinkSync(outputDirpath);
 
-        assert.strictEqual(files.length, 1);
-        assert.strictEqual(outputLink, inputDirpath);
-        assert.strictEqual(stats.isDirectory(), true);
-        assert.strictEqual(lstats.isDirectory(), false);
+        t.assert.strictEqual(files.length, 1);
+        t.assert.strictEqual(outputLink, inputDirpath);
+        t.assert.strictEqual(stats.isDirectory(), true);
+        t.assert.strictEqual(lstats.isDirectory(), false);
       }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-        done,
-      );
+      pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
     },
   );
 
