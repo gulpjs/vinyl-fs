@@ -461,7 +461,10 @@ describeStreams(".dest() with symlinks", (stream) => {
       [
         from([file]),
         // The useJunctions option is ignored when file is not a directory
-        vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
+        vfs.dest(outputBase, {
+          useJunctions: true,
+          relativeSymlinks: true,
+        }),
         concatArray(assert),
       ],
       done,
@@ -509,7 +512,10 @@ describeStreams(".dest() with symlinks", (stream) => {
       pipeline(
         [
           from([file]),
-          vfs.dest(outputBase, { useJunctions: false, relativeSymlinks: true }),
+          vfs.dest(outputBase, {
+            useJunctions: false,
+            relativeSymlinks: true,
+          }),
           concatArray(assert),
         ],
         done,
