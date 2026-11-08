@@ -430,7 +430,10 @@ describeStreams(".dest() with symlinks", (stream) => {
     pipeline(
       [
         from([file]),
-        vfs.dest(outputBase, { useJunctions: true, relativeSymlinks: true }),
+        vfs.dest(outputBase, {
+          useJunctions: true,
+          relativeSymlinks: true,
+        }),
         concatArray(assert),
       ],
       done,
