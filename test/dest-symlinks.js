@@ -54,20 +54,17 @@ describeStreams(".dest() with symlinks", function (stream) {
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
     file.symlink = inputPath;
 
-    function assertion(files) {
+    function assert(files) {
       var symlink = fs.readlinkSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(file.symlink, symlink);
-      assert.strictEqual(files[0].symlink, symlink);
-      assert.strictEqual(files[0].isSymbolic(), true);
-      assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(file.symlink, symlink);
+      t.assert.strictEqual(files[0].symlink, symlink);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].path, outputPath);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
   it("does not create symlinks when `file.isSymbolic()` is false", function (t, done) {
@@ -83,17 +80,14 @@ describeStreams(".dest() with symlinks", function (stream) {
     // `src()` adds this side-effect with `resolveSymlinks` option set to false
     file.symlink = inputPath;
 
-    function assertion(files) {
+    function assert(files) {
       var symlinkExists = fs.existsSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(symlinkExists, false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(symlinkExists, false);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
   it("errors if missing a `.symlink` property", function (t, done) {
@@ -106,16 +100,16 @@ describeStreams(".dest() with symlinks", function (stream) {
       },
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(
         err.message,
         "Missing symlink property on symbolic vinyl",
       );
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
   it("emits Vinyl files that are (still) symbolic", function (t, done) {
