@@ -12,7 +12,6 @@ var isWindows = require("./utils/is-windows");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
 
-var skipPosix = { skip: !isWindows };
 var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
