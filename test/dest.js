@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require("node:path");
-var assert = require("node:assert");
 var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
@@ -68,27 +67,27 @@ describeStreams(".dest()", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("throws on no folder argument", function () {
+  it("throws on no folder argument", (t) => {
     function noFolder() {
       vfs.dest();
     }
-    assert.throws(noFolder, {
+    t.assert.throws(noFolder, {
       message:
         "Invalid dest() folder argument. Please specify a non-empty string or a function.",
     });
   });
 
-  it("throws on empty string folder argument", function () {
+  it("throws on empty string folder argument", (t) => {
     function emptyFolder() {
       vfs.dest("");
     }
-    assert.throws(emptyFolder, {
+    t.assert.throws(emptyFolder, {
       message:
         "Invalid dest() folder argument. Please specify a non-empty string or a function.",
     });
   });
 
-  it("accepts the sourcemap option as true", function (t, done) {
+  it("accepts the sourcemap option as true", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -96,22 +95,22 @@ describeStreams(".dest()", function (stream) {
       sourceMap: makeSourceMap(),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { sourcemaps: true }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("accepts the sourcemap option as a string", function (t, done) {
+  it("accepts the sourcemap option as a string", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -119,22 +118,22 @@ describeStreams(".dest()", function (stream) {
       sourceMap: makeSourceMap(),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 2);
-      assert.strictEqual(files.includes(file), true);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 2);
+      t.assert.strictEqual(files.includes(file), true);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { sourcemaps: "." }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("inlines sourcemaps when option is true", function (t, done) {
+  it("inline sourcemaps when option is true", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -142,23 +141,26 @@ describeStreams(".dest()", function (stream) {
       sourceMap: makeSourceMap(),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.match(files[0].contents.toString(), new RegExp(sourcemapContents));
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.match(
+        files[0].contents.toString(),
+        new RegExp(sourcemapContents),
+      );
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { sourcemaps: true }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("generates an extra File when option is a string", function (t, done) {
+  it("generates an extra File when option is a string", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -166,14 +168,14 @@ describeStreams(".dest()", function (stream) {
       sourceMap: makeSourceMap(),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 2);
-      assert.strictEqual(files.includes(file), true);
-      assert.match(
+    function assert(files) {
+      t.assert.strictEqual(files.length, 2);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.match(
         files[0].contents.toString(),
         new RegExp("//# sourceMappingURL=test.txt.map"),
       );
-      assert.strictEqual(
+      t.assert.strictEqual(
         files[1].contents.toString(),
         JSON.stringify(makeSourceMap()),
       );
@@ -183,78 +185,72 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { sourcemaps: "." }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("passes through writes with cwd", function (t, done) {
+  it("passes through writes with cwd", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: null,
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].cwd, __dirname);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].cwd, __dirname);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputRelative, { cwd: __dirname }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("passes through writes with default cwd", function (t, done) {
+  it("passes through writes with default cwd", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: null,
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].cwd, process.cwd());
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].cwd, process.cwd());
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("does not write null files", function (t, done) {
+  it("does not write null files", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: null,
     });
 
-    function assertion(files) {
+    function assert(files) {
       var exists = fs.existsSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].base, outputBase);
-      assert.strictEqual(files[0].path, outputPath);
-      assert.strictEqual(exists, false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(exists, false);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("writes buffer files to the right folder with relative cwd", function (t, done) {
+  it("writes buffer files to the right folder with relative cwd", (t, done) => {
     var cwd = path.relative(process.cwd(), __dirname);
 
     var file = new File({
@@ -263,28 +259,28 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].cwd, __dirname);
-      assert.strictEqual(files[0].base, outputBase);
-      assert.strictEqual(files[0].path, outputPath);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].cwd, __dirname);
+      t.assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputRelative, { cwd: cwd }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("writes buffer files to the right folder with function and relative cwd", function (t, done) {
+  it("writes buffer files to the right folder with function and relative cwd", (t, done) => {
     var cwd = path.relative(process.cwd(), __dirname);
 
     var file = new File({
@@ -294,75 +290,69 @@ describeStreams(".dest()", function (stream) {
     });
 
     function outputFn(f) {
-      assert.ok(f != null);
-      assert.strictEqual(f, file);
+      t.assert.ok(f != null);
+      t.assert.strictEqual(f, file);
       return outputRelative;
     }
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].cwd, __dirname);
-      assert.strictEqual(files[0].base, outputBase);
-      assert.strictEqual(files[0].path, outputPath);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].cwd, __dirname);
+      t.assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     pipeline(
-      [from([file]), vfs.dest(outputFn, { cwd: cwd }), concatArray(assertion)],
+      [from([file]), vfs.dest(outputFn, { cwd: cwd }), concatArray(assert)],
       done,
     );
   });
 
-  it("writes buffer files to the right folder", function (t, done) {
+  it("writes buffer files to the right folder", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].base, outputBase);
-      assert.strictEqual(files[0].path, outputPath);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(outputContents, contents);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("writes streaming files to the right folder", function (t, done) {
+  it("writes streaming files to the right folder", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: from([contents]),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].base, outputBase);
-      assert.strictEqual(files[0].path, outputPath);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files[0].path, outputPath);
+      t.assert.strictEqual(outputContents, contents);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("writes large streaming files to the right folder", function (t, done) {
+  it("writes large streaming files to the right folder", (t, done) => {
     var size = 40000;
 
     var file = new File({
@@ -371,21 +361,18 @@ describeStreams(".dest()", function (stream) {
       contents: chunks(size),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var stats = fs.lstatSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(stats.size, size);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(stats.size, size);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("writes directories to the right folder", function (t, done) {
+  it("writes directories to the right folder", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -395,35 +382,32 @@ describeStreams(".dest()", function (stream) {
       },
     });
 
-    function assertion(files) {
+    function assert(files) {
       var stats = fs.lstatSync(outputDirpath);
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(files[0].base, outputBase);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(files[0].base, outputBase);
       // TODO: normalize this path
-      assert.strictEqual(files[0].path, outputDirpath);
-      assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(files[0].path, outputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("allows piping multiple dests in streaming mode", function (t, done) {
+  it("allows piping multiple dests in streaming mode", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: Buffer.from(contents),
     });
 
-    function assertion() {
+    function assert() {
       var outputContents1 = fs.readFileSync(outputPath, "utf8");
       var outputContents2 = fs.readFileSync(outputRenamePath, "utf8");
-      assert.strictEqual(outputContents1, contents);
-      assert.strictEqual(outputContents2, contents);
+      t.assert.strictEqual(outputContents1, contents);
+      t.assert.strictEqual(outputContents2, contents);
     }
 
     pipeline(
@@ -434,13 +418,13 @@ describeStreams(".dest()", function (stream) {
         rename(outputRenamePath),
         includes({ path: outputRenamePath }),
         vfs.dest(outputBase),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("writes new files with the default user mode", function (t, done) {
+  it("writes new files with the default user mode", (t, done) => {
     var expectedMode = applyUmask("666");
 
     var file = new File({
@@ -449,29 +433,26 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files.includes(file), true);
-      assert.strictEqual(statMode(outputPath), expectedMode);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
   // TODO this errored without other tests being active
   // Setup is somehow wrong
-  it("reports i/o errors", function (t, done) {
+  it("reports i/o errors", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: Buffer.from(contents),
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
+    function assert(err) {
+      t.assert.ok(err != null);
       done();
     }
 
@@ -479,10 +460,10 @@ describeStreams(".dest()", function (stream) {
     fs.closeSync(fs.openSync(outputPath, "w"));
     fs.chmodSync(outputPath, 0);
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("reports stat errors", function (t, done) {
+  it("reports stat errors", (t, done) => {
     var expectedMode = applyUmask("722");
 
     var fstatSpy = t.mock.method(fs, "fstat", mockError);
@@ -496,19 +477,19 @@ describeStreams(".dest()", function (stream) {
       },
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(fstatSpy.mock.callCount(), 1);
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(fstatSpy.mock.callCount(), 1);
       done();
     }
 
     fs.mkdirSync(outputBase);
     fs.closeSync(fs.openSync(outputPath, "w"));
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("does not overwrite files with overwrite option set to false", function (t, done) {
+  it("does not overwrite files with overwrite option set to false", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -517,11 +498,11 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, existingContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents);
     }
 
     // Write expected file which should not be overwritten
@@ -532,13 +513,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { overwrite: false }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("overwrites files with overwrite option set to true", function (t, done) {
+  it("overwrites files with overwrite option set to true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -547,11 +528,11 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     // This should be overwritten
@@ -562,13 +543,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { overwrite: true }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("does not overwrite files with overwrite option set to a function that returns false", function (t, done) {
+  it("does not overwrite files with overwrite option set to a function that returns false", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -578,15 +559,15 @@ describeStreams(".dest()", function (stream) {
     });
 
     function overwrite(f) {
-      assert.strictEqual(f, file);
+      t.assert.strictEqual(f, file);
       return false;
     }
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, existingContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents);
     }
 
     // Write expected file which should not be overwritten
@@ -597,13 +578,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { overwrite: overwrite }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("overwrites files with overwrite option set to a function that returns true", function (t, done) {
+  it("overwrites files with overwrite option set to a function that returns true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -613,15 +594,15 @@ describeStreams(".dest()", function (stream) {
     });
 
     function overwrite(f) {
-      assert.strictEqual(f, file);
+      t.assert.strictEqual(f, file);
       return true;
     }
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     // This should be overwritten
@@ -632,13 +613,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { overwrite: overwrite }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("appends content with append option set to true", function (t, done) {
+  it("appends content with append option set to true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -647,11 +628,11 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, existingContents + contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents + contents);
     }
 
     // This should be overwritten
@@ -662,13 +643,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { append: true }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("appends content with append option set to a function that returns true", function (t, done) {
+  it("appends content with append option set to a function that returns true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -678,15 +659,15 @@ describeStreams(".dest()", function (stream) {
     });
 
     function append(f) {
-      assert.strictEqual(f, file);
+      t.assert.strictEqual(f, file);
       return true;
     }
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(outputContents, existingContents + contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents + contents);
     }
 
     // This should be overwritten
@@ -697,13 +678,13 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { append: append }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("does not do any transcoding with encoding defaulted (buffer)", function (t, done) {
+  it("does not do any transcoding with encoding defaulted (buffer)", (t, done) => {
     var expectedContents = fs.readFileSync(ranBomInputPath);
     var file = new File({
       base: inputBase,
@@ -711,20 +692,17 @@ describeStreams(".dest()", function (stream) {
       contents: expectedContents,
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("does not do any transcoding with encoding option set to false (buffer)", function (t, done) {
+  it("does not do any transcoding with encoding option set to false (buffer)", (t, done) => {
     var expectedContents = fs.readFileSync(ranBomInputPath);
     var file = new File({
       base: inputBase,
@@ -732,24 +710,24 @@ describeStreams(".dest()", function (stream) {
       contents: expectedContents,
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { encoding: false }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("does not do any transcoding with encoding defaulted (stream)", function (t, done) {
+  it("does not do any transcoding with encoding defaulted (stream)", (t, done) => {
     var expectedContents = fs.readFileSync(ranBomInputPath);
     var file = new File({
       base: inputBase,
@@ -757,20 +735,17 @@ describeStreams(".dest()", function (stream) {
       contents: fs.createReadStream(ranBomInputPath),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("does not do any transcoding with encoding option set to false (stream)", function (t, done) {
+  it("does not do any transcoding with encoding option set to false (stream)", (t, done) => {
     var expectedContents = fs.readFileSync(ranBomInputPath);
     var file = new File({
       base: inputBase,
@@ -778,24 +753,24 @@ describeStreams(".dest()", function (stream) {
       contents: fs.createReadStream(ranBomInputPath),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { encoding: false }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("transcodes utf8 to gb2312 with encoding option (buffer)", function (t, done) {
+  it("transcodes utf8 to gb2312 with encoding option (buffer)", (t, done) => {
     var expectedContents = fs.readFileSync(encodedInputPath);
     var file = new File({
       base: inputBase,
@@ -803,24 +778,24 @@ describeStreams(".dest()", function (stream) {
       contents: Buffer.from(encodedContents),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { encoding: "gb2312" }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("transcodes utf8 to gb2312 with encoding option (stream)", function (t, done) {
+  it("transcodes utf8 to gb2312 with encoding option (stream)", (t, done) => {
     var expectedContents = fs.readFileSync(encodedInputPath);
     var file = new File({
       base: inputBase,
@@ -828,24 +803,24 @@ describeStreams(".dest()", function (stream) {
       contents: from([encodedContents]),
     });
 
-    function assertion(files) {
+    function assert(files) {
       var outputContents = fs.readFileSync(outputPath);
 
-      assert.strictEqual(files.length, 1);
-      assert.deepStrictEqual(outputContents, expectedContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.deepStrictEqual(outputContents, expectedContents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { encoding: "gb2312" }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("sends utf8 downstream despite encoding option, preserve BOM if any (buffer)", function (t, done) {
+  it("sends utf8 downstream despite encoding option, preserve BOM if any (buffer)", (t, done) => {
     var expectedString = "\ufeff" + bomContents.replace("X", "16-BE");
     var expectedContents = Buffer.from(expectedString);
 
@@ -855,23 +830,23 @@ describeStreams(".dest()", function (stream) {
       contents: expectedContents,
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files[0].isBuffer(), true);
-      assert.deepStrictEqual(files[0].contents, expectedContents);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].isBuffer(), true);
+      t.assert.deepStrictEqual(files[0].contents, expectedContents);
     }
 
     pipeline(
       [
         from([file]),
         vfs.dest(outputBase, { encoding: "utf16be" }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("sends utf8 downstream despite encoding option, preserve BOM if any (stream)", function (t, done) {
+  it("sends utf8 downstream despite encoding option, preserve BOM if any (stream)", (t, done) => {
     var expectedString = "\ufeff" + bomContents.replace("X", "16-BE");
     var expectedContents = Buffer.from(expectedString);
 
@@ -882,12 +857,12 @@ describeStreams(".dest()", function (stream) {
     });
 
     function assertContent(contents) {
-      assert.deepStrictEqual(contents, expectedContents);
+      t.assert.deepStrictEqual(contents, expectedContents);
     }
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files[0].isStream(), true);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].isStream(), true);
     }
 
     pipeline(
@@ -895,26 +870,26 @@ describeStreams(".dest()", function (stream) {
         from([file]),
         vfs.dest(outputBase, { encoding: "utf16be" }),
         compareContents(assertContent),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       done,
     );
   });
 
-  it("reports unsupported encoding errors (buffer)", function (t, done) {
+  it("reports unsupported encoding errors (buffer)", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: Buffer.from(contents),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 0);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 0);
     }
 
     function finish(err) {
-      assert.ok(err != null);
-      assert.strictEqual(err.message, "Unsupported encoding: fubar42");
+      t.assert.ok(err != null);
+      t.assert.strictEqual(err.message, "Unsupported encoding: fubar42");
       done();
     }
 
@@ -922,26 +897,26 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { encoding: "fubar42" }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       finish,
     );
   });
 
-  it("reports unsupported encoding errors (stream)", function (t, done) {
+  it("reports unsupported encoding errors (stream)", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
       contents: from([contents]),
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 0);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 0);
     }
 
     function finish(err) {
-      assert.ok(err != null);
-      assert.strictEqual(err.message, "Unsupported encoding: fubar42");
+      t.assert.ok(err != null);
+      t.assert.strictEqual(err.message, "Unsupported encoding: fubar42");
       done();
     }
 
@@ -949,17 +924,17 @@ describeStreams(".dest()", function (stream) {
       [
         from([file]),
         vfs.dest(outputBase, { encoding: "fubar42" }),
-        concatArray(assertion),
+        concatArray(assert),
       ],
       finish,
     );
   });
 
-  it("emits a finish event", function (t, done) {
+  it("emits a finish event", (t, done) => {
     var destStream = vfs.dest(outputBase);
 
     var finished = false;
-    destStream.once("finish", function () {
+    destStream.once("finish", () => {
       finished = true;
     });
 
@@ -970,14 +945,14 @@ describeStreams(".dest()", function (stream) {
     });
 
     function finish() {
-      assert.strictEqual(finished, true);
+      t.assert.strictEqual(finished, true);
       done();
     }
 
     pipeline([from([file]), destStream], finish);
   });
 
-  it("does not get clogged by highWaterMark", function (t, done) {
+  it("does not get clogged by highWaterMark", (t, done) => {
     var expectedCount = 17;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -1001,7 +976,7 @@ describeStreams(".dest()", function (stream) {
     );
   });
 
-  it("allows backpressure when piped to another, slower stream", function (t, done) {
+  it("allows backpressure when piped to another, slower stream", (t, done) => {
     var expectedCount = 24;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -1024,7 +999,7 @@ describeStreams(".dest()", function (stream) {
     );
   });
 
-  it("respects readable listeners on destination stream", function (t, done) {
+  it("respects readable listeners on destination stream", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -1034,7 +1009,7 @@ describeStreams(".dest()", function (stream) {
     var destStream = vfs.dest(outputBase);
 
     var readables = 0;
-    destStream.on("readable", function () {
+    destStream.on("readable", () => {
       var data = destStream.read();
 
       if (data != null) {
@@ -1042,15 +1017,15 @@ describeStreams(".dest()", function (stream) {
       }
     });
 
-    function assertion(err) {
-      assert.strictEqual(readables, 1);
+    function assert(err) {
+      t.assert.strictEqual(readables, 1);
       done(err);
     }
 
-    pipeline([from([file]), destStream], assertion);
+    pipeline([from([file]), destStream], assert);
   });
 
-  it("respects data listeners on destination stream", function (t, done) {
+  it("respects data listeners on destination stream", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -1060,19 +1035,19 @@ describeStreams(".dest()", function (stream) {
     var destStream = vfs.dest(outputBase);
 
     var datas = 0;
-    destStream.on("data", function () {
+    destStream.on("data", () => {
       datas++;
     });
 
-    function assertion(err) {
-      assert.strictEqual(datas, 1);
+    function assert(err) {
+      t.assert.strictEqual(datas, 1);
       done(err);
     }
 
-    pipeline([from([file]), destStream], assertion);
+    pipeline([from([file]), destStream], assert);
   });
 
-  it("sinks the stream if all the readable event handlers are removed", function (t, done) {
+  it("sinks the stream if all the readable event handlers are removed", (t, done) => {
     var expectedCount = 17;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -1099,12 +1074,12 @@ describeStreams(".dest()", function (stream) {
       done,
     );
 
-    process.nextTick(function () {
+    process.nextTick(() => {
       destStream.removeListener("readable", noop);
     });
   });
 
-  it("sinks the stream if all the data event handlers are removed", function (t, done) {
+  it("sinks the stream if all the data event handlers are removed", (t, done) => {
     var expectedCount = 17;
     var highwatermarkFiles = [];
     for (var idx = 0; idx < expectedCount; idx++) {
@@ -1131,12 +1106,12 @@ describeStreams(".dest()", function (stream) {
       done,
     );
 
-    process.nextTick(function () {
+    process.nextTick(() => {
       destStream.removeListener("data", noop);
     });
   });
 
-  it("successfully processes files with streaming contents", function (t, done) {
+  it("successfully processes files with streaming contents", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -1146,37 +1121,37 @@ describeStreams(".dest()", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase)], done);
   });
 
-  it("errors when a non-Vinyl object is emitted", function (t, done) {
+  it("errors when a non-Vinyl object is emitted", (t, done) => {
     var file = {};
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(
         err.message,
         "Received a non-Vinyl object in `dest()`",
       );
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("errors when a buffer-mode stream is piped to it", function (t, done) {
+  it("errors when a buffer-mode stream is piped to it", (t, done) => {
     var file = Buffer.from("test");
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(
         err.message,
         "Received a non-Vinyl object in `dest()`",
       );
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("errors if we cannot mkdirp", function (t, done) {
+  it("errors if we cannot mkdirp", (t, done) => {
     var mkdirSpy = t.mock.method(fs, "mkdir", mockError);
 
     var file = new File({
@@ -1185,16 +1160,16 @@ describeStreams(".dest()", function (stream) {
       contents: null,
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(mkdirSpy.mock.callCount(), 1);
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(mkdirSpy.mock.callCount(), 1);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("errors if vinyl object is a directory and we cannot mkdirp", function (t, done) {
+  it("errors if vinyl object is a directory and we cannot mkdirp", (t, done) => {
     var ogMkdir = fs.mkdir;
 
     var mkdirSpy = t.mock.method(fs, "mkdir", mockError);
@@ -1209,17 +1184,17 @@ describeStreams(".dest()", function (stream) {
       },
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(mkdirSpy.mock.callCount(), 2);
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(mkdirSpy.mock.callCount(), 2);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
   // TODO: is this correct behavior? had to adjust it
-  it("does not error if vinyl object is a directory and we cannot open it", function (t, done) {
+  it("does not error if vinyl object is a directory and we cannot open it", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -1230,18 +1205,15 @@ describeStreams(".dest()", function (stream) {
       },
     });
 
-    function assertion() {
+    function assert() {
       var exists = fs.existsSync(outputDirpath);
-      assert.strictEqual(exists, true);
+      t.assert.strictEqual(exists, true);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("errors if vinyl object is a directory and open errors", function (t, done) {
+  it("errors if vinyl object is a directory and open errors", (t, done) => {
     var openSpy = t.mock.method(fs, "open", mockError);
 
     var file = new File({
@@ -1253,16 +1225,16 @@ describeStreams(".dest()", function (stream) {
       },
     });
 
-    function assertion(err) {
-      assert.ok(err != null);
-      assert.strictEqual(openSpy.mock.callCount(), 1);
+    function assert(err) {
+      t.assert.ok(err != null);
+      t.assert.strictEqual(openSpy.mock.callCount(), 1);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("errors if content stream errors", function (t, done) {
+  it("errors if content stream errors", (t, done) => {
     var error = new Error("mocked error");
 
     var contentStream = fromError(error);
@@ -1273,15 +1245,15 @@ describeStreams(".dest()", function (stream) {
       contents: contentStream,
     });
 
-    function assertion(err) {
-      assert.strictEqual(err, error);
+    function assert(err) {
+      t.assert.strictEqual(err, error);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("does not pass options on to stream", function (t, done) {
+  it("does not pass options on to stream", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -1291,39 +1263,32 @@ describeStreams(".dest()", function (stream) {
     // Reference: https://github.com/gulpjs/vinyl-fs/issues/153
     var read = t.mock.fn(() => false);
 
-    function assertion() {
+    function assert() {
       // Called never because it's not a valid option
-      assert.strictEqual(read.mock.callCount(), 0);
+      t.assert.strictEqual(read.mock.callCount(), 0);
     }
 
     pipeline(
-      [
-        from([file]),
-        vfs.dest(outputBase, { read: read }),
-        concatArray(assertion),
-      ],
+      [from([file]), vfs.dest(outputBase, { read: read }), concatArray(assert)],
       done,
     );
   });
 
-  it("does not marshall a Vinyl object with isSymbolic method", function (t, done) {
+  it("does not marshall a Vinyl object with isSymbolic method", (t, done) => {
     var file = new File({
       base: outputBase,
       path: outputPath,
     });
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
-      assert.strictEqual(files[0], file);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0], file);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("marshalls a Vinyl object without isSymbolic to a newer Vinyl", function (t, done) {
+  it("marshalls a Vinyl object without isSymbolic to a newer Vinyl", (t, done) => {
     var file = new File({
       base: outputBase,
       path: outputPath,
@@ -1331,17 +1296,14 @@ describeStreams(".dest()", function (stream) {
 
     breakPrototype(file);
 
-    function assertion(files) {
-      assert.strictEqual(files.length, 1);
+    function assert(files) {
+      t.assert.strictEqual(files.length, 1);
       // Avoid comparing stats because they get reflected
       files[0].stat = file.stat;
-      assert.partialDeepStrictEqual(files[0], file);
-      assert.notStrictEqual(files[0], file);
+      t.assert.partialDeepStrictEqual(files[0], file);
+      t.assert.notStrictEqual(files[0], file);
     }
 
-    pipeline(
-      [from([file]), vfs.dest(outputBase), concatArray(assertion)],
-      done,
-    );
+    pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 });

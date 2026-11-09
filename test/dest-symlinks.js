@@ -474,57 +474,53 @@ describeStreams(".dest() with symlinks", (stream) => {
     );
   });
 
-  it(
-    "(win) create relative links for dirs when junctions are disabled",
-    skipPosix,
-    function (t, done) {
-      var file = new File({
-        base: inputBase,
-        path: inputDirpath,
-        contents: null,
-        stat: {
-          isSymbolicLink: always(true),
-        },
-      });
+  it("(win) rl for dirs without junctions", skipPosix, (t, done) => {
+    var file = new File({
+      base: inputBase,
+      path: inputDirpath,
+      contents: null,
+      stat: {
+        isSymbolicLink: always(true),
+      },
+    });
 
-      // `src()` adds this side-effect with `resolveSymlinks` option set to false
-      file.symlink = inputDirpath;
+    // `src()` adds this side-effect with `resolveSymlinks` option set to false
+    file.symlink = inputDirpath;
 
-      function assert(files) {
-        var stats = fs.statSync(outputDirpath);
-        var lstats = fs.lstatSync(outputDirpath);
-        var outputLink = fs.readlinkSync(outputDirpath);
+    function assert(files) {
+      var stats = fs.statSync(outputDirpath);
+      var lstats = fs.lstatSync(outputDirpath);
+      var outputLink = fs.readlinkSync(outputDirpath);
 
-        t.assert.strictEqual(files.length, 1);
-        t.assert.strictEqual(files.includes(file), true);
-        t.assert.strictEqual(
-          files[0].base,
-          outputBase,
-          "base should have changed",
-        );
-        t.assert.strictEqual(
-          files[0].path,
-          outputDirpath,
-          "path should have changed",
-        );
-        t.assert.strictEqual(outputLink, path.normalize("../fixtures/foo"));
-        t.assert.strictEqual(stats.isDirectory(), true);
-        t.assert.strictEqual(lstats.isDirectory(), false);
-      }
-
-      pipeline(
-        [
-          from([file]),
-          vfs.dest(outputBase, {
-            useJunctions: false,
-            relativeSymlinks: true,
-          }),
-          concatArray(assert),
-        ],
-        done,
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(
+        files[0].base,
+        outputBase,
+        "base should have changed",
       );
-    },
-  );
+      t.assert.strictEqual(
+        files[0].path,
+        outputDirpath,
+        "path should have changed",
+      );
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/foo"));
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
+    }
+
+    pipeline(
+      [
+        from([file]),
+        vfs.dest(outputBase, {
+          useJunctions: false,
+          relativeSymlinks: true,
+        }),
+        concatArray(assert),
+      ],
+      done,
+    );
+  });
 
   it("does not overwrite links with overwrite option set to false", (t, done) => {
     var existingContents = "Lorem Ipsum";

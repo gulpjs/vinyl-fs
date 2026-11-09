@@ -2,7 +2,6 @@
 
 var path = require("node:path");
 var buffer = require("node:buffer");
-var assert = require("node:assert");
 var { afterEach, beforeEach, describe, it } = require("node:test");
 
 var fs = require("graceful-fs");
@@ -52,7 +51,7 @@ var clean = cleanup(outputBase);
 
 function noop() {}
 
-describe("isOwner", function () {
+describe("isOwner", () => {
   var ownerStat = {
     uid: 9001,
   };
@@ -61,7 +60,7 @@ describe("isOwner", function () {
     uid: 9002,
   };
 
-  beforeEach(function () {
+  beforeEach(() => {
     if (typeof process.geteuid !== "function") {
       process.geteuid = noop;
     }
@@ -71,7 +70,7 @@ describe("isOwner", function () {
     }
   });
 
-  afterEach(function (t) {
+  afterEach((t) => {
     // Restore mocked methods before removing Windows placeholders.
     t.mock.restoreAll();
 
@@ -92,8 +91,8 @@ describe("isOwner", function () {
 
     isOwner(ownerStat);
 
-    assert.strictEqual(getuidSpy.mock.callCount(), 0);
-    assert.strictEqual(geteuidSpy.mock.callCount(), 1);
+    t.assert.strictEqual(getuidSpy.mock.callCount(), 0);
+    t.assert.strictEqual(geteuidSpy.mock.callCount(), 1);
   });
 
   it("uses process.getuid() when geteuid() is not available", function (t) {
@@ -105,20 +104,20 @@ describe("isOwner", function () {
 
     isOwner(ownerStat);
 
-    assert.strictEqual(getuidSpy.mock.callCount(), 1);
+    t.assert.strictEqual(getuidSpy.mock.callCount(), 1);
   });
 
-  it("returns false when non-root and non-owner", function () {
+  it("returns false when non-root and non-owner", (t) => {
     var result = isOwner(nonOwnerStat);
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
   it("returns true when owner and non-root", function (t) {
     t.mock.method(process, "geteuid", () => ownerStat.uid);
     var result = isOwner(ownerStat);
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 
   it("returns true when non-owner but root", function (t) {
@@ -126,188 +125,188 @@ describe("isOwner", function () {
 
     var result = isOwner(nonOwnerStat);
 
-    assert.strictEqual(result, true);
-    assert.strictEqual(spy.mock.callCount(), 1);
+    t.assert.strictEqual(result, true);
+    t.assert.strictEqual(spy.mock.callCount(), 1);
   });
 });
 
-describe("isValidUnixId", function () {
-  it("returns true if the given id is a valid unix id", function () {
+describe("isValidUnixId", () => {
+  it("returns true if the given id is a valid unix id", (t) => {
     var result = isValidUnixId(1000);
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 
-  it("returns false if the given id is not a number", function () {
+  it("returns false if the given id is not a number", (t) => {
     var result = isValidUnixId("root");
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns false when the given id is less than 0", function () {
+  it("returns false when the given id is less than 0", (t) => {
     var result = isValidUnixId(-1);
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 });
 
-describe("getFlags", function () {
-  it("returns wx if overwrite is false and append is false", function () {
+describe("getFlags", () => {
+  it("returns wx if overwrite is false and append is false", (t) => {
     var result = getFlags({
       overwrite: false,
       append: false,
     });
 
-    assert.strictEqual(result, "wx");
+    t.assert.strictEqual(result, "wx");
   });
 
-  it("returns w if overwrite is true and append is false", function () {
+  it("returns w if overwrite is true and append is false", (t) => {
     var result = getFlags({
       overwrite: true,
       append: false,
     });
 
-    assert.strictEqual(result, "w");
+    t.assert.strictEqual(result, "w");
   });
 
-  it("returns ax if overwrite is false and append is true", function () {
+  it("returns ax if overwrite is false and append is true", (t) => {
     var result = getFlags({
       overwrite: false,
       append: true,
     });
 
-    assert.strictEqual(result, "ax");
+    t.assert.strictEqual(result, "ax");
   });
 
-  it("returns a if overwrite is true and append is true", function () {
+  it("returns a if overwrite is true and append is true", (t) => {
     var result = getFlags({
       overwrite: true,
       append: true,
     });
 
-    assert.strictEqual(result, "a");
+    t.assert.strictEqual(result, "a");
   });
 });
 
-describe("isFatalOverwriteError", function () {
-  it("returns false if not given any error", function () {
+describe("isFatalOverwriteError", () => {
+  it("returns false if not given any error", (t) => {
     var result = isFatalOverwriteError(null);
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns true if code != EEXIST", function () {
+  it("returns true if code != EEXIST", (t) => {
     var result = isFatalOverwriteError({ code: "EOTHER" });
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 
-  it("returns false if code == EEXIST and flags == wx", function () {
+  it("returns false if code == EEXIST and flags == wx", (t) => {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "wx");
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns false if code == EEXIST and flags == ax", function () {
+  it("returns false if code == EEXIST and flags == ax", (t) => {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "ax");
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns true if error.code == EEXIST and flags == w", function () {
+  it("returns true if error.code == EEXIST and flags == w", (t) => {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "w");
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 
-  it("returns true if error.code == EEXIST and flags == a", function () {
+  it("returns true if error.code == EEXIST and flags == a", (t) => {
     var result = isFatalOverwriteError({ code: "EEXIST" }, "a");
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 });
 
-describe("isFatalUnlinkError", function () {
-  it("returns false if not given any error", function () {
+describe("isFatalUnlinkError", () => {
+  it("returns false if not given any error", (t) => {
     var result = isFatalUnlinkError(null);
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns false if code == ENOENT", function () {
+  it("returns false if code == ENOENT", (t) => {
     var result = isFatalUnlinkError({ code: "ENOENT" }, "wx");
 
-    assert.strictEqual(result, false);
+    t.assert.strictEqual(result, false);
   });
 
-  it("returns true if code != ENOENT", function () {
+  it("returns true if code != ENOENT", (t) => {
     var result = isFatalUnlinkError({ code: "EOTHER" });
 
-    assert.strictEqual(result, true);
+    t.assert.strictEqual(result, true);
   });
 });
 
-describe("getModeDiff", function () {
-  it("returns 0 if both modes are the same", function () {
+describe("getModeDiff", () => {
+  it("returns 0 if both modes are the same", (t) => {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("777");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result, 0);
+    t.assert.strictEqual(result, 0);
   });
 
-  it("returns 0 if vinyl mode is not a number", function () {
+  it("returns 0 if vinyl mode is not a number", (t) => {
     var fsMode = applyUmask("777");
     var vfsMode = undefined;
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result, 0);
+    t.assert.strictEqual(result, 0);
   });
 
-  it("returns a value greater than 0 if modes are different", function () {
+  it("returns a value greater than 0 if modes are different", (t) => {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("744");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result > 0, true);
+    t.assert.strictEqual(result > 0, true);
   });
 
-  it("returns the proper diff", function () {
+  it("returns the proper diff", (t) => {
     var fsMode = applyUmask("777");
     var vfsMode = applyUmask("744");
     var expectedDiff = applyUmask("33");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result, expectedDiff);
+    t.assert.strictEqual(result, expectedDiff);
   });
 
-  it("does not matter the order of diffing", function () {
+  it("does not matter the order of diffing", (t) => {
     var fsMode = applyUmask("655");
     var vfsMode = applyUmask("777");
     var expectedDiff = applyUmask("122");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result, expectedDiff);
+    t.assert.strictEqual(result, expectedDiff);
   });
 
-  it("includes the sticky/setuid/setgid bits", function () {
+  it("includes the sticky/setuid/setgid bits", (t) => {
     var fsMode = applyUmask("1777");
     var vfsMode = applyUmask("4777");
     var expectedDiff = applyUmask("5000");
 
     var result = getModeDiff(fsMode, vfsMode);
 
-    assert.strictEqual(result, expectedDiff);
+    t.assert.strictEqual(result, expectedDiff);
   });
 });
 
-describe("getTimesDiff", function () {
-  it("returns undefined if vinyl mtime is not a valid date", function () {
+describe("getTimesDiff", () => {
+  it("returns undefined if vinyl mtime is not a valid date", (t) => {
     var fsStat = {
       mtime: new Date(),
     };
@@ -317,10 +316,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if vinyl mtime & atime are both equal to counterparts", function () {
+  it("returns undefined if vinyl mtime & atime are both equal to counterparts", (t) => {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -333,11 +332,11 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
   // TODO: is this proper/expected?
-  it("returns undefined if vinyl mtimes equals the counterpart and atimes are null", function () {
+  it("returns undefined if vinyl mtimes equals the counterpart and atimes are null", (t) => {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -350,10 +349,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
-  it("returns a diff object if mtimes do not match", function () {
+  it("returns a diff object if mtimes do not match", (t) => {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -369,10 +368,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
-  it("returns a diff object if atimes do not match", function () {
+  it("returns a diff object if atimes do not match", (t) => {
     var now = Date.now();
     var then = now - 1000;
     var fsStat = {
@@ -390,10 +389,10 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs atime if the vinyl atime is invalid", function () {
+  it("returns the fs atime if the vinyl atime is invalid", (t) => {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -410,11 +409,11 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
   // TODO: is this proper/expected?
-  it("makes atime diff undefined if fs and vinyl atime are invalid", function () {
+  it("makes atime diff undefined if fs and vinyl atime are invalid", (t) => {
     var now = Date.now();
     var fsStat = {
       mtime: new Date(now),
@@ -431,12 +430,12 @@ describe("getTimesDiff", function () {
 
     var result = getTimesDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 });
 
-describe("getOwnerDiff", function () {
-  it("returns undefined if vinyl uid & gid are invalid", function () {
+describe("getOwnerDiff", () => {
+  it("returns undefined if vinyl uid & gid are invalid", (t) => {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -448,10 +447,10 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if vinyl uid & gid are both equal to counterparts", function () {
+  it("returns undefined if vinyl uid & gid are both equal to counterparts", (t) => {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -463,10 +462,10 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
-  it("returns a diff object if uid or gid do not match", function () {
+  it("returns a diff object if uid or gid do not match", (t) => {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -482,7 +481,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: 1000,
@@ -495,10 +494,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs uid if the vinyl uid is invalid", function () {
+  it("returns the fs uid if the vinyl uid is invalid", (t) => {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -514,7 +513,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: -1,
@@ -523,10 +522,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
-  it("returns the fs gid if the vinyl gid is invalid", function () {
+  it("returns the fs gid if the vinyl gid is invalid", (t) => {
     var fsStat = {
       uid: 1000,
       gid: 1000,
@@ -542,7 +541,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
 
     vfsStat = {
       uid: 1001,
@@ -551,10 +550,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.deepStrictEqual(result, expected);
+    t.assert.deepStrictEqual(result, expected);
   });
 
-  it("returns undefined if fs and vinyl uid are invalid", function () {
+  it("returns undefined if fs and vinyl uid are invalid", (t) => {
     var fsStat = {
       uid: undefined,
       gid: 1000,
@@ -566,7 +565,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
 
     fsStat = {
       uid: -1,
@@ -579,10 +578,10 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 
-  it("returns undefined if fs and vinyl gid are invalid", function () {
+  it("returns undefined if fs and vinyl gid are invalid", (t) => {
     var fsStat = {
       uid: 1000,
       gid: undefined,
@@ -594,7 +593,7 @@ describe("getOwnerDiff", function () {
 
     var result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
 
     fsStat = {
       uid: 1000,
@@ -607,11 +606,11 @@ describe("getOwnerDiff", function () {
 
     result = getOwnerDiff(fsStat, vfsStat);
 
-    assert.strictEqual(result, undefined);
+    t.assert.strictEqual(result, undefined);
   });
 });
 
-describe("closeFd", function () {
+describe("closeFd", () => {
   // This is just a very large number since node broke our tests by disallowing -1
   // We're also doing some hacky version matching because node 0.12 accepts 10000 on Windows (and fails the test)
   var invalidFd = process.version[1] === "0" ? -1 : 10000;
@@ -620,7 +619,7 @@ describe("closeFd", function () {
     var propagatedError = new Error();
 
     closeFd(propagatedError, null, function (err) {
-      assert.strictEqual(err, propagatedError);
+      t.assert.strictEqual(err, propagatedError);
 
       done();
     });
@@ -628,7 +627,7 @@ describe("closeFd", function () {
 
   it("calls the callback with close error if no error to propagate", (t, done) => {
     closeFd(null, invalidFd, function (err) {
-      assert.ok(err != null);
+      t.assert.ok(err != null);
 
       done();
     });
@@ -638,7 +637,7 @@ describe("closeFd", function () {
     var propagatedError = new Error();
 
     closeFd(propagatedError, invalidFd, function (err) {
-      assert.strictEqual(err, propagatedError);
+      t.assert.strictEqual(err, propagatedError);
 
       done();
     });
@@ -652,8 +651,8 @@ describe("closeFd", function () {
     var closeSpy = t.mock.method(fs, "close");
 
     closeFd(propagatedError, fd, function (err) {
-      assert.strictEqual(closeSpy.mock.callCount(), 1);
-      assert.strictEqual(err, propagatedError);
+      t.assert.strictEqual(closeSpy.mock.callCount(), 1);
+      t.assert.strictEqual(err, propagatedError);
 
       done();
     });
@@ -665,15 +664,15 @@ describe("closeFd", function () {
     var spy = t.mock.method(fs, "close");
 
     closeFd(null, fd, function (err) {
-      assert.strictEqual(spy.mock.callCount(), 1);
-      assert.strictEqual(err, undefined);
+      t.assert.strictEqual(spy.mock.callCount(), 1);
+      t.assert.strictEqual(err, undefined);
 
       done();
     });
   });
 });
 
-describe("writeFile", function () {
+describe("writeFile", () => {
   beforeEach(clean);
   afterEach(clean);
 
@@ -683,13 +682,13 @@ describe("writeFile", function () {
 
   it("writes a file to the filesystem, does not close and returns the fd", (t, done) => {
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, function () {
+      fs.close(fd, (t) => {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        assert.strictEqual(written, contents);
+        t.assert.strictEqual(written, contents);
 
         done();
       });
@@ -700,11 +699,11 @@ describe("writeFile", function () {
     var expected = applyUmask("666");
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, function () {
-        assert.strictEqual(statMode(outputPath), expected);
+      fs.close(fd, (t) => {
+        t.assert.strictEqual(statMode(outputPath), expected);
 
         done();
       });
@@ -719,11 +718,11 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, function () {
-        assert.strictEqual(statMode(outputPath), expected);
+      fs.close(fd, (t) => {
+        t.assert.strictEqual(statMode(outputPath), expected);
 
         done();
       });
@@ -734,11 +733,11 @@ describe("writeFile", function () {
     var length = contents.length;
 
     writeFile(outputPath, Buffer.from(contents), function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
       fs.read(fd, Buffer.alloc(length), 0, length, 0, function (readErr) {
-        assert.ok(readErr != null);
+        t.assert.ok(readErr != null);
 
         fs.close(fd, done);
       });
@@ -752,8 +751,8 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(contents), options, function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
       fs.read(
         fd,
@@ -762,9 +761,9 @@ describe("writeFile", function () {
         length,
         0,
         function (readErr, _, written) {
-          assert.ifError(readErr);
+          t.assert.ifError(readErr);
 
-          assert.strictEqual(written.toString(), contents);
+          t.assert.strictEqual(written.toString(), contents);
 
           fs.close(fd, done);
         },
@@ -785,13 +784,13 @@ describe("writeFile", function () {
     };
 
     writeFile(outputPath, Buffer.from(toWrite), options, function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, function () {
+      fs.close(fd, (t) => {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        assert.strictEqual(written, expected);
+        t.assert.strictEqual(written, expected);
 
         done();
       });
@@ -802,8 +801,8 @@ describe("writeFile", function () {
     var notExistDir = path.join(__dirname, "./not-exist-dir/writeFile.txt");
 
     writeFile(notExistDir, Buffer.from(contents), function (err, fd) {
-      assert.ok(err != null);
-      assert.strictEqual(typeof fd === "number", false);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(typeof fd === "number", false);
 
       done();
     });
@@ -815,8 +814,8 @@ describe("writeFile", function () {
     };
 
     writeFile(inputPath, Buffer.from(contents), options, function (err, fd) {
-      assert.ok(err != null);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, done);
     });
@@ -824,7 +823,7 @@ describe("writeFile", function () {
 
   it("passes an error if called with string as data", (t, done) => {
     writeFile(outputPath, contents, function (err) {
-      assert.ok(err != null);
+      t.assert.ok(err != null);
 
       done();
     });
@@ -837,13 +836,13 @@ describe("writeFile", function () {
     buf.copy(content, 0, 0, length);
 
     writeFile(outputPath, content, function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, function () {
+      fs.close(fd, (t) => {
         var written = fs.readFileSync(outputPath, "utf8");
 
-        assert.strictEqual(written, contents);
+        t.assert.strictEqual(written, contents);
 
         done();
       });
@@ -852,15 +851,15 @@ describe("writeFile", function () {
 
   it("does not error if options is falsy", (t, done) => {
     writeFile(outputPath, Buffer.from(contents), null, function (err, fd) {
-      assert.ifError(err);
-      assert.strictEqual(typeof fd === "number", true);
+      t.assert.ifError(err);
+      t.assert.strictEqual(typeof fd === "number", true);
 
       fs.close(fd, done);
     });
   });
 });
 
-describe("reflectStat", function () {
+describe("reflectStat", () => {
   beforeEach(clean);
   afterEach(clean);
 
@@ -872,7 +871,7 @@ describe("reflectStat", function () {
     var file = new File();
 
     reflectStat(neInputDirpath, file, function (err) {
-      assert.ok(err != null);
+      t.assert.ok(err != null);
 
       done();
     });
@@ -883,13 +882,13 @@ describe("reflectStat", function () {
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectStat(symlinkPath, file, function () {
+    reflectStat(symlinkPath, file, (t) => {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
       fs.stat(symlinkPath, function (err, stat) {
-        assert.deepStrictEqual(file.stat, stat);
+        t.assert.deepStrictEqual(file.stat, stat);
 
         done();
       });
@@ -897,7 +896,7 @@ describe("reflectStat", function () {
   });
 });
 
-describe("reflectLinkStat", function () {
+describe("reflectLinkStat", () => {
   beforeEach(clean);
   afterEach(clean);
 
@@ -909,7 +908,7 @@ describe("reflectLinkStat", function () {
     var file = new File();
 
     reflectLinkStat(neInputDirpath, file, function (err) {
-      assert.ok(err != null);
+      t.assert.ok(err != null);
 
       done();
     });
@@ -920,13 +919,13 @@ describe("reflectLinkStat", function () {
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectLinkStat(symlinkPath, file, function () {
+    reflectLinkStat(symlinkPath, file, (t) => {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
       // dev but possibly others as well?
       fs.lstat(symlinkPath, function (err, stat) {
-        assert.deepStrictEqual(file.stat, stat);
+        t.assert.deepStrictEqual(file.stat, stat);
 
         done();
       });
@@ -934,7 +933,7 @@ describe("reflectLinkStat", function () {
   });
 });
 
-describe("updateMetadata", function () {
+describe("updateMetadata", () => {
   beforeEach(clean);
   afterEach(clean);
 
@@ -964,7 +963,7 @@ describe("updateMetadata", function () {
     });
 
     updateMetadata(fd, file, function (err) {
-      assert.ok(err != null);
+      t.assert.ok(err != null);
 
       done();
     });
@@ -981,10 +980,10 @@ describe("updateMetadata", function () {
     var fd = fs.openSync(outputPath, "w+");
     var stats = fs.fstatSync(fd);
 
-    updateMetadata(fd, file, function () {
+    updateMetadata(fd, file, (t) => {
       // Not sure why .toEqual doesn't match these
       Object.keys(file.stat).forEach(function (key) {
-        assert.deepStrictEqual(file.stat[key], stats[key]);
+        t.assert.deepStrictEqual(file.stat[key], stats[key]);
       });
 
       fs.close(fd, done);
@@ -1004,9 +1003,9 @@ describe("updateMetadata", function () {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, function () {
-      assert.strictEqual(fchmodSpy.mock.callCount(), 0);
-      assert.strictEqual(futimesSpy.mock.callCount(), 0);
+    updateMetadata(fd, file, (t) => {
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
       fs.close(fd, done);
     });
@@ -1034,9 +1033,9 @@ describe("updateMetadata", function () {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, function () {
-      assert.strictEqual(fchmodSpy.mock.callCount(), 0);
-      assert.strictEqual(futimesSpy.mock.callCount(), 0);
+    updateMetadata(fd, file, (t) => {
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
       fs.close(fd, done);
     });
@@ -1063,16 +1062,16 @@ describe("updateMetadata", function () {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, function () {
-      assert.strictEqual(futimesSpy.mock.callCount(), 1);
+    updateMetadata(fd, file, (t) => {
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
       // Var stats = fs.fstatSync(fd);
       var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
       var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-      assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
-      assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
-      assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
-      assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
+      t.assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
+      t.assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
+      t.assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
+      t.assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
 
       fs.close(fd, done);
     });
@@ -1097,11 +1096,11 @@ describe("updateMetadata", function () {
     });
 
     var fd = fs.openSync(outputPath, "w+");
-    assert.strictEqual(typeof fd === "number", true);
+    t.assert.strictEqual(typeof fd === "number", true);
 
     updateMetadata(fd, file, function (err) {
-      assert.ok(err != null);
-      assert.strictEqual(futimesSpy.mock.callCount(), 1);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
       fs.close(fd, done);
     });
@@ -1122,7 +1121,7 @@ describe("updateMetadata", function () {
     );
 
     var fd = fs.openSync(outputPath, "w+");
-    assert.strictEqual(typeof fd === "number", true);
+    t.assert.strictEqual(typeof fd === "number", true);
 
     var stat = fs.fstatSync(fd);
 
@@ -1137,11 +1136,11 @@ describe("updateMetadata", function () {
     });
 
     updateMetadata(fd, file, function (err) {
-      assert.ifError(err);
-      assert.strictEqual(futimesSpy.mock.callCount(), 1);
+      t.assert.ifError(err);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
       // Times were updated to match the filesystem since futimes wasn't implemented
-      assert.deepStrictEqual(file.stat.mtime, stat.mtime);
-      assert.deepStrictEqual(file.stat.atime, stat.atime);
+      t.assert.deepStrictEqual(file.stat.mtime, stat.mtime);
+      t.assert.deepStrictEqual(file.stat.atime, stat.atime);
 
       fs.close(fd, done);
     });
@@ -1164,10 +1163,10 @@ describe("updateMetadata", function () {
     var fd = fs.openSync(outputPath, "w+");
 
     updateMetadata(fd, file, function (err) {
-      assert.ifError(err);
-      assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+      t.assert.ifError(err);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       var stats = fs.fstatSync(fd);
-      assert.strictEqual(file.stat.mode, stats.mode);
+      t.assert.strictEqual(file.stat.mode, stats.mode);
 
       fs.close(fd, done);
     });
@@ -1189,10 +1188,10 @@ describe("updateMetadata", function () {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, function () {
-      assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+    updateMetadata(fd, file, (t) => {
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       var stats = fs.fstatSync(fd);
-      assert.strictEqual(file.stat.mode, stats.mode);
+      t.assert.strictEqual(file.stat.mode, stats.mode);
 
       fs.close(fd, done);
     });
@@ -1216,8 +1215,8 @@ describe("updateMetadata", function () {
     });
 
     updateMetadata(fd, file, function (err) {
-      assert.ok(err != null);
-      assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
 
       fs.close(fd, done);
     });
@@ -1248,17 +1247,17 @@ describe("updateMetadata", function () {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, function () {
-      assert.strictEqual(fchmodSpy.mock.callCount(), 1);
-      assert.strictEqual(futimesSpy.mock.callCount(), 1);
+    updateMetadata(fd, file, (t) => {
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
       var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
       var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-      assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
-      assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
-      assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
-      assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
+      t.assert.deepStrictEqual(file.stat.mtime, new Date(mtimeEarlier));
+      t.assert.deepStrictEqual(mtimeSpy.getTime(), mtimeEarlier);
+      t.assert.deepStrictEqual(file.stat.atime, new Date(atimeEarlier));
+      t.assert.deepStrictEqual(atimeSpy.getTime(), atimeEarlier);
 
       fs.close(fd, done);
     });
@@ -1290,10 +1289,10 @@ describe("updateMetadata", function () {
     var fd = fs.openSync(outputPath, "w");
 
     updateMetadata(fd, file, function (err) {
-      assert.ok(err != null);
-      assert.strictEqual(err, mockedErr);
-      assert.strictEqual(fchmodSpy.mock.callCount(), 1);
-      assert.strictEqual(futimesSpy.mock.callCount(), 1);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(err, mockedErr);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
       fs.close(fd, done);
     });
@@ -1319,35 +1318,35 @@ describeStreams("createWriteStream", function (stream) {
   });
 
   it("accepts just a file path and writes to it", (t, done) => {
-    function assertion(err) {
+    function assert(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      assert.strictEqual(outputContents, contents);
+      t.assert.strictEqual(outputContents, contents);
       done(err);
     }
 
-    pipeline([from([contents]), createWriteStream(outputPath)], assertion);
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
   });
 
   it("accepts just a file path and writes a large file to it", (t, done) => {
     var size = 40000;
 
-    function assertion(err) {
+    function assert(err) {
       var stats = fs.lstatSync(outputPath);
 
-      assert.strictEqual(stats.size, size);
+      t.assert.strictEqual(stats.size, size);
       done(err);
     }
 
-    pipeline([chunks(size), createWriteStream(outputPath)], assertion);
+    pipeline([chunks(size), createWriteStream(outputPath)], assert);
   });
 
   it("accepts flags option", (t, done) => {
     // Write 13 stars then 12345 because the length of expected is 13
     fs.writeFileSync(outputPath, "*************12345");
 
-    function assertion(err) {
+    function assert(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      assert.strictEqual(outputContents, contents + "12345");
+      t.assert.strictEqual(outputContents, contents + "12345");
       done(err);
     }
 
@@ -1357,16 +1356,16 @@ describeStreams("createWriteStream", function (stream) {
         // Replaces from the beginning of the file
         createWriteStream(outputPath, { flags: "r+" }),
       ],
-      assertion,
+      assert,
     );
   });
 
   it("accepts append flag as option & places cursor at the end", (t, done) => {
     fs.writeFileSync(outputPath, "12345");
 
-    function assertion(err) {
+    function assert(err) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
-      assert.strictEqual(outputContents, "12345" + contents);
+      t.assert.strictEqual(outputContents, "12345" + contents);
       done(err);
     }
 
@@ -1376,33 +1375,33 @@ describeStreams("createWriteStream", function (stream) {
         // Appends to the end of the file
         createWriteStream(outputPath, { flags: "a" }),
       ],
-      assertion,
+      assert,
     );
   });
 
   it("accepts mode option", skipWin, (t, done) => {
     var mode = applyUmask("777");
 
-    function assertion(err) {
-      assert.strictEqual(statMode(outputPath), mode);
+    function assert(err) {
+      t.assert.strictEqual(statMode(outputPath), mode);
       done(err);
     }
 
     pipeline(
       [from([contents]), createWriteStream(outputPath, { mode: mode })],
-      assertion,
+      assert,
     );
   });
 
   it("uses default file mode if no mode options", (t, done) => {
     var defaultMode = applyUmask(DEFAULT_FILE_MODE);
 
-    function assertion(err) {
-      assert.strictEqual(statMode(outputPath), defaultMode);
+    function assert(err) {
+      t.assert.strictEqual(statMode(outputPath), defaultMode);
       done(err);
     }
 
-    pipeline([from([contents]), createWriteStream(outputPath)], assertion);
+    pipeline([from([contents]), createWriteStream(outputPath)], assert);
   });
 
   it("accepts a flush function that is called before close emitted", (t, done) => {
@@ -1413,12 +1412,12 @@ describeStreams("createWriteStream", function (stream) {
       cb();
     });
 
-    function assertion(err) {
-      assert.strictEqual(flushCalled, true);
+    function assert(err) {
+      t.assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assertion);
+    pipeline([from([contents]), outStream], assert);
   });
 
   it("can specify flush without options argument", (t, done) => {
@@ -1429,29 +1428,29 @@ describeStreams("createWriteStream", function (stream) {
       cb();
     });
 
-    function assertion(err) {
-      assert.strictEqual(flushCalled, true);
+    function assert(err) {
+      t.assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assertion);
+    pipeline([from([contents]), outStream], assert);
   });
 
   it("passes the file descriptor to flush", (t, done) => {
     var flushCalled = false;
 
     var outStream = createWriteStream(outputPath, function (fd, cb) {
-      assert.strictEqual(typeof fd, "number");
+      t.assert.strictEqual(typeof fd, "number");
       flushCalled = true;
       cb();
     });
 
-    function assertion(err) {
-      assert.strictEqual(flushCalled, true);
+    function assert(err) {
+      t.assert.strictEqual(flushCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assertion);
+    pipeline([from([contents]), outStream], assert);
   });
 
   it("passes a callback to flush to call when work is done", (t, done) => {
@@ -1460,44 +1459,44 @@ describeStreams("createWriteStream", function (stream) {
 
     var outStream = createWriteStream(outputPath, function (fd, cb) {
       flushCalled = true;
-      setTimeout(function () {
+      setTimeout(() => {
         timeoutCalled = true;
         cb();
       }, 250);
     });
 
-    function assertion(err) {
-      assert.strictEqual(flushCalled, true);
-      assert.strictEqual(timeoutCalled, true);
+    function assert(err) {
+      t.assert.strictEqual(flushCalled, true);
+      t.assert.strictEqual(timeoutCalled, true);
       done(err);
     }
 
-    pipeline([from([contents]), outStream], assertion);
+    pipeline([from([contents]), outStream], assert);
   });
 
   it("emits an error if open fails", (t, done) => {
     var badOutputPath = path.join(outputBase, "./non-exist/test.coffee");
 
-    function assertion(err) {
-      assert.ok(err instanceof Error);
+    function assert(err) {
+      t.assert.ok(err instanceof Error);
       done();
     }
 
-    pipeline([from([contents]), createWriteStream(badOutputPath)], assertion);
+    pipeline([from([contents]), createWriteStream(badOutputPath)], assert);
   });
 
   it("emits an error if write fails", (t, done) => {
     // Create the file so it can be opened with `r`
     fs.writeFileSync(outputPath, contents);
 
-    function assertion(err) {
-      assert.ok(err instanceof Error);
+    function assert(err) {
+      t.assert.ok(err instanceof Error);
       done();
     }
 
     pipeline(
       [from([contents]), createWriteStream(outputPath, { flags: "r" })],
-      assertion,
+      assert,
     );
   });
 });
