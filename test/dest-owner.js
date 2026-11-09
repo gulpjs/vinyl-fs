@@ -1,6 +1,5 @@
 "use strict";
 
-var assert = require("node:assert");
 var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
@@ -42,14 +41,14 @@ describeStreams(".dest() with custom owner", (stream) => {
       },
     });
 
-    function assertion() {
+    function assert() {
       t.assert.strictEqual(fchownSpy.mock.callCount(), 1);
       t.assert.strictEqual(fchownSpy.mock.calls[0].arguments[1], 1002);
       t.assert.strictEqual(fchownSpy.mock.calls[0].arguments[2], 1002);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
   it("does not call fchown if uid/gid are invalid", skipWin, (t, done) => {
@@ -65,11 +64,11 @@ describeStreams(".dest() with custom owner", (stream) => {
       },
     });
 
-    function assertion() {
+    function assert() {
       t.assert.strictEqual(fchownSpy.mock.callCount(), 0);
       done();
     }
 
-    pipeline([from([file]), vfs.dest(outputBase)], assertion);
+    pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 });
