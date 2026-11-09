@@ -33,7 +33,6 @@ describeStreams(".dest() with custom times", function (stream) {
     // Changing the time of a directory errors in Windows.
     // Windows is treated as though it does not have permission to make this operation.
     var earlier = Date.now() - 1001;
-    //
     var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
