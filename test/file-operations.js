@@ -116,7 +116,6 @@ describe("isOwner", () => {
   it("returns true when owner and non-root", function (t) {
     t.mock.method(process, "geteuid", () => ownerStat.uid);
     var result = isOwner(ownerStat);
-
     t.assert.strictEqual(result, true);
   });
 
@@ -685,7 +684,7 @@ describe("writeFile", () => {
       t.assert.ifError(err);
       t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, (t) => {
+      fs.close(fd, () => {
         var written = fs.readFileSync(outputPath, "utf8");
 
         t.assert.strictEqual(written, contents);
@@ -702,7 +701,7 @@ describe("writeFile", () => {
       t.assert.ifError(err);
       t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, (t) => {
+      fs.close(fd, () => {
         t.assert.strictEqual(statMode(outputPath), expected);
 
         done();
@@ -721,7 +720,7 @@ describe("writeFile", () => {
       t.assert.ifError(err);
       t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, (t) => {
+      fs.close(fd, () => {
         t.assert.strictEqual(statMode(outputPath), expected);
 
         done();
@@ -787,7 +786,7 @@ describe("writeFile", () => {
       t.assert.ifError(err);
       t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, (t) => {
+      fs.close(fd, () => {
         var written = fs.readFileSync(outputPath, "utf8");
 
         t.assert.strictEqual(written, expected);
@@ -839,7 +838,7 @@ describe("writeFile", () => {
       t.assert.ifError(err);
       t.assert.strictEqual(typeof fd === "number", true);
 
-      fs.close(fd, (t) => {
+      fs.close(fd, () => {
         var written = fs.readFileSync(outputPath, "utf8");
 
         t.assert.strictEqual(written, contents);
@@ -882,7 +881,7 @@ describe("reflectStat", () => {
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectStat(symlinkPath, file, (t) => {
+    reflectStat(symlinkPath, file, () => {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
@@ -919,7 +918,7 @@ describe("reflectLinkStat", () => {
 
     fs.symlinkSync(inputPath, symlinkPath);
 
-    reflectLinkStat(symlinkPath, file, (t) => {
+    reflectLinkStat(symlinkPath, file, () => {
       // There appears to be a bug in the Windows implementation which causes
       // the sync versions of stat and lstat to return unsigned 32-bit ints
       // whilst the async versions returns signed 32-bit ints... This affects
@@ -980,7 +979,7 @@ describe("updateMetadata", () => {
     var fd = fs.openSync(outputPath, "w+");
     var stats = fs.fstatSync(fd);
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       // Not sure why .toEqual doesn't match these
       Object.keys(file.stat).forEach(function (key) {
         t.assert.deepStrictEqual(file.stat[key], stats[key]);
@@ -1003,7 +1002,7 @@ describe("updateMetadata", () => {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
       t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
@@ -1033,7 +1032,7 @@ describe("updateMetadata", () => {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
       t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
 
@@ -1062,7 +1061,7 @@ describe("updateMetadata", () => {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
       // Var stats = fs.fstatSync(fd);
       var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
@@ -1188,7 +1187,7 @@ describe("updateMetadata", () => {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       var stats = fs.fstatSync(fd);
       t.assert.strictEqual(file.stat.mode, stats.mode);
@@ -1247,7 +1246,7 @@ describe("updateMetadata", () => {
 
     var fd = fs.openSync(outputPath, "w+");
 
-    updateMetadata(fd, file, (t) => {
+    updateMetadata(fd, file, () => {
       t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
