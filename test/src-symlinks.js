@@ -150,9 +150,7 @@ describeStreams(".src() with symlinks", (stream) => {
   });
 
   it("only calls resolveSymlinks once-per-file if it is a function", (t, done) => {
-    var spy = t.mock.fn(() => {
-      true;
-    });
+    var spy = t.mock.fn(() => true);
 
     function assert() {
       t.assert.strictEqual(spy.mock.callCount(), 1);
