@@ -1,6 +1,5 @@
 "use strict";
 
-var assert = require("node:assert");
 var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
@@ -12,6 +11,9 @@ var cleanup = require("./utils/cleanup");
 var isWindows = require("./utils/is-windows");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
+
+var skipPosix = { skip: !isWindows };
+var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -28,185 +30,150 @@ describeStreams(".dest() with custom times", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it(
-    "does not call futimes when no mtime is provided on the vinyl stat",
-    { skip: isWindows },
-    function (t, done) {
-      // Changing the time of a directory errors in Windows.
-      // Windows is treated as though it does not have permission to make this operation.
-      var earlier = Date.now() - 1001;
-      //
-      var futimesSpy = t.mock.method(fs, "futimes");
+  it("does not call futimes when no mtime is provided", skipWin, (t, done) => {
+    // Changing the time of a directory errors in Windows.
+    // Windows is treated as though it does not have permission to make this operation.
+    var earlier = Date.now() - 1001;
+    //
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: inputBase,
-        path: inputPath,
-        contents: Buffer.from(contents),
-        stat: {},
-      });
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: Buffer.from(contents),
+      stat: {},
+    });
 
-      function assertion() {
-        var stats = fs.lstatSync(outputPath);
+    function assert() {
+      var stats = fs.lstatSync(outputPath);
 
-        assert.strictEqual(futimesSpy.mock.callCount(), 0);
-        assert.strictEqual(stats.atime.getTime() >= earlier, true);
-        assert.strictEqual(stats.mtime.getTime() >= earlier, true);
-        done();
-      }
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      t.assert.strictEqual(stats.atime.getTime() >= earlier, true);
+      t.assert.strictEqual(stats.mtime.getTime() >= earlier, true);
+      done();
+    }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-        assertion,
-      );
-    },
-  );
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
+  });
 
-  it(
-    "calls futimes when an mtime is provided on the vinyl stat",
-    { skip: isWindows },
-    function (t, done) {
-      // Use new mtime
-      var mtime = new Date(Date.now() - 2048);
+  it("calls futimes when an mtime is provided", skipWin, (t, done) => {
+    // Use new mtime
+    var mtime = new Date(Date.now() - 2048);
 
-      var futimesSpy = t.mock.method(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: inputBase,
-        path: inputPath,
-        contents: Buffer.from(contents),
-        stat: {
-          mtime: mtime,
-        },
-      });
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: Buffer.from(contents),
+      stat: {
+        mtime: mtime,
+      },
+    });
 
-      function assertion() {
-        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+    function assert() {
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-        // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
-        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
+      // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
-        assert.strictEqual(file.stat.mtime, mtime);
+      t.assert.strictEqual(file.stat.mtime, mtime);
 
-        done();
-      }
+      done();
+    }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-        assertion,
-      );
-    },
-  );
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
+  });
 
-  it(
-    "does not call futimes when provided mtime on the vinyl stat is invalid",
-    { skip: isWindows },
-    function (t, done) {
-      var earlier = Date.now() - 1001;
+  it("does not call when provided mtime is invalid", skipWin, (t, done) => {
+    var earlier = Date.now() - 1001;
 
-      var futimesSpy = t.mock.method(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: inputBase,
-        path: inputPath,
-        contents: Buffer.from(contents),
-        stat: {
-          mtime: new Date(undefined),
-        },
-      });
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: Buffer.from(contents),
+      stat: {
+        mtime: new Date(undefined),
+      },
+    });
 
-      function assertion() {
-        var stats = fs.lstatSync(outputPath);
+    function assert() {
+      var stats = fs.lstatSync(outputPath);
 
-        assert.strictEqual(futimesSpy.mock.callCount(), 0);
-        assert.strictEqual(stats.mtime.getTime() >= earlier, true);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      t.assert.strictEqual(stats.mtime.getTime() >= earlier, true);
 
-        done();
-      }
+      done();
+    }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-        assertion,
-      );
-    },
-  );
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
+  });
 
-  it(
-    "calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid",
-    { skip: isWindows },
-    function (t, done) {
-      // Use new mtime
-      var mtime = new Date(Date.now() - 2048);
-      var invalidAtime = new Date(undefined);
+  it("calls when mtime valid and atime is invalid", skipWin, (t, done) => {
+    // Use new mtime
+    var mtime = new Date(Date.now() - 2048);
+    var invalidAtime = new Date(undefined);
 
-      var futimesSpy = t.mock.method(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: inputBase,
-        path: inputPath,
-        contents: Buffer.from(contents),
-        stat: {
-          atime: invalidAtime,
-          mtime: mtime,
-        },
-      });
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: Buffer.from(contents),
+      stat: {
+        atime: invalidAtime,
+        mtime: mtime,
+      },
+    });
 
-      function assertion() {
-        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+    function assert() {
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
-        done();
-      }
+      done();
+    }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-        assertion,
-      );
-    },
-  );
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
+  });
 
-  it(
-    "writes file atime and mtime using the vinyl stat",
-    { skip: isWindows },
-    function (t, done) {
-      // Use new atime/mtime
-      var atime = new Date(Date.now() - 2048);
-      var mtime = new Date(Date.now() - 1024);
+  it("writes file atime and mtime using the vinyl stat", skipWin, (t, done) => {
+    // Use new atime/mtime
+    var atime = new Date(Date.now() - 2048);
+    var mtime = new Date(Date.now() - 1024);
 
-      var futimesSpy = t.mock.method(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: inputBase,
-        path: inputPath,
-        contents: Buffer.from(contents),
-        stat: {
-          atime: atime,
-          mtime: mtime,
-        },
-      });
+    var file = new File({
+      base: inputBase,
+      path: inputPath,
+      contents: Buffer.from(contents),
+      stat: {
+        atime: atime,
+        mtime: mtime,
+      },
+    });
 
-      function assertion() {
-        assert.strictEqual(futimesSpy.mock.callCount(), 1);
+    function assert() {
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-        var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
-        var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
+      var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-        assert.strictEqual(atimeSpy.getTime(), atime.getTime());
-        assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
-        assert.strictEqual(file.stat.mtime, mtime);
-        assert.deepStrictEqual(file.stat.atime, atime);
+      t.assert.strictEqual(atimeSpy.getTime(), atime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
+      t.assert.strictEqual(file.stat.mtime, mtime);
+      t.assert.deepStrictEqual(file.stat.atime, atime);
 
-        done();
-      }
+      done();
+    }
 
-      pipeline(
-        [from([file]), vfs.dest(outputBase, { cwd: __dirname })],
-        assertion,
-      );
-    },
-  );
+    pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
+  });
 });
