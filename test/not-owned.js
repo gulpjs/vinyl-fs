@@ -1,6 +1,5 @@
 "use strict";
 
-var assert = require("node:assert");
 var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
@@ -60,7 +59,7 @@ describeStreams(".dest() on not owned files", function (stream) {
   it(
     "does not error if mtime is different",
     { skip: needsAction() },
-    function (t, done) {
+    (t, done) => {
       var futimesSpy = t.mock.method(fs, "futimes");
 
       var earlier = Date.now() - 1000;
@@ -74,12 +73,12 @@ describeStreams(".dest() on not owned files", function (stream) {
         },
       });
 
-      function assertion() {
-        assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      function assert() {
+        t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
       }
 
       pipeline(
-        [from([file]), vfs.dest(notOwnedBase), concatArray(assertion)],
+        [from([file]), vfs.dest(notOwnedBase), concatArray(assert)],
         done,
       );
     },
@@ -88,7 +87,7 @@ describeStreams(".dest() on not owned files", function (stream) {
   it(
     "does not error if mode is different",
     { skip: needsAction() },
-    function (t, done) {
+    (t, done) => {
       var fchmodSpy = t.mock.method(fs, "fchmod");
 
       var file = new File({
@@ -100,12 +99,12 @@ describeStreams(".dest() on not owned files", function (stream) {
         },
       });
 
-      function assertion() {
-        assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+      function assert() {
+        t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
       }
 
       pipeline(
-        [from([file]), vfs.dest(notOwnedBase), concatArray(assertion)],
+        [from([file]), vfs.dest(notOwnedBase), concatArray(assert)],
         done,
       );
     },
