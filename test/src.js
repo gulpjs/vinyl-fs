@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require("node:path");
-var assert = require("node:assert");
 var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
