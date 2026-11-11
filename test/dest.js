@@ -442,8 +442,6 @@ describeStreams(".dest()", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  // TODO this errored without other tests being active
-  // Setup is somehow wrong
   it("reports i/o errors", (t, done) => {
     var file = new File({
       base: inputBase,
