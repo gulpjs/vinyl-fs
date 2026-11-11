@@ -42,71 +42,28 @@ describeStreams(".src()", (stream) => {
   beforeEach(clean);
   afterEach(clean);
 
-  it("throws on invalid glob (empty)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src();
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      done();
-    }
+  it("throws on invalid glob (empty)", (t) => {
+    t.assert.throws(() => vfs.src());
   });
 
-  it("throws on invalid glob (empty string)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src("");
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      done();
-    }
+  it("throws on invalid glob (empty string)", (t) => {
+    t.assert.throws(() => vfs.src(""));
   });
 
-  it("throws on invalid glob (number)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src(123);
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      done();
-    }
+  it("throws on invalid glob (number)", (t) => {
+    t.assert.throws(() => vfs.src(123));
   });
 
-  it("throws on invalid glob (nested array)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src([["./fixtures/*.coffee"]]);
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      t.assert.match(err.message, /Invalid glob argument/);
-      done();
-    }
+  it("throws on invalid glob (nested array)", (t) => {
+    t.assert.throws(() => vfs.src(), { message: /Invalid glob argument/ });
   });
 
-  it("throws on invalid glob (empty string in array)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src([""]);
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      done();
-    }
+  it("throws on invalid glob (empty string in array)", (t) => {
+    t.assert.throws(() => vfs.src([""]));
   });
 
-  it("throws on invalid glob (empty array)", (t, done) => {
-    var stream;
-    try {
-      stream = vfs.src([]);
-    } catch (err) {
-      t.assert.ok(err != null);
-      t.assert.ok(stream === undefined);
-      done();
-    }
+  it("throws on invalid glob (empty array)", (t) => {
+    t.assert.throws(() => vfs.src([]));
   });
 
   it("supports arrays of globs", (t, done) => {
