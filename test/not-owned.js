@@ -29,8 +29,6 @@ describeStreams(".dest() on not owned files", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  var seenActions = false;
-
   function needsAction() {
     var fileStats = fs.statSync(notOwnedPath);
 
@@ -45,68 +43,54 @@ describeStreams(".dest() on not owned files", function (stream) {
       actions.push("  sudo chmod 666 " + notOwnedPath);
     }
     if (actions.length > 0) {
-      if (!seenActions) {
-        console.log(problems.join("\n"));
-        console.log("Please run the following commands and try again:");
-        console.log(actions.join("\n"));
-        seenActions = true;
-      }
-      return true;
+      return [
+        ...problems,
+        "Run the following commands and try again:",
+        ...actions,
+      ].join("\n");
     }
     return false;
   }
 
-  it(
-    "does not error if mtime is different",
-    { skip: needsAction() },
-    (t, done) => {
-      var futimesSpy = t.mock.method(fs, "futimes");
+  var skipAction = { skip: needsAction() };
 
-      var earlier = Date.now() - 1000;
+  it("does not error if mtime is different", skipAction, (t, done) => {
+    var futimesSpy = t.mock.method(fs, "futimes");
 
-      var file = new File({
-        base: notOwnedBase,
-        path: notOwnedPath,
-        contents: Buffer.from(contents),
-        stat: {
-          mtime: new Date(earlier),
-        },
-      });
+    var earlier = Date.now() - 1000;
 
-      function assert() {
-        t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
-      }
+    var file = new File({
+      base: notOwnedBase,
+      path: notOwnedPath,
+      contents: Buffer.from(contents),
+      stat: {
+        mtime: new Date(earlier),
+      },
+    });
 
-      pipeline(
-        [from([file]), vfs.dest(notOwnedBase), concatArray(assert)],
-        done,
-      );
-    },
-  );
+    function assert() {
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
+    }
 
-  it(
-    "does not error if mode is different",
-    { skip: needsAction() },
-    (t, done) => {
-      var fchmodSpy = t.mock.method(fs, "fchmod");
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
+  });
 
-      var file = new File({
-        base: notOwnedBase,
-        path: notOwnedPath,
-        contents: Buffer.from(contents),
-        stat: {
-          mode: applyUmask("777"),
-        },
-      });
+  it("does not error if mode is different", skipAction, (t, done) => {
+    var fchmodSpy = t.mock.method(fs, "fchmod");
 
-      function assert() {
-        t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
-      }
+    var file = new File({
+      base: notOwnedBase,
+      path: notOwnedPath,
+      contents: Buffer.from(contents),
+      stat: {
+        mode: applyUmask("777"),
+      },
+    });
 
-      pipeline(
-        [from([file]), vfs.dest(notOwnedBase), concatArray(assert)],
-        done,
-      );
-    },
-  );
+    function assert() {
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+    }
+
+    pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
+  });
 });
