@@ -29,6 +29,8 @@ describeStreams(".dest() with custom times", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
+  // Changing the time of a directory errors in Windows.
+  // Windows is treated as though it does not have permission to make this operation.
   it("does not call futimes when no mtime is provided", skipWin, (t, done) => {
     var earlier = Date.now() - 1001;
     var futimesSpy = t.mock.method(fs, "futimes");
