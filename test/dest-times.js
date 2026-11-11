@@ -85,7 +85,7 @@ describeStreams(".dest() with custom times", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("does not call when provided mtime is invalid", skipWin, (t, done) => {
+  it("no futimes when provided mtime is invalid", skipWin, (t, done) => {
     var earlier = Date.now() - 1001;
 
     var futimesSpy = t.mock.method(fs, "futimes");
@@ -111,7 +111,7 @@ describeStreams(".dest() with custom times", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("calls when mtime valid and atime is invalid", skipWin, (t, done) => {
+  it("calls futimes if mtime valid/atime invalid", skipWin, (t, done) => {
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
     var invalidAtime = new Date(undefined);

@@ -87,7 +87,7 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(win) sources a dirs, creates a symlink and cp", skipPosix, (t, done) => {
+  it("(win) sources a dir, creates & copy a junction", skipPosix, (t, done) => {
     function assert(files) {
       // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
       var expected = inputDirpath;

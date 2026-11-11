@@ -523,7 +523,7 @@ describeStreams("symlink stream", function (stream) {
     );
   });
 
-  it("(windows) supports relativeSymlinks option", skipPosix, (t, done) => {
+  it("(win) support relativeSymlinks on non-dirs", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,

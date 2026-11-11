@@ -6,7 +6,6 @@ var { afterEach, beforeEach, describe, it } = require("node:test");
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
-
 var mkdirp = require("fs-mkdirp-stream/mkdirp");
 
 var fo = require("../lib/file-operations");
@@ -1105,7 +1104,7 @@ describe("updateMetadata", () => {
     });
   });
 
-  it("sets stats if not implemented (issue 302)", skipWin, (t, done) => {
+  it("sets stats if missing futimes (issue 302)", skipWin, (t, done) => {
     var futimesSpy = t.mock.method(
       fs,
       "futimes",
@@ -1378,6 +1377,7 @@ describeStreams("createWriteStream", function (stream) {
     );
   });
 
+  // Changing the mode of a file is not supported by node.js in Windows.
   it("accepts mode option", skipWin, (t, done) => {
     var mode = applyUmask("777");
 

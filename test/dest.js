@@ -1173,7 +1173,7 @@ describeStreams(".dest()", function (stream) {
     var ogMkdir = fs.mkdir;
 
     var mkdirSpy = t.mock.method(fs, "mkdir", mockError);
-    mkdirSpy.mock.mockImplementationOnce(ogMkdir, 0);
+    mkdirSpy.mock.mockImplementationOnce(ogMkdir);
 
     var file = new File({
       base: inputBase,
@@ -1274,7 +1274,7 @@ describeStreams(".dest()", function (stream) {
     );
   });
 
-  it("does not marshall a Vinyl object with isSymbolic method", (t, done) => {
+  it("does not marshal a Vinyl object with isSymbolic method", (t, done) => {
     var file = new File({
       base: outputBase,
       path: outputPath,
