@@ -1,6 +1,6 @@
 {
   "name": "vinyl-fs",
-  "version": "4.0.2",
+  "version": "5.0.0",
   "description": "Vinyl adapter for the file system.",
   "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
