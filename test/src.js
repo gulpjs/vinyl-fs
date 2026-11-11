@@ -541,9 +541,8 @@ describeStreams(".src()", (stream) => {
   });
 
   it("reports unsupported encoding errors (stream)", (t, done) => {
-    // assert isn't being called here is this an error checker.
     function assert(files) {
-      t.assert.strictEqual(files.length, 2);
+      tt.assert.fail("should not be called");
     }
 
     function finish(err) {
