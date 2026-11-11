@@ -1,7 +1,8 @@
 "use strict";
 
+var { describe, it } = require("node:test");
+
 var fs = require("graceful-fs");
-var expect = require("expect");
 
 var getCodec = require("../lib/codecs");
 var DEFAULT_ENCODING = require("../lib/constants").DEFAULT_ENCODING;
@@ -17,116 +18,101 @@ var notBomContents = testConstants.notBomContents;
 var encodedInputPath = testConstants.encodedInputPath;
 var encodedContents = testConstants.encodedContents;
 
-describe("codecs", function () {
-  it("exports a function", function (done) {
-    expect(typeof getCodec).toEqual("function");
-    done();
+describe("codecs", () => {
+  it("exports a function", (t) => {
+    t.assert.strictEqual(typeof getCodec, "function");
   });
 
-  it("returns undefined for unsupported encoding", function (done) {
+  it("returns undefined for unsupported encoding", (t) => {
     var codec = getCodec("fubar42");
-    expect(codec).toBe(undefined);
-    done();
+    t.assert.strictEqual(codec, undefined);
   });
 
-  it(
-    "returns a proper codec for default encoding " + DEFAULT_ENCODING,
-    function (done) {
-      var codec = getCodec(DEFAULT_ENCODING);
-      testCodec(codec);
-      expect(codec.enc).toEqual(DEFAULT_ENCODING);
-      expect(codec.bomAware).toEqual(true);
-      done();
-    },
-  );
+  it("returns a proper codec for default encoding " + DEFAULT_ENCODING, (t) => {
+    var codec = getCodec(DEFAULT_ENCODING);
+    testCodec(codec);
+    t.assert.strictEqual(codec.enc, DEFAULT_ENCODING);
+    t.assert.strictEqual(codec.bomAware, true);
+  });
 
-  it("returns a proper codec for utf16be", function (done) {
+  it("returns a proper codec for utf16be", (t) => {
     var codec = getCodec("utf16be");
     testCodec(codec);
-    expect(codec.bomAware).toEqual(true);
-    done();
+    t.assert.strictEqual(codec.bomAware, true);
   });
 
-  it("returns a proper codec for utf16le", function (done) {
+  it("returns a proper codec for utf16le", (t) => {
     var codec = getCodec("utf16le");
     testCodec(codec);
-    expect(codec.bomAware).toEqual(true);
-    done();
+    t.assert.strictEqual(codec.bomAware, true);
   });
 
-  it("returns a proper codec for gb2312", function (done) {
+  it("returns a proper codec for gb2312", () => {
     var codec = getCodec("gb2312");
     testCodec(codec);
-    done();
   });
 
-  describe("buffer", function () {
-    it("can decode bytes from utf16be encoding to a string", function (done) {
+  describe("buffer", () => {
+    it("can decode bytes from utf16be encoding to a string", (t) => {
       var codec = getCodec("utf16be");
       var expected = notBomContents.replace("X", "BE");
 
       var result = codec.decode(fs.readFileSync(beNotBomInputPath));
-      expect(result).toEqual(expect.anything());
-      expect(typeof result).toEqual("string");
-      expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
-      done();
+      t.assert.ok(result != null);
+      t.assert.strictEqual(typeof result, "string");
+      t.assert.strictEqual(result.slice(2), expected); // Ignore leading garbage
     });
 
-    it("can encode a string to bytes in utf16be encoding", function (done) {
+    it("can encode a string to bytes in utf16be encoding", (t) => {
       var codec = getCodec("utf16be");
       var expected = fs.readFileSync(beNotBomInputPath);
 
       var result = codec.encode(notBomContents.replace("X", "BE"));
-      expect(result).toEqual(expect.anything());
-      expect(typeof result).toEqual("object");
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
-      done();
+      t.assert.ok(result != null);
+      t.assert.strictEqual(typeof result, "object");
+      t.assert.strictEqual(Buffer.isBuffer(result), true);
+      t.assert.deepStrictEqual(result, expected.subarray(4)); // Ignore leading garbage
     });
 
-    it("can decode bytes from utf16le encoding to a string", function (done) {
+    it("can decode bytes from utf16le encoding to a string", (t) => {
       var codec = getCodec("utf16le");
       var expected = notBomContents.replace("X", "LE");
 
       var result = codec.decode(fs.readFileSync(leNotBomInputPath));
-      expect(result).toEqual(expect.anything());
-      expect(typeof result).toEqual("string");
-      expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
-      done();
+      t.assert.ok(result != null);
+      t.assert.strictEqual(typeof result, "string");
+      t.assert.strictEqual(result.slice(2), expected); // Ignore leading garbage
     });
 
-    it("can encode a string to bytes in utf16le encoding", function (done) {
+    it("can encode a string to bytes in utf16le encoding", (t) => {
       var codec = getCodec("utf16le");
       var expected = fs.readFileSync(leNotBomInputPath);
 
       var result = codec.encode(notBomContents.replace("X", "LE"));
-      expect(result).toEqual(expect.anything());
-      expect(typeof result).toEqual("object");
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
-      done();
+      t.assert.ok(result != null);
+      t.assert.strictEqual(typeof result, "object");
+      t.assert.strictEqual(Buffer.isBuffer(result), true);
+      t.assert.deepStrictEqual(result, expected.subarray(4)); // Ignore leading garbage
     });
 
-    it("can decode bytes from gb2312 encoding to a string", function (done) {
+    it("can decode bytes from gb2312 encoding to a string", (t) => {
       var codec = getCodec("gb2312");
       var expected = encodedContents;
 
       var result = codec.decode(fs.readFileSync(encodedInputPath));
-      expect(result).toEqual(expected);
-      done();
+      t.assert.strictEqual(result, expected);
     });
 
-    it("can encode a string to bytes in gb2312 encoding", function (done) {
+    it("can encode a string to bytes in gb2312 encoding", (t) => {
       var codec = getCodec("gb2312");
       var expected = fs.readFileSync(encodedInputPath);
 
       var result = codec.encode(encodedContents);
-      expect(result).toEqual(expected);
-      done();
+      t.assert.deepStrictEqual(result, expected);
     });
   });
 
-  describeStreams("stream", function (stream) {
+  describeStreams("stream", (stream) => {
     var from = stream.Readable.from;
     var pipeline = stream.pipeline;
 
@@ -134,14 +120,14 @@ describe("codecs", function () {
     var concatString = streamUtils.concatString;
     var concatBuffer = streamUtils.concatBuffer;
 
-    it("can decode bytes from utf16be encoding to a string", function (done) {
+    it("can decode bytes from utf16be encoding to a string", (t, done) => {
       var codec = getCodec("utf16be");
       var expected = notBomContents.replace("X", "BE");
 
       function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(typeof result).toEqual("string");
-        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
+        t.assert.ok(result != null);
+        t.assert.strictEqual(typeof result, "string");
+        t.assert.strictEqual(result.slice(2), expected); // Ignore leading garbage
       }
 
       pipeline(
@@ -154,14 +140,14 @@ describe("codecs", function () {
       );
     });
 
-    it("can encode a string to bytes in utf16be encoding", function (done) {
+    it("can encode a string to bytes in utf16be encoding", (t, done) => {
       var codec = getCodec("utf16be");
       var expected = fs.readFileSync(beNotBomInputPath);
 
       function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(Buffer.isBuffer(result)).toBe(true);
-        expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
+        t.assert.ok(result != null);
+        t.assert.strictEqual(Buffer.isBuffer(result), true);
+        t.assert.deepStrictEqual(result, expected.subarray(4)); // Ignore leading garbage
       }
 
       pipeline(
@@ -174,14 +160,14 @@ describe("codecs", function () {
       );
     });
 
-    it("can decode bytes from utf16le encoding to a string", function (done) {
+    it("can decode bytes from utf16le encoding to a string", (t, done) => {
       var codec = getCodec("utf16le");
       var expected = notBomContents.replace("X", "LE");
 
       function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(typeof result).toEqual("string");
-        expect(result.slice(2)).toEqual(expected); // Ignore leading garbage
+        t.assert.ok(result != null);
+        t.assert.strictEqual(typeof result, "string");
+        t.assert.strictEqual(result.slice(2), expected); // Ignore leading garbage
       }
 
       pipeline(
@@ -194,14 +180,14 @@ describe("codecs", function () {
       );
     });
 
-    it("can encode a string to bytes in utf16le encoding", function (done) {
+    it("can encode a string to bytes in utf16le encoding", (t, done) => {
       var codec = getCodec("utf16le");
       var expected = fs.readFileSync(leNotBomInputPath);
 
       function assert(result) {
-        expect(result).toEqual(expect.anything());
-        expect(Buffer.isBuffer(result)).toBe(true);
-        expect(result).toEqual(expected.slice(4)); // Ignore leading garbage
+        t.assert.ok(result != null);
+        t.assert.strictEqual(Buffer.isBuffer(result), true);
+        t.assert.deepStrictEqual(result, expected.subarray(4)); // Ignore leading garbage
       }
 
       pipeline(
@@ -214,12 +200,12 @@ describe("codecs", function () {
       );
     });
 
-    it("can decode bytes from gb2312 encoding to a string", function (done) {
+    it("can decode bytes from gb2312 encoding to a string", (t, done) => {
       var codec = getCodec("gb2312");
       var expected = encodedContents;
 
       function assert(result) {
-        expect(result).toEqual(expected);
+        t.assert.strictEqual(result, expected);
       }
 
       pipeline(
@@ -232,12 +218,12 @@ describe("codecs", function () {
       );
     });
 
-    it("can encode a string to bytes in gb2312 encoding", function (done) {
+    it("can encode a string to bytes in gb2312 encoding", (t, done) => {
       var codec = getCodec("gb2312");
       var expected = fs.readFileSync(encodedInputPath);
 
       function assert(result) {
-        expect(result).toEqual(expected);
+        t.assert.deepStrictEqual(result, expected);
       }
 
       pipeline(

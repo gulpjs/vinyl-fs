@@ -1,10 +1,10 @@
 "use strict";
 
-var path = require("path");
+var path = require("node:path");
+var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -14,6 +14,9 @@ var always = require("./utils/always");
 var testStreams = require("./utils/test-streams");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
+
+var skipPosix = { skip: !isWindows };
+var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -30,7 +33,7 @@ var neOutputDirpath = testConstants.neOutputDirpath;
 
 var clean = cleanup(outputBase);
 
-describeStreams(".dest() with symlinks", function (stream) {
+describeStreams(".dest() with symlinks", (stream) => {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
@@ -40,7 +43,7 @@ describeStreams(".dest() with symlinks", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("creates symlinks when `file.isSymbolic()` is true", function (done) {
+  it("creates symlinks when `file.isSymbolic()` is true", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -56,17 +59,17 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var symlink = fs.readlinkSync(outputPath);
 
-      expect(files.length).toEqual(1);
-      expect(file.symlink).toEqual(symlink);
-      expect(files[0].symlink).toEqual(symlink);
-      expect(files[0].isSymbolic()).toBe(true);
-      expect(files[0].path).toEqual(outputPath);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(file.symlink, symlink);
+      t.assert.strictEqual(files[0].symlink, symlink);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].path, outputPath);
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("does not create symlinks when `file.isSymbolic()` is false", function (done) {
+  it("does not create symlinks when `file.isSymbolic()` is false", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -82,14 +85,14 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var symlinkExists = fs.existsSync(outputPath);
 
-      expect(files.length).toEqual(1);
-      expect(symlinkExists).toBe(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(symlinkExists, false);
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("errors if missing a `.symlink` property", function (done) {
+  it("errors if missing a `.symlink` property", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -100,15 +103,18 @@ describeStreams(".dest() with symlinks", function (stream) {
     });
 
     function assert(err) {
-      expect(err).toEqual(expect.anything());
-      expect(err.message).toEqual("Missing symlink property on symbolic vinyl");
+      t.assert.ok(err != null);
+      t.assert.strictEqual(
+        err.message,
+        "Missing symlink property on symbolic vinyl",
+      );
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("emits Vinyl files that are (still) symbolic", function (done) {
+  it("emits Vinyl files that are (still) symbolic", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -122,14 +128,14 @@ describeStreams(".dest() with symlinks", function (stream) {
     file.symlink = inputPath;
 
     function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].isSymbolic()).toEqual(true);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("can create relative links", function (done) {
+  it("can create relative links", (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -145,9 +151,9 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var outputLink = fs.readlinkSync(outputPath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(path.normalize("../fixtures/test.txt"));
-      expect(files[0].isSymbolic()).toBe(true);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/test.txt"));
+      t.assert.strictEqual(files[0].isSymbolic(), true);
     }
 
     pipeline(
@@ -160,12 +166,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(*nix) creates a link for a directory", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(nix) creates a link for a directory", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -183,21 +184,16 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(inputDirpath);
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, inputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("(windows) creates a junction for a directory", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) creates a junction for a directory", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -215,22 +211,17 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
-      expect(outputLink).toEqual(inputDirpath);
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(outputLink, inputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline([from([file]), vfs.dest(outputBase), concatArray(assert)], done);
   });
 
-  it("(windows) options can disable junctions for a directory", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) can disable junctions for directory", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -248,10 +239,10 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(inputDirpath);
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, inputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline(
@@ -264,12 +255,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(windows) options can disable junctions for a directory (as a function)", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) func disable junctions for directory", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -283,8 +269,8 @@ describeStreams(".dest() with symlinks", function (stream) {
     file.symlink = inputDirpath;
 
     function useJunctions(f) {
-      expect(f).toEqual(expect.anything());
-      expect(f).toBe(file);
+      t.assert.ok(f != null);
+      t.assert.strictEqual(f, file);
       return false;
     }
 
@@ -293,10 +279,10 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(inputDirpath);
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, inputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline(
@@ -309,12 +295,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(*nix) can create relative links for directories", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(nix) creates relative links for directories", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -332,10 +313,10 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(path.normalize("../fixtures/foo"));
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/foo"));
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline(
@@ -348,12 +329,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(*nix) receives a virtual symbolic directory and creates a symlink", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(nix) symlink from virtual symbolic dir", skipWin, (t, done) => {
     var file = new File({
       base: neInputBase,
       path: neInputDirpath,
@@ -371,10 +347,10 @@ describeStreams(".dest() with symlinks", function (stream) {
       var outputLink = fs.readlinkSync(neOutputDirpath);
       var linkTargetExists = fs.existsSync(outputLink);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(neInputDirpath);
-      expect(linkTargetExists).toEqual(false);
-      expect(lstats.isSymbolicLink()).toEqual(true);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, neInputDirpath);
+      t.assert.strictEqual(linkTargetExists, false);
+      t.assert.strictEqual(lstats.isSymbolicLink(), true);
     }
 
     pipeline(
@@ -391,12 +367,7 @@ describeStreams(".dest() with symlinks", function (stream) {
   // There's no way to determine the proper type of link to create with a dangling link
   // So we just create a 'file' type symlink
   // There's also no real way to test the type that was created
-  it("(windows) receives a virtual symbolic directory and creates a symlink", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) symlink from virtual symbolic dir", skipPosix, (t, done) => {
     var file = new File({
       base: neInputBase,
       path: neInputDirpath,
@@ -414,10 +385,10 @@ describeStreams(".dest() with symlinks", function (stream) {
       var outputLink = fs.readlinkSync(neOutputDirpath);
       var linkTargetExists = fs.existsSync(outputLink);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(neInputDirpath);
-      expect(linkTargetExists).toEqual(false);
-      expect(lstats.isSymbolicLink()).toEqual(true);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, neInputDirpath);
+      t.assert.strictEqual(linkTargetExists, false);
+      t.assert.strictEqual(lstats.isSymbolicLink(), true);
     }
 
     pipeline(
@@ -431,12 +402,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(windows) relativeSymlinks option is ignored when junctions are used", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) relativeSymlinks ignored when junctions", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -454,11 +420,11 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
-      expect(outputLink).toEqual(inputDirpath);
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(outputLink, inputDirpath);
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline(
@@ -474,12 +440,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(windows) supports relativeSymlinks option when link is not for a directory", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) relativeSymlinks when link not a dir", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputPath,
@@ -495,8 +456,8 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var outputLink = fs.readlinkSync(outputPath);
 
-      expect(files.length).toEqual(1);
-      expect(outputLink).toEqual(path.normalize("../fixtures/test.txt"));
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/test.txt"));
     }
 
     pipeline(
@@ -513,12 +474,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("(windows) can create relative links for directories when junctions are disabled", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) rl for dirs without junctions", skipPosix, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -536,13 +492,21 @@ describeStreams(".dest() with symlinks", function (stream) {
       var lstats = fs.lstatSync(outputDirpath);
       var outputLink = fs.readlinkSync(outputDirpath);
 
-      expect(files.length).toEqual(1);
-      expect(files).toContain(file);
-      expect(files[0].base).toEqual(outputBase, "base should have changed");
-      expect(files[0].path).toEqual(outputDirpath, "path should have changed");
-      expect(outputLink).toEqual(path.normalize("../fixtures/foo"));
-      expect(stats.isDirectory()).toEqual(true);
-      expect(lstats.isDirectory()).toEqual(false);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files.includes(file), true);
+      t.assert.strictEqual(
+        files[0].base,
+        outputBase,
+        "base should have changed",
+      );
+      t.assert.strictEqual(
+        files[0].path,
+        outputDirpath,
+        "path should have changed",
+      );
+      t.assert.strictEqual(outputLink, path.normalize("../fixtures/foo"));
+      t.assert.strictEqual(stats.isDirectory(), true);
+      t.assert.strictEqual(lstats.isDirectory(), false);
     }
 
     pipeline(
@@ -558,7 +522,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("does not overwrite links with overwrite option set to false", function (done) {
+  it("does not overwrite links with overwrite option set to false", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -576,8 +540,8 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      expect(files.length).toEqual(1);
-      expect(outputContents).toEqual(existingContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents);
     }
 
     // Write expected file which should not be overwritten
@@ -594,7 +558,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("overwrites links with overwrite option set to true", function (done) {
+  it("overwrites links with overwrite option set to true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -612,8 +576,8 @@ describeStreams(".dest() with symlinks", function (stream) {
     function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      expect(files.length).toEqual(1);
-      expect(outputContents).toEqual(contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     // This should be overwritten
@@ -630,7 +594,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("does not overwrite links with overwrite option set to a function that returns false", function (done) {
+  it("does not overwrite links with overwrite option set to a function that returns false", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -646,15 +610,15 @@ describeStreams(".dest() with symlinks", function (stream) {
     file.symlink = inputPath;
 
     function overwrite(f) {
-      expect(f).toEqual(file);
+      t.assert.strictEqual(f, file);
       return false;
     }
 
     function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      expect(files.length).toEqual(1);
-      expect(outputContents).toEqual(existingContents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, existingContents);
     }
 
     // Write expected file which should not be overwritten
@@ -671,7 +635,7 @@ describeStreams(".dest() with symlinks", function (stream) {
     );
   });
 
-  it("overwrites links with overwrite option set to a function that returns true", function (done) {
+  it("overwrites links with overwrite option set to a function that returns true", (t, done) => {
     var existingContents = "Lorem Ipsum";
 
     var file = new File({
@@ -687,15 +651,15 @@ describeStreams(".dest() with symlinks", function (stream) {
     file.symlink = inputPath;
 
     function overwrite(f) {
-      expect(f).toEqual(file);
+      t.assert.strictEqual(f, file);
       return true;
     }
 
     function assert(files) {
       var outputContents = fs.readFileSync(outputPath, "utf8");
 
-      expect(files.length).toEqual(1);
-      expect(outputContents).toEqual(contents);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(outputContents, contents);
     }
 
     // This should be overwritten

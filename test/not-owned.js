@@ -1,9 +1,9 @@
 "use strict";
 
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -29,8 +29,6 @@ describeStreams(".dest() on not owned files", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  var seenActions = false;
-
   function needsAction() {
     var fileStats = fs.statSync(notOwnedPath);
 
@@ -45,24 +43,19 @@ describeStreams(".dest() on not owned files", function (stream) {
       actions.push("  sudo chmod 666 " + notOwnedPath);
     }
     if (actions.length > 0) {
-      if (!seenActions) {
-        console.log(problems.join("\n"));
-        console.log("Please run the following commands and try again:");
-        console.log(actions.join("\n"));
-        seenActions = true;
-      }
-      return true;
+      return [
+        ...problems,
+        "Run the following commands and try again:",
+        ...actions,
+      ].join("\n");
     }
     return false;
   }
 
-  it("does not error if mtime is different", function (done) {
-    if (needsAction()) {
-      this.skip();
-      return;
-    }
+  var skipAction = { skip: needsAction() };
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+  it("does not error if mtime is different", skipAction, (t, done) => {
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var earlier = Date.now() - 1000;
 
@@ -76,19 +69,14 @@ describeStreams(".dest() on not owned files", function (stream) {
     });
 
     function assert() {
-      expect(futimesSpy.callCount).toEqual(0);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
     }
 
     pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);
   });
 
-  it("does not error if mode is different", function (done) {
-    if (needsAction()) {
-      this.skip();
-      return;
-    }
-
-    var fchmodSpy = sinon.spy(fs, "fchmod");
+  it("does not error if mode is different", skipAction, (t, done) => {
+    var fchmodSpy = t.mock.method(fs, "fchmod");
 
     var file = new File({
       base: notOwnedBase,
@@ -100,7 +88,7 @@ describeStreams(".dest() on not owned files", function (stream) {
     });
 
     function assert() {
-      expect(fchmodSpy.callCount).toEqual(0);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
     }
 
     pipeline([from([file]), vfs.dest(notOwnedBase), concatArray(assert)], done);

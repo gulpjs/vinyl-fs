@@ -1,9 +1,9 @@
 "use strict";
 
-var path = require("path");
+var path = require("node:path");
+var { afterEach, beforeEach, it } = require("node:test");
 
 var fs = require("graceful-fs");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -12,6 +12,9 @@ var isWindows = require("./utils/is-windows");
 var testStreams = require("./utils/test-streams");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
+
+var skipPosix = { skip: !isWindows };
+var skipWin = { skip: isWindows };
 
 var base = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -39,10 +42,8 @@ describeStreams("integrations", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("does not exhaust available file descriptors when streaming thousands of files", function (done) {
-    // This can be a very slow test on boxes with slow disk i/o
-    this.timeout(0);
-
+  // This can be a very slow test on boxes with slow disk i/o
+  it("does not exhaust available file descriptors when streaming thousands of files", (t, done) => {
     // Make a ton of files. Changed from hard links due to Windows failures
     var expectedCount = 6000;
 
@@ -64,20 +65,15 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(*nix) sources a directory, creates a symlink and copies it", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(*nix) sources a dirs, creates a symlink and cp", skipWin, (t, done) => {
     function assert(files) {
       var symlinkResult = fs.readlinkSync(outputSymlink);
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(symlinkResult).toEqual(inputDirpath);
-      expect(destResult).toEqual(inputDirpath);
-      expect(files[0].isSymbolic()).toBe(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
+      t.assert.strictEqual(symlinkResult, inputDirpath);
+      t.assert.strictEqual(destResult, inputDirpath);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].symlink, inputDirpath);
     }
 
     pipeline(
@@ -91,22 +87,17 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(windows) sources a directory, creates a junction and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) sources a dir, creates & copy a junction", skipPosix, (t, done) => {
     function assert(files) {
       // When creating a junction, it seems Windows no longer appends a separator as of Node 22+
       var expected = inputDirpath;
       var symlinkResult = fs.readlinkSync(outputSymlink);
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(symlinkResult).toEqual(expected);
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toBe(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
+      t.assert.strictEqual(symlinkResult, expected);
+      t.assert.strictEqual(destResult, expected);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].symlink, inputDirpath);
     }
 
     pipeline(
@@ -120,12 +111,7 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(*nix) sources a symlink and copies it", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(*nix) sources a symlink and copies it", skipWin, (t, done) => {
     fs.mkdirSync(base);
     fs.mkdirSync(symlinkDirpath);
     fs.symlinkSync(inputDirpath, outputSymlink);
@@ -133,9 +119,9 @@ describeStreams("integrations", function (stream) {
     function assert(files) {
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(destResult).toEqual(inputDirpath);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
+      t.assert.strictEqual(destResult, inputDirpath);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].symlink, inputDirpath);
     }
 
     pipeline(
@@ -148,12 +134,7 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(windows) sources a directory symlink and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) sources a dir symlink and copies it", skipPosix, (t, done) => {
     fs.mkdirSync(base);
     fs.mkdirSync(symlinkDirpath);
     fs.symlinkSync(inputDirpath, outputSymlink, "dir");
@@ -163,9 +144,9 @@ describeStreams("integrations", function (stream) {
       var expected = inputDirpath;
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
+      t.assert.strictEqual(destResult, expected);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].symlink, inputDirpath);
     }
 
     pipeline(
@@ -178,12 +159,7 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("(windows) sources a junction and copies it", function (done) {
-    if (!isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("(win) sources a junction and copies it", skipPosix, (t, done) => {
     fs.mkdirSync(base);
     fs.mkdirSync(symlinkDirpath);
     fs.symlinkSync(inputDirpath, outputSymlink, "junction");
@@ -193,9 +169,9 @@ describeStreams("integrations", function (stream) {
       var expected = inputDirpath;
       var destResult = fs.readlinkSync(outputDirpathSymlink);
 
-      expect(destResult).toEqual(expected);
-      expect(files[0].isSymbolic()).toEqual(true);
-      expect(files[0].symlink).toEqual(inputDirpath);
+      t.assert.strictEqual(destResult, expected);
+      t.assert.strictEqual(files[0].isSymbolic(), true);
+      t.assert.strictEqual(files[0].symlink, inputDirpath);
     }
 
     pipeline(
@@ -208,11 +184,14 @@ describeStreams("integrations", function (stream) {
     );
   });
 
-  it("can re-assign contents to a well-behaving stream as per issue #310", function (done) {
+  it("can re-assign contents to a well-behaving stream as per issue #310", (t, done) => {
     var contents = ["something", " ", "else"];
 
     function assert() {
-      expect(fs.readFileSync(outputPath).toString()).toEqual(contents.join(""));
+      t.assert.strictEqual(
+        fs.readFileSync(outputPath).toString(),
+        contents.join(""),
+      );
       done();
     }
 

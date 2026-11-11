@@ -1,3 +1,4 @@
+var { describe } = require("node:test");
 var streams = ["stream", "streamx", "readable-stream"];
 
 function describeStreams(name, suite) {

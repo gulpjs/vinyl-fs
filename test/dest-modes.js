@@ -1,9 +1,9 @@
 "use strict";
 
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -15,6 +15,8 @@ var applyUmask = require("./utils/apply-umask");
 var always = require("./utils/always");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
+
+var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -28,20 +30,16 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describeStreams(".dest() with custom modes", function (stream) {
+describeStreams(".dest() with custom modes", (stream) => {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it("sets the mode of a written buffer file if set on the vinyl object", function (done) {
+  it("applies vinyl mode to written buffer files", skipWin, (t, done) => {
     // Changing the mode of a file is not supported by node.js in Windows.
     // Windows is treated as though it does not have permission to make this operation.
-    if (isWindows) {
-      this.skip();
-      return;
-    }
 
     var expectedMode = applyUmask("677");
 
@@ -55,19 +53,14 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("sets the sticky bit on the mode of a written stream file if set on the vinyl object", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("applies vinyl sticky bit to written stream files", skipWin, (t, done) => {
     var expectedMode = applyUmask("1677");
 
     var file = new File({
@@ -80,19 +73,14 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("sets the mode of a written stream file if set on the vinyl object", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("applies vinyl mode to stream files", skipWin, (t, done) => {
     var expectedMode = applyUmask("677");
 
     var file = new File({
@@ -105,19 +93,14 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("sets the mode of a written directory if set on the vinyl object", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("applies vinyl mode to written directories", skipWin, (t, done) => {
     var expectedMode = applyUmask("677");
 
     var file = new File({
@@ -131,19 +114,14 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputDirpath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputDirpath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("sets sticky bit on the mode of a written directory if set on the vinyl object", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("applies vinyl sticky bit to directories", skipWin, (t, done) => {
     var expectedMode = applyUmask("1677");
 
     var file = new File({
@@ -157,19 +135,14 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputDirpath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputDirpath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("writes new files with the mode specified in options", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("writes new files with the mode in options", skipWin, (t, done) => {
     var expectedMode = applyUmask("777");
 
     var file = new File({
@@ -179,7 +152,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
@@ -192,12 +165,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     );
   });
 
-  it("updates the file mode to match the vinyl mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("updates the file mode to match vinyl mode", skipWin, (t, done) => {
     var startMode = applyUmask("655");
     var expectedMode = applyUmask("722");
 
@@ -211,7 +179,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
@@ -222,12 +190,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("updates the directory mode to match the vinyl mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("updates the directory mode to match the vinyl", skipWin, (t, done) => {
     var startMode = applyUmask("2777");
     var expectedMode = applyUmask("727");
 
@@ -249,7 +212,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputDirpath)).toEqual(expectedMode);
+      t.assert.strictEqual(statMode(outputDirpath), expectedMode);
       done();
     }
 
@@ -259,12 +222,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     );
   });
 
-  it("uses different modes for files and directories", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("uses different modes for files and directories", skipWin, (t, done) => {
     var expectedDirMode = applyUmask("2777");
     var expectedFileMode = applyUmask("755");
 
@@ -275,8 +233,8 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(statMode(outputDirpath)).toEqual(expectedDirMode);
-      expect(statMode(outputNestedPath)).toEqual(expectedFileMode);
+      t.assert.strictEqual(statMode(outputDirpath), expectedDirMode);
+      t.assert.strictEqual(statMode(outputNestedPath), expectedFileMode);
       done();
     }
 
@@ -293,13 +251,8 @@ describeStreams(".dest() with custom modes", function (stream) {
     );
   });
 
-  it("does not fchmod a matching file", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var fchmodSpy = sinon.spy(fs, "fchmod");
+  it("does not fchmod a matching file", skipWin, (t, done) => {
+    var fchmodSpy = t.mock.method(fs, "fchmod");
 
     var expectedMode = applyUmask("777");
 
@@ -313,21 +266,16 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(fchmodSpy.callCount).toEqual(0);
-      expect(statMode(outputPath)).toEqual(expectedMode);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 0);
+      t.assert.strictEqual(statMode(outputPath), expectedMode);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("sees a file with special chmod (setuid/setgid/sticky) as distinct", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var fchmodSpy = sinon.spy(fs, "fchmod");
+  it("sees a file with special chmod as distinct", skipWin, (t, done) => {
+    var fchmodSpy = t.mock.method(fs, "fchmod");
 
     var startMode = applyUmask("3722");
     var expectedMode = applyUmask("722");
@@ -342,7 +290,7 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert() {
-      expect(fchmodSpy.callCount).toEqual(1);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       done();
     }
 
@@ -353,15 +301,10 @@ describeStreams(".dest() with custom modes", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("reports fchmod errors", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("reports fchmod errors", skipWin, (t, done) => {
     var expectedMode = applyUmask("722");
 
-    var fchmodSpy = sinon.stub(fs, "fchmod").callsFake(mockError);
+    var fchmodSpy = t.mock.method(fs, "fchmod", mockError);
 
     var file = new File({
       base: inputBase,
@@ -373,8 +316,8 @@ describeStreams(".dest() with custom modes", function (stream) {
     });
 
     function assert(err) {
-      expect(err).toEqual(expect.anything());
-      expect(fchmodSpy.callCount).toEqual(1);
+      t.assert.ok(err != null);
+      t.assert.strictEqual(fchmodSpy.mock.callCount(), 1);
       done();
     }
 

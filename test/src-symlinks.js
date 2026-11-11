@@ -1,8 +1,8 @@
 "use strict";
 
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -25,7 +25,7 @@ var symlinkNestedSecond = testConstants.symlinkNestedSecond;
 
 var clean = cleanup(outputBase);
 
-describeStreams(".src() with symlinks", function (stream) {
+describeStreams(".src() with symlinks", (stream) => {
   var pipeline = stream.pipeline;
 
   var streamUtils = testStreams(stream);
@@ -34,7 +34,7 @@ describeStreams(".src() with symlinks", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  beforeEach(function (done) {
+  beforeEach((t, done) => {
     fs.mkdirSync(outputBase);
     fs.mkdirSync(outputDirpath);
     fs.symlinkSync(inputDirpath, symlinkDirpath);
@@ -46,58 +46,58 @@ describeStreams(".src() with symlinks", function (stream) {
     done();
   });
 
-  it("resolves symlinks correctly", function (done) {
+  it("resolves symlinks correctly", (t, done) => {
     function assert(files) {
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // The path should be the symlink itself
-      expect(files[0].path).toEqual(symlinkNestedFirst);
+      t.assert.strictEqual(files[0].path, symlinkNestedFirst);
       // But the content should be what's in the actual file
-      expect(files[0].contents.toString()).toEqual("symlink works\n");
+      t.assert.strictEqual(files[0].contents.toString(), "symlink works\n");
       // And the stats should have been updated
-      expect(files[0].stat.isSymbolicLink()).toEqual(false);
-      expect(files[0].stat.isFile()).toEqual(true);
+      t.assert.strictEqual(files[0].stat.isSymbolicLink(), false);
+      t.assert.strictEqual(files[0].stat.isFile(), true);
     }
 
     pipeline([vfs.src(symlinkNestedFirst), concatArray(assert)], done);
   });
 
-  it("resolves directory symlinks correctly", function (done) {
+  it("resolves directory symlinks correctly", (t, done) => {
     function assert(files) {
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // The path should be the symlink itself
-      expect(files[0].path).toEqual(symlinkDirpath);
+      t.assert.strictEqual(files[0].path, symlinkDirpath);
       // But the contents should be null
-      expect(files[0].contents).toEqual(null);
+      t.assert.strictEqual(files[0].contents, null);
       // And the stats should have been updated
-      expect(files[0].stat.isSymbolicLink()).toEqual(false);
-      expect(files[0].stat.isDirectory()).toEqual(true);
+      t.assert.strictEqual(files[0].stat.isSymbolicLink(), false);
+      t.assert.strictEqual(files[0].stat.isDirectory(), true);
     }
 
     pipeline([vfs.src(symlinkDirpath), concatArray(assert)], done);
   });
 
-  it("resolves nested symlinks to directories correctly", function (done) {
+  it("resolves nested symlinks to directories correctly", (t, done) => {
     function assert(files) {
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // The path should be the symlink itself
-      expect(files[0].path).toEqual(symlinkMultiDirpathSecond);
+      t.assert.strictEqual(files[0].path, symlinkMultiDirpathSecond);
       // But the contents should be null
-      expect(files[0].contents).toEqual(null);
+      t.assert.strictEqual(files[0].contents, null);
       // And the stats should have been updated
-      expect(files[0].stat.isSymbolicLink()).toEqual(false);
-      expect(files[0].stat.isDirectory()).toEqual(true);
+      t.assert.strictEqual(files[0].stat.isSymbolicLink(), false);
+      t.assert.strictEqual(files[0].stat.isDirectory(), true);
     }
 
     pipeline([vfs.src(symlinkMultiDirpathSecond), concatArray(assert)], done);
   });
 
-  it("preserves file symlinks with resolveSymlinks option set to false", function (done) {
+  it("preserves file symlinks with resolveSymlinks option set to false", (t, done) => {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkPath);
 
     function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(symlinkPath);
-      expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].path, symlinkPath);
+      t.assert.strictEqual(files[0].symlink, expectedRelativeSymlinkPath);
     }
 
     pipeline(
@@ -106,13 +106,13 @@ describeStreams(".src() with symlinks", function (stream) {
     );
   });
 
-  it("preserves directory symlinks with resolveSymlinks option set to false", function (done) {
+  it("preserves directory symlinks with resolveSymlinks option set to false", (t, done) => {
     var expectedRelativeSymlinkPath = fs.readlinkSync(symlinkDirpath);
 
     function assert(files) {
-      expect(files.length).toEqual(1);
-      expect(files[0].path).toEqual(symlinkDirpath);
-      expect(files[0].symlink).toEqual(expectedRelativeSymlinkPath);
+      t.assert.strictEqual(files.length, 1);
+      t.assert.strictEqual(files[0].path, symlinkDirpath);
+      t.assert.strictEqual(files[0].symlink, expectedRelativeSymlinkPath);
     }
 
     pipeline(
@@ -124,20 +124,20 @@ describeStreams(".src() with symlinks", function (stream) {
     );
   });
 
-  it("receives a file with symbolic link stats when resolveSymlinks is a function", function (done) {
+  it("receives a file with symbolic link stats when resolveSymlinks is a function", (t, done) => {
     function resolveSymlinks(file) {
-      expect(file).toEqual(expect.anything());
-      expect(file.stat).toEqual(expect.anything());
-      expect(file.stat.isSymbolicLink()).toEqual(true);
+      t.assert.ok(file != null);
+      t.assert.ok(file.stat != null);
+      t.assert.strictEqual(file.stat.isSymbolicLink(), true);
 
       return true;
     }
 
     function assert(files) {
-      expect(files.length).toEqual(1);
+      t.assert.strictEqual(files.length, 1);
       // And the stats should have been updated
-      expect(files[0].stat.isSymbolicLink()).toEqual(false);
-      expect(files[0].stat.isFile()).toEqual(true);
+      t.assert.strictEqual(files[0].stat.isSymbolicLink(), false);
+      t.assert.strictEqual(files[0].stat.isFile(), true);
     }
 
     pipeline(
@@ -149,11 +149,11 @@ describeStreams(".src() with symlinks", function (stream) {
     );
   });
 
-  it("only calls resolveSymlinks once-per-file if it is a function", function (done) {
-    var spy = sinon.fake.returns(true);
+  it("only calls resolveSymlinks once-per-file if it is a function", (t, done) => {
+    var spy = t.mock.fn(() => true);
 
     function assert() {
-      expect(spy.callCount).toEqual(1);
+      t.assert.strictEqual(spy.mock.callCount(), 1);
     }
 
     pipeline(

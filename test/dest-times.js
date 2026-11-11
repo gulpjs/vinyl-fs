@@ -1,9 +1,9 @@
 "use strict";
 
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -11,6 +11,8 @@ var cleanup = require("./utils/cleanup");
 var isWindows = require("./utils/is-windows");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
+
+var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -27,17 +29,11 @@ describeStreams(".dest() with custom times", function (stream) {
   beforeEach(clean);
   afterEach(clean);
 
-  it("does not call futimes when no mtime is provided on the vinyl stat", function (done) {
-    // Changing the time of a directory errors in Windows.
-    // Windows is treated as though it does not have permission to make this operation.
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  // Changing the time of a directory errors in Windows.
+  // Windows is treated as though it does not have permission to make this operation.
+  it("does not call futimes when no mtime is provided", skipWin, (t, done) => {
     var earlier = Date.now() - 1001;
-
-    var futimesSpy = sinon.spy(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -49,25 +45,20 @@ describeStreams(".dest() with custom times", function (stream) {
     function assert() {
       var stats = fs.lstatSync(outputPath);
 
-      expect(futimesSpy.callCount).toEqual(0);
-      expect(stats.atime.getTime()).toBeGreaterThan(earlier);
-      expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      t.assert.strictEqual(stats.atime.getTime() >= earlier, true);
+      t.assert.strictEqual(stats.mtime.getTime() >= earlier, true);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("calls futimes when an mtime is provided on the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("calls futimes when an mtime is provided", skipWin, (t, done) => {
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -79,14 +70,14 @@ describeStreams(".dest() with custom times", function (stream) {
     });
 
     function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
       // Compare args instead of fs.lstats(), since mtime may be drifted in x86 Node.js
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
-      expect(file.stat.mtime).toEqual(mtime);
+      t.assert.strictEqual(file.stat.mtime, mtime);
 
       done();
     }
@@ -94,15 +85,10 @@ describeStreams(".dest() with custom times", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("does not call futimes when provided mtime on the vinyl stat is invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("no futimes when provided mtime is invalid", skipWin, (t, done) => {
     var earlier = Date.now() - 1001;
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -116,8 +102,8 @@ describeStreams(".dest() with custom times", function (stream) {
     function assert() {
       var stats = fs.lstatSync(outputPath);
 
-      expect(futimesSpy.callCount).toEqual(0);
-      expect(stats.mtime.getTime()).toBeGreaterThan(earlier);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 0);
+      t.assert.strictEqual(stats.mtime.getTime() >= earlier, true);
 
       done();
     }
@@ -125,17 +111,12 @@ describeStreams(".dest() with custom times", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("calls futimes when provided mtime on the vinyl stat is valid but provided atime is invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("calls futimes if mtime valid/atime invalid", skipWin, (t, done) => {
     // Use new mtime
     var mtime = new Date(Date.now() - 2048);
     var invalidAtime = new Date(undefined);
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -148,11 +129,11 @@ describeStreams(".dest() with custom times", function (stream) {
     });
 
     function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
 
       done();
     }
@@ -160,17 +141,12 @@ describeStreams(".dest() with custom times", function (stream) {
     pipeline([from([file]), vfs.dest(outputBase, { cwd: __dirname })], assert);
   });
 
-  it("writes file atime and mtime using the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("writes file atime and mtime using the vinyl stat", skipWin, (t, done) => {
     // Use new atime/mtime
     var atime = new Date(Date.now() - 2048);
     var mtime = new Date(Date.now() - 1024);
 
-    var futimesSpy = sinon.spy(fs, "futimes");
+    var futimesSpy = t.mock.method(fs, "futimes");
 
     var file = new File({
       base: inputBase,
@@ -183,15 +159,15 @@ describeStreams(".dest() with custom times", function (stream) {
     });
 
     function assert() {
-      expect(futimesSpy.callCount).toEqual(1);
+      t.assert.strictEqual(futimesSpy.mock.callCount(), 1);
 
-      var atimeSpy = futimesSpy.getCall(0).args[1];
-      var mtimeSpy = futimesSpy.getCall(0).args[2];
+      var atimeSpy = futimesSpy.mock.calls[0].arguments[1];
+      var mtimeSpy = futimesSpy.mock.calls[0].arguments[2];
 
-      expect(atimeSpy.getTime()).toEqual(atime.getTime());
-      expect(mtimeSpy.getTime()).toEqual(mtime.getTime());
-      expect(file.stat.mtime).toEqual(mtime);
-      expect(file.stat.atime).toEqual(atime);
+      t.assert.strictEqual(atimeSpy.getTime(), atime.getTime());
+      t.assert.strictEqual(mtimeSpy.getTime(), mtime.getTime());
+      t.assert.strictEqual(file.stat.mtime, mtime);
+      t.assert.deepStrictEqual(file.stat.atime, atime);
 
       done();
     }

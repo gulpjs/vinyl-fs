@@ -1,6 +1,6 @@
 "use strict";
 
-var expect = require("expect");
+var assert = require("node:assert");
 
 module.exports = function makeUtils(stream) {
   function chunks(length) {
@@ -31,7 +31,7 @@ module.exports = function makeUtils(stream) {
           cb = enc;
         }
 
-        expect(file.path).toEqual(obj.path);
+        assert.strictEqual(file.path, obj.path);
         cb(null, file);
       },
     });
@@ -50,7 +50,7 @@ module.exports = function makeUtils(stream) {
         cb(null, file);
       },
       flush: function (cb) {
-        expect(count).toEqual(value);
+        assert.strictEqual(count, value);
         cb();
       },
     });
@@ -72,7 +72,7 @@ module.exports = function makeUtils(stream) {
         }, 250);
       },
       end: function (data, enc, cb) {
-        expect(count).toEqual(value);
+        assert.strictEqual(count, value);
         cb();
       },
     });

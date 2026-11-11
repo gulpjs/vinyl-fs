@@ -1,9 +1,9 @@
 "use strict";
 
+var { afterEach, beforeEach, it } = require("node:test");
+
 var fs = require("graceful-fs");
 var File = require("vinyl");
-var sinon = require("sinon");
-var expect = require("expect");
 
 var vfs = require("../");
 
@@ -12,6 +12,8 @@ var isWindows = require("./utils/is-windows");
 var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
 
+var skipWin = { skip: isWindows };
+
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
 var inputPath = testConstants.inputPath;
@@ -19,20 +21,15 @@ var contents = testConstants.contents;
 
 var clean = cleanup(outputBase);
 
-describeStreams(".dest() with custom owner", function (stream) {
+describeStreams(".dest() with custom owner", (stream) => {
   var from = stream.Readable.from;
   var pipeline = stream.pipeline;
 
   beforeEach(clean);
   afterEach(clean);
 
-  it("calls fchown when the uid and/or gid are provided on the vinyl stat", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var fchownSpy = sinon.spy(fs, "fchown");
+  it("calls fchown when uid or gid are provided", skipWin, (t, done) => {
+    var fchownSpy = t.mock.method(fs, "fchown");
 
     var file = new File({
       base: inputBase,
@@ -45,22 +42,17 @@ describeStreams(".dest() with custom owner", function (stream) {
     });
 
     function assert() {
-      expect(fchownSpy.callCount).toEqual(1);
-      expect(fchownSpy.getCall(0).args[1]).toEqual(1002);
-      expect(fchownSpy.getCall(0).args[2]).toEqual(1002);
+      t.assert.strictEqual(fchownSpy.mock.callCount(), 1);
+      t.assert.strictEqual(fchownSpy.mock.calls[0].arguments[1], 1002);
+      t.assert.strictEqual(fchownSpy.mock.calls[0].arguments[2], 1002);
       done();
     }
 
     pipeline([from([file]), vfs.dest(outputBase)], assert);
   });
 
-  it("does not call fchown when the uid and gid provided on the vinyl stat are invalid", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var fchownSpy = sinon.spy(fs, "fchown");
+  it("does not call fchown if uid/gid are invalid", skipWin, (t, done) => {
+    var fchownSpy = t.mock.method(fs, "fchown");
 
     var file = new File({
       base: inputBase,
@@ -73,7 +65,7 @@ describeStreams(".dest() with custom owner", function (stream) {
     });
 
     function assert() {
-      expect(fchownSpy.callCount).toEqual(0);
+      t.assert.strictEqual(fchownSpy.mock.callCount(), 0);
       done();
     }
 
