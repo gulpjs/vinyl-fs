@@ -19,7 +19,7 @@ var describeStreams = require("./utils/suite");
 function noop() {}
 
 var skipPosix = { skip: !isWindows };
-var skipWindows = { skip: isWindows };
+var skipWin = { skip: isWindows };
 
 var outputRelative = testConstants.outputRelative;
 var inputBase = testConstants.inputBase;
@@ -313,7 +313,7 @@ describeStreams("symlink stream", function (stream) {
     );
   });
 
-  it("(*nix) creates a link for a directory", skipWindows, (t, done) => {
+  it("(*nix) creates a link for a directory", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -450,7 +450,7 @@ describeStreams("symlink stream", function (stream) {
     );
   });
 
-  it("(*nix) can create relative links for dirs", skipWindows, (t, done) => {
+  it("(*nix) can create relative links for dirs", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -592,7 +592,7 @@ describeStreams("symlink stream", function (stream) {
     );
   });
 
-  it("reports IO errors", skipWindows, (t, done) => {
+  it("reports IO errors", skipWin, (t, done) => {
     // Changing the mode of a file is not supported by node.js in Windows.
     // This test is skipped on Windows because we have to chmod the file to 0.
     var file = new File({

@@ -16,7 +16,7 @@ var testConstants = require("./utils/test-constants");
 var describeStreams = require("./utils/suite");
 
 var skipPosix = { skip: !isWindows };
-var skipWindows = { skip: isWindows };
+var skipWin = { skip: isWindows };
 
 var inputBase = testConstants.inputBase;
 var outputBase = testConstants.outputBase;
@@ -166,7 +166,7 @@ describeStreams(".dest() with symlinks", (stream) => {
     );
   });
 
-  it("(nix) creates a link for a directory", skipWindows, (t, done) => {
+  it("(nix) creates a link for a directory", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -295,7 +295,7 @@ describeStreams(".dest() with symlinks", (stream) => {
     );
   });
 
-  it("(nix) creats relative links for directories", skipWindows, (t, done) => {
+  it("(nix) creates relative links for directories", skipWin, (t, done) => {
     var file = new File({
       base: inputBase,
       path: inputDirpath,
@@ -329,7 +329,7 @@ describeStreams(".dest() with symlinks", (stream) => {
     );
   });
 
-  it("(nix) symlink from virtual symbolic dir", skipWindows, (t, done) => {
+  it("(nix) symlink from virtual symbolic dir", skipWin, (t, done) => {
     var file = new File({
       base: neInputBase,
       path: neInputDirpath,
